@@ -72,6 +72,11 @@ html = '''
         .pop-b .pr{background:var(--teal);color:#fff}
         .pop-b .sc{background:rgba(255,255,255,.1);color:var(--txt2)}
         .empty{text-align:center;padding:20px;color:var(--txt2);font-size:.8rem}
+        .area-btn-wrap{padding:8px 14px;border-bottom:1px solid var(--border)}
+        .area-btn{width:100%;padding:8px;background:linear-gradient(135deg,var(--pink),#9b59b6);border:none;border-radius:6px;color:#fff;font-size:.7rem;font-weight:600;cursor:pointer;transition:.2s}
+        .area-btn:hover{transform:scale(1.02);box-shadow:0 4px 15px rgba(233,69,96,.4)}
+        .area-btn.active{background:linear-gradient(135deg,var(--teal),#2ecc71)}
+        .area-info{font-size:.6rem;color:var(--txt2);margin-top:5px;text-align:center}
         @media(max-width:768px){.wrap{flex-direction:column}.side{width:100%;height:50%;order:2}#map{height:50%}}
     </style>
 </head>
@@ -98,6 +103,7 @@ html = '''
                 <button class="tab" data-c="weihnachten">🎄 Märkte</button>
             </div>
         </div>
+        <div class="area-btn-wrap"><button class="area-btn" id="areaBtn">🔍 In diesem Bereich suchen</button></div>
         <div class="mons" id="mons">
             <button class="mon on" data-m="all">Alle</button>
             <button class="mon" data-m="1">Jan</button>
@@ -295,7 +301,7 @@ const D=[
 const CC={festival:"#9b59b6",volksfest:"#f39c12",kultur:"#e94560",sport:"#4ecca3",familie:"#3498db",sehenswuerdigkeit:"#f1c40f",weihnachten:"#e94560"};
 const CI={festival:"🎵",volksfest:"🎪",kultur:"🎭",sport:"⚽",familie:"👨‍👩‍👧",sehenswuerdigkeit:"🏛️",weihnachten:"🎄"};
 
-let map,M={},fC="all",fM="all",fS="";
+let map,M={},fC="all",fM="all",fS="",fArea=false,areaBounds=null;
 
 function init(){
     map=L.map("map").setView([47.2,9.2],8);
@@ -307,6 +313,29 @@ function init(){
     document.getElementById("src").addEventListener("input",e=>{fS=e.target.value;go();});
     document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));b.classList.add("on");fC=b.dataset.c;go();}));
     document.querySelectorAll(".mon").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".mon").forEach(x=>x.classList.remove("on"));b.classList.add("on");fM=b.dataset.m;go();}));
+    
+    const areaBtn=document.getElementById("areaBtn");
+    areaBtn.addEventListener("click",()=>{
+        if(fArea){
+            fArea=false;
+            areaBounds=null;
+            areaBtn.textContent="🔍 In diesem Bereich suchen";
+            areaBtn.classList.remove("active");
+        }else{
+            fArea=true;
+            areaBounds=map.getBounds();
+            areaBtn.textContent="✕ Bereichsfilter aufheben";
+            areaBtn.classList.add("active");
+        }
+        go();
+    });
+    
+    map.on("moveend",()=>{
+        if(fArea){
+            areaBounds=map.getBounds();
+            go();
+        }
+    });
 }
 
 function icon(c,h){
@@ -316,6 +345,7 @@ function icon(c,h){
 
 function render(data){
     Object.values(M).forEach(m=>map.removeLayer(m));M={};
+    document.getElementById("cnt").textContent=data.length;
     data.forEach(p=>{
         const m=L.marker([p.lat,p.lng],{icon:icon(p.c,p.h)}).addTo(map);
         m.bindPopup(`<div class="pop"><img class="pop-img" src="${p.img}" onerror="this.style.display='none'"><div class="pop-body"><div class="pop-c">${CI[p.c]} ${p.c}</div><div class="pop-t">${p.n}</div><div class="pop-l">📍 ${p.l} (${p.r})</div><div class="pop-d">${p.desc}</div><div class="pop-i"><div><label>Datum</label><span>${p.d}</span></div><div><label>Preis</label><span>${p.p}</span></div></div><div class="pop-b"><a href="https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}" target="_blank" class="pr">📍 Route</a><a href="${p.w}" target="_blank" class="sc">🔗 Web</a></div></div></div>`);
@@ -335,8 +365,9 @@ function go(){
     if(fC!=="all")f=f.filter(p=>p.c===fC);
     if(fM!=="all"){const m=+fM;f=f.filter(p=>p.m===m||p.m===0);}
     if(fS){const s=fS.toLowerCase();f=f.filter(p=>p.n.toLowerCase().includes(s)||p.l.toLowerCase().includes(s)||p.desc.toLowerCase().includes(s));}
+    if(fArea&&areaBounds){f=f.filter(p=>areaBounds.contains([p.lat,p.lng]));}
     render(f);
-    if(f.length)map.fitBounds(f.map(p=>[p.lat,p.lng]),{padding:[30,30]});
+    if(f.length&&!fArea)map.fitBounds(f.map(p=>[p.lat,p.lng]),{padding:[30,30]});
 }
 
 document.addEventListener("DOMContentLoaded",init);
