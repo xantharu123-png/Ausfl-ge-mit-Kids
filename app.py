@@ -1,267 +1,228 @@
 import streamlit as st
-import pandas as pd
+import streamlit.components.v1 as components
 
-# ============================================
-# PAGE CONFIG
-# ============================================
-st.set_page_config(
-    page_title="Jahresguide 2026",
-    page_icon="🗺️",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+st.set_page_config(page_title="Jahresguide 2026", page_icon="🗺️", layout="wide", initial_sidebar_state="collapsed")
 
-# ============================================
-# CUSTOM CSS - Pompeii Style
-# ============================================
-st.markdown("""
-<style>
-    .stApp {
-        background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
-    }
-    
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #16213e 0%, #1a1a2e 100%);
-    }
-    
-    h1, h2, h3 { color: #ffffff !important; }
-    
-    .main-title {
-        background: linear-gradient(135deg, #e94560, #9b59b6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-size: 2.2rem;
-        font-weight: 700;
-    }
-    
-    .subtitle { color: #a0a0a0; font-size: 0.95rem; }
-    
-    .stat-box {
-        background: rgba(255,255,255,0.05);
-        border-radius: 10px;
-        padding: 15px;
-        text-align: center;
-        border: 1px solid rgba(255,255,255,0.1);
-    }
-    
-    .stat-number { font-size: 1.8rem; font-weight: 700; color: #4ecca3; }
-    .stat-label { color: #a0a0a0; font-size: 0.8rem; }
-    
-    .poi-card {
-        background: #16213e;
-        border-radius: 12px;
-        padding: 16px;
-        margin-bottom: 12px;
-        border-left: 4px solid #e94560;
-    }
-    
-    .poi-card:hover { background: #1f2b47; }
-    
-    .poi-title { color: #ffffff; font-weight: 600; font-size: 1.1rem; margin-bottom: 5px; }
-    .poi-location { color: #a0a0a0; font-size: 0.85rem; margin-bottom: 8px; }
-    .poi-desc { color: #cccccc; font-size: 0.9rem; margin-bottom: 10px; }
-    
-    .tag {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 15px;
-        font-size: 0.75rem;
-        margin-right: 6px;
-        margin-bottom: 6px;
-    }
-    
-    .tag-date { background: rgba(233,69,96,0.2); color: #e94560; }
-    .tag-price { background: rgba(78,204,163,0.2); color: #4ecca3; }
-    .tag-highlight { background: rgba(243,156,18,0.2); color: #f39c12; }
-    
-    .cat-festival { border-left-color: #9b59b6 !important; }
-    .cat-volksfest { border-left-color: #f39c12 !important; }
-    .cat-kultur { border-left-color: #e94560 !important; }
-    .cat-sport { border-left-color: #4ecca3 !important; }
-    .cat-familie { border-left-color: #3498db !important; }
-    .cat-sehenswuerdigkeit { border-left-color: #f1c40f !important; }
-    .cat-weihnachten { border-left-color: #e94560 !important; }
-    
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-</style>
-""", unsafe_allow_html=True)
+st.markdown("""<style>#MainMenu,footer,header{visibility:hidden;}.block-container{padding:0!important;max-width:100%!important;}</style>""", unsafe_allow_html=True)
 
-# ============================================
-# DATA
-# ============================================
-@st.cache_data
-def load_data():
-    data = [
-        # FESTIVALS
-        {"name": "OpenAir St. Gallen", "category": "festival", "location": "St. Gallen", "region": "SG", "lat": 47.4245, "lng": 9.3767, "date": "25.-28. Juni", "month": 6, "price": "Ab 230 CHF", "description": "Legendäres Festival mit Twenty One Pilots, Nina Chuba und 45+ Acts.", "highlights": "Twenty One Pilots, Nina Chuba", "website": "https://www.openairsg.ch", "is_highlight": True},
-        {"name": "FL1.LIFE Festival", "category": "festival", "location": "Schaan", "region": "LI", "lat": 47.165, "lng": 9.5094, "date": "3.-4. Juli", "month": 7, "price": "Ab 89 CHF", "description": "Liechtensteins grösstes Open-Air mit Mark Forster.", "highlights": "Mark Forster, Sportfreunde Stiller", "website": "https://www.fl1.life", "is_highlight": False},
-        {"name": "OpenAir Frauenfeld", "category": "festival", "location": "Frauenfeld", "region": "TG", "lat": 47.557, "lng": 8.8987, "date": "9.-11. Juli", "month": 7, "price": "Ab 199 CHF", "description": "Europas grösstes Hip-Hop Festival.", "highlights": "Sido, SSIO, Hip-Hop", "website": "https://www.openair-frauenfeld.ch", "is_highlight": True},
-        {"name": "Moon & Stars Locarno", "category": "festival", "location": "Locarno", "region": "TI", "lat": 46.167, "lng": 8.794, "date": "9.-19. Juli", "month": 7, "price": "Ab 79 CHF", "description": "Magische Nächte auf der Piazza Grande.", "highlights": "Neil Young, Jamiroquai, OneRepublic", "website": "https://www.moonandstars.ch", "is_highlight": True},
-        {"name": "VaduzSOUNDZ", "category": "festival", "location": "Vaduz", "region": "LI", "lat": 47.141, "lng": 9.5215, "date": "22.-25. Juli", "month": 7, "price": "Kinder bis 14 GRATIS", "description": "Familien-Festival vor der Schlosskulisse.", "highlights": "Fritz Kalkbrenner, Jovanotti", "website": "https://www.vaduzsoundz.li", "is_highlight": True},
-        {"name": "Bregenzer Festspiele", "category": "festival", "location": "Bregenz", "region": "AT", "lat": 47.5027, "lng": 9.7472, "date": "22.7.-23.8.", "month": 7, "price": "Ab 35€", "description": "80 Jahre Jubiläum! Seebühne mit La traviata.", "highlights": "80 Jahre, La traviata, Seebühne", "website": "https://bregenzerfestspiele.com", "is_highlight": True},
-        {"name": "Street Parade Zürich", "category": "festival", "location": "Zürich", "region": "ZH", "lat": 47.3669, "lng": 8.5417, "date": "8. August", "month": 8, "price": "Gratis", "description": "Grösste Techno-Parade der Welt.", "highlights": "1 Million Teilnehmer, Gratis", "website": "https://www.streetparade.com", "is_highlight": True},
-        {"name": "Heiden Festival", "category": "festival", "location": "Heiden", "region": "AR", "lat": 47.4432, "lng": 9.5322, "date": "23.-25. Mai", "month": 5, "price": "Ab 45 CHF", "description": "10 Jahre Jubiläum! 40h Live-Musik.", "highlights": "10 Jahre Jubiläum", "website": "https://www.heidenfestival.ch", "is_highlight": False},
-        {"name": "Clanx Festival", "category": "festival", "location": "Appenzell", "region": "AI", "lat": 47.3308, "lng": 9.4089, "date": "28.-30. August", "month": 8, "price": "Ab 60 CHF", "description": "Non-Profit Bergfestival mit Camping.", "highlights": "Bergfestival, Camping", "website": "https://www.clanx.ch", "is_highlight": False},
-        {"name": "Estival Jazz Lugano", "category": "festival", "location": "Lugano", "region": "TI", "lat": 46.0037, "lng": 8.9511, "date": "15.-24. Juli", "month": 7, "price": "Gratis", "description": "Jazz Festival mit Strassenumzug.", "highlights": "Jazz Parade, Gratis", "website": "https://www.estivaljazz.ch", "is_highlight": False},
-        
-        # VOLKSFESTE
-        {"name": "Basler Fasnacht", "category": "volksfest", "location": "Basel", "region": "BS", "lat": 47.5596, "lng": 7.5886, "date": "23.-25. Februar", "month": 2, "price": "Gratis", "description": "UNESCO-Weltkulturerbe! Morgestraich.", "highlights": "UNESCO, Morgestraich", "website": "https://www.fasnachts-comite.ch", "is_highlight": True},
-        {"name": "Sechseläuten", "category": "volksfest", "location": "Zürich", "region": "ZH", "lat": 47.3669, "lng": 8.5417, "date": "17.-20. April", "month": 4, "price": "Gratis", "description": "Böögg-Verbrennen, Gastkanton Graubünden.", "highlights": "Böögg-Verbrennen, Tradition", "website": "https://www.sechselaeuten.ch", "is_highlight": True},
-        {"name": "Seenachtfest Konstanz", "category": "volksfest", "location": "Konstanz", "region": "DE", "lat": 47.6603, "lng": 9.1753, "date": "8. August", "month": 8, "price": "Variiert", "description": "NEU: Drohnen-Show! 1 Mio+ Besucher.", "highlights": "Drohnen-Show, 1 Mio Besucher", "website": "https://www.konstanzer-seenachtfest.de", "is_highlight": True},
-        {"name": "Fantastical Kreuzlingen", "category": "volksfest", "location": "Kreuzlingen", "region": "TG", "lat": 47.6467, "lng": 9.1781, "date": "7.-9. August", "month": 8, "price": "Gratis", "description": "Seenachtfest mit Feuerwerk.", "highlights": "Feuerwerk, Bodensee", "website": "https://www.fantastical.ch", "is_highlight": False},
-        {"name": "Churer Fest", "category": "volksfest", "location": "Chur", "region": "GR", "lat": 46.8499, "lng": 9.5329, "date": "14.-16. August", "month": 8, "price": "Gratis", "description": "Grösstes Volksfest Graubündens.", "highlights": "Altstadt-Festival", "website": "https://www.churerfest.ch", "is_highlight": False},
-        {"name": "OLMA St. Gallen", "category": "volksfest", "location": "St. Gallen", "region": "SG", "lat": 47.4245, "lng": 9.3767, "date": "8.-18. Oktober", "month": 10, "price": "Ab 18 CHF", "description": "Grösste Schweizer Landwirtschaftsmesse.", "highlights": "Grösste CH-Messe", "website": "https://www.olma-messen.ch", "is_highlight": False},
-        {"name": "Arbon Classics", "category": "volksfest", "location": "Arbon", "region": "TG", "lat": 47.5168, "lng": 9.4321, "date": "30.-31. Mai", "month": 5, "price": "Gratis", "description": "10 Jahre Jubiläum! Oldtimer-Treffen.", "highlights": "10 Jahre, 50'000 Besucher", "website": "https://www.arbon-classics.ch", "is_highlight": False},
-        {"name": "Genussfestival Vaduz", "category": "volksfest", "location": "Vaduz", "region": "LI", "lat": 47.141, "lng": 9.5215, "date": "5.-13. September", "month": 9, "price": "Variiert", "description": "Kulinarik mit Sterneköchen.", "highlights": "15'000 Besucher, Sterneköche", "website": "https://www.genussfestival.li", "is_highlight": False},
-        
-        # SPORT
-        {"name": "Zürich Marathon", "category": "sport", "location": "Zürich", "region": "ZH", "lat": 47.3769, "lng": 8.5417, "date": "12. April", "month": 4, "price": "Ab 85 CHF", "description": "Schönster Stadt-Marathon der Schweiz.", "highlights": "42.195 km", "website": "https://www.zurichmarathon.ch", "is_highlight": False},
-        {"name": "IRONMAN 70.3", "category": "sport", "location": "Rapperswil-Jona", "region": "SG", "lat": 47.2269, "lng": 8.818, "date": "7. Juni", "month": 6, "price": "Ab 399 CHF", "description": "Triathlon-Klassiker am Zürichsee.", "highlights": "Triathlon", "website": "https://www.ironman.com", "is_highlight": False},
-        {"name": "75. RUND UM Regatta", "category": "sport", "location": "Lindau", "region": "DE", "lat": 47.546, "lng": 9.6842, "date": "4.-6. Juni", "month": 6, "price": "Gratis", "description": "75 Jahre Jubiläum! 350-400 Boote.", "highlights": "75 Jahre, Grösste Regatta", "website": "https://www.rund-um.com", "is_highlight": True},
-        {"name": "Eidg. Schützenfest", "category": "sport", "location": "Chur", "region": "GR", "lat": 46.8499, "lng": 9.5329, "date": "27.6.-25.7.", "month": 6, "price": "Variiert", "description": "Grösster Sportanlass 2026! 36'000 Schützen.", "highlights": "36'000 Schützen, 100'000 Besucher", "website": "https://www.esf2026.ch", "is_highlight": True},
-        {"name": "Weltklasse Zürich", "category": "sport", "location": "Zürich", "region": "ZH", "lat": 47.3831, "lng": 8.5036, "date": "26.-27. August", "month": 8, "price": "Ab 45 CHF", "description": "Diamond League Leichtathletik.", "highlights": "Diamond League", "website": "https://www.weltklassezuerich.ch", "is_highlight": False},
-        {"name": "Giro d'Italia Etappe", "category": "sport", "location": "Bellinzona", "region": "TI", "lat": 46.1952, "lng": 9.0241, "date": "26. Mai", "month": 5, "price": "Gratis", "description": "Etappe 16: 113km durchs Tessin.", "highlights": "Giro d'Italia, Bergetappe", "website": "https://www.giroditalia.it", "is_highlight": True},
-        {"name": "UCI MTB World Cup", "category": "sport", "location": "Lenzerheide", "region": "GR", "lat": 46.7333, "lng": 9.55, "date": "19.-21. Juni", "month": 6, "price": "Gratis", "description": "Weltcup Mountainbike.", "highlights": "Downhill, Cross Country", "website": "https://www.lenzerheide.swiss", "is_highlight": False},
-        {"name": "3-Länder-Marathon", "category": "sport", "location": "Bodensee", "region": "CH-AT-DE", "lat": 47.5, "lng": 9.5, "date": "11. Oktober", "month": 10, "price": "Ab 65 CHF", "description": "Marathon durch 3 Länder.", "highlights": "3 Länder, Bodensee", "website": "https://www.sparkasse-3-laender-marathon.at", "is_highlight": False},
-        
-        # KULTUR
-        {"name": "79. Locarno Film Festival", "category": "kultur", "location": "Locarno", "region": "TI", "lat": 46.167, "lng": 8.794, "date": "5.-15. August", "month": 8, "price": "Ab 25 CHF", "description": "Legendäres Open-Air Kino, 8'000 Plätze.", "highlights": "Piazza Grande, Open-Air", "website": "https://www.locarnofestival.ch", "is_highlight": True},
-        {"name": "Zurich Film Festival", "category": "kultur", "location": "Zürich", "region": "ZH", "lat": 47.3769, "lng": 8.5417, "date": "24.9.-4.10.", "month": 9, "price": "Ab 22 CHF", "description": "Internationales Filmfestival.", "highlights": "Premieren, Stars", "website": "https://zff.com", "is_highlight": False},
-        {"name": "Asisi-Panorama", "category": "kultur", "location": "Konstanz", "region": "DE", "lat": 47.6603, "lng": 9.1753, "date": "Ab März 2026", "month": 3, "price": "Ca. 15€", "description": "NEU: 360-Grad-Rundbild Bodensee.", "highlights": "NEU 2026, 360-Grad", "website": "https://www.asisi.de", "is_highlight": True},
-        {"name": "150 J. Rätisches Museum", "category": "kultur", "location": "Chur", "region": "GR", "lat": 46.8499, "lng": 9.5329, "date": "Ganzjährig", "month": 0, "price": "12 CHF", "description": "Jubiläumsausstellung, 150 Objekte.", "highlights": "150 Jahre Jubiläum", "website": "https://www.raetischesmuseum.gr.ch", "is_highlight": False},
-        {"name": "20. Museumsnacht SG", "category": "kultur", "location": "St. Gallen", "region": "SG", "lat": 47.4245, "lng": 9.3767, "date": "12. September", "month": 9, "price": "25 CHF", "description": "Jubiläumsausgabe der Museumsnacht.", "highlights": "20 Jahre Jubiläum", "website": "https://www.museumsnacht.ch", "is_highlight": False},
-        
-        # FAMILIE
-        {"name": "Zoo Zürich", "category": "familie", "location": "Zürich", "region": "ZH", "lat": 47.3846, "lng": 8.5749, "date": "Ganzjährig", "month": 0, "price": "29 CHF", "description": "360 Tierarten, Masoala Regenwaldhalle.", "highlights": "360 Tierarten, Masoala", "website": "https://www.zoo.ch", "is_highlight": False},
-        {"name": "Wildnispark Langenberg", "category": "familie", "location": "Zürich", "region": "ZH", "lat": 47.2852, "lng": 8.5445, "date": "Ganzjährig", "month": 0, "price": "GRATIS", "description": "Kostenlos! Bären, Wölfe, Luchse.", "highlights": "GRATIS, Bären, Wölfe", "website": "https://www.wildnispark.ch", "is_highlight": True},
-        {"name": "Technorama", "category": "familie", "location": "Winterthur", "region": "ZH", "lat": 47.4993, "lng": 8.7268, "date": "Ganzjährig", "month": 0, "price": "32 CHF", "description": "500+ Experimente zum Anfassen.", "highlights": "500+ Experimente", "website": "https://www.technorama.ch", "is_highlight": True},
-        {"name": "Connyland", "category": "familie", "location": "Lipperswil", "region": "TG", "lat": 47.6342, "lng": 9.0103, "date": "April-Okt", "month": 0, "price": "49 CHF", "description": "Grösster Freizeitpark der Schweiz.", "highlights": "Cobra Achterbahn", "website": "https://www.connyland.ch", "is_highlight": False},
-        {"name": "100 J. Pfahlbaumuseum", "category": "familie", "location": "Unteruhldingen", "region": "DE", "lat": 47.726, "lng": 9.2236, "date": "Ganzjährig", "month": 0, "price": "12€", "description": "UNESCO-Welterbe, 100 Jahre Jubiläum!", "highlights": "100 Jahre, UNESCO", "website": "https://www.pfahlbauten.de", "is_highlight": True},
-        {"name": "Rheinfall", "category": "familie", "location": "Schaffhausen", "region": "SH", "lat": 47.6778, "lng": 8.6156, "date": "Ganzjährig", "month": 0, "price": "5 CHF", "description": "Europas grösster Wasserfall, 150m breit.", "highlights": "Grösster Wasserfall Europas", "website": "https://www.rheinfall.ch", "is_highlight": True},
-        {"name": "Schaukelpfad Malbun", "category": "familie", "location": "Malbun", "region": "LI", "lat": 47.1023, "lng": 9.6089, "date": "Mai-Okt", "month": 0, "price": "Gratis", "description": "10 Schaukeln mit Bergpanorama!", "highlights": "10 Schaukeln, Gratis", "website": "https://www.malbun.li", "is_highlight": True},
-        {"name": "Insel Mainau", "category": "familie", "location": "Konstanz", "region": "DE", "lat": 47.7051, "lng": 9.1919, "date": "Ganzjährig", "month": 0, "price": "26€", "description": "45 ha Blumenparadies, Kinder gratis.", "highlights": "Kinder GRATIS", "website": "https://www.mainau.de", "is_highlight": False},
-        {"name": "Säntis", "category": "familie", "location": "Schwägalp", "region": "AR", "lat": 47.2492, "lng": 9.3439, "date": "Ganzjährig", "month": 0, "price": "46 CHF", "description": "6-Länder-Panorama auf 2'502m.", "highlights": "6-Länder-Panorama", "website": "https://www.saentisbahn.ch", "is_highlight": False},
-        {"name": "Marienschlucht", "category": "familie", "location": "Bodanrück", "region": "DE", "lat": 47.75, "lng": 9.05, "date": "Ab 28. März", "month": 3, "price": "Gratis", "description": "WIEDERERÖFFNUNG nach 11 Jahren!", "highlights": "Nach 11 Jahren offen!", "website": "https://www.bodensee.eu", "is_highlight": True},
-        
-        # SEHENSWÜRDIGKEITEN
-        {"name": "Stiftsbibliothek St.Gallen", "category": "sehenswuerdigkeit", "location": "St. Gallen", "region": "SG", "lat": 47.4232, "lng": 9.3772, "date": "Ganzjährig", "month": 0, "price": "18 CHF", "description": "UNESCO! 170'000 Bücher, Mumie.", "highlights": "UNESCO, Mumie Schepenese", "website": "https://www.stiftsbibliothek.ch", "is_highlight": True},
-        {"name": "UNESCO Burgen Bellinzona", "category": "sehenswuerdigkeit", "location": "Bellinzona", "region": "TI", "lat": 46.1952, "lng": 9.0241, "date": "Ganzjährig", "month": 0, "price": "15 CHF", "description": "3 mittelalterliche UNESCO-Festungen.", "highlights": "UNESCO, 3 Burgen", "website": "https://www.bellinzonaturismo.ch", "is_highlight": True},
-        {"name": "1200 Jahre Radolfzell", "category": "sehenswuerdigkeit", "location": "Radolfzell", "region": "DE", "lat": 47.7381, "lng": 8.9706, "date": "Ganzjährig", "month": 0, "price": "Variiert", "description": "Grosses Stadtjubiläum 2026!", "highlights": "1200 Jahre!", "website": "https://www.radolfzell.de", "is_highlight": True},
-        {"name": "100 J. Flugplatz Altenrhein", "category": "sehenswuerdigkeit", "location": "Altenrhein", "region": "SG", "lat": 47.485, "lng": 9.56, "date": "28.-30. August", "month": 8, "price": "Variiert", "description": "Jahrhundertfeier! 50-100'000 Besucher.", "highlights": "100 Jahre, Flugshow", "website": "https://www.peoples.ch", "is_highlight": True},
-        {"name": "Burg Meersburg", "category": "sehenswuerdigkeit", "location": "Meersburg", "region": "DE", "lat": 47.6957, "lng": 9.2711, "date": "Ganzjährig", "month": 0, "price": "14.80€", "description": "Älteste bewohnte Burg Deutschlands.", "highlights": "Älteste Burg DE", "website": "https://www.burg-meersburg.de", "is_highlight": False},
-        {"name": "Lindau Insel", "category": "sehenswuerdigkeit", "location": "Lindau", "region": "DE", "lat": 47.546, "lng": 9.6842, "date": "Ganzjährig", "month": 0, "price": "Gratis", "description": "Leuchtturm und Bayerischer Löwe.", "highlights": "Leuchtturm, Löwe", "website": "https://www.lindau.de", "is_highlight": False},
-        {"name": "Altstadt Chur", "category": "sehenswuerdigkeit", "location": "Chur", "region": "GR", "lat": 46.8499, "lng": 9.5329, "date": "Ganzjährig", "month": 0, "price": "Gratis", "description": "Älteste Stadt der Schweiz.", "highlights": "Älteste Stadt CH", "website": "https://www.churtourismus.ch", "is_highlight": False},
-        
-        # WEIHNACHTSMÄRKTE
-        {"name": "Sternenstadt St. Gallen", "category": "weihnachten", "location": "St. Gallen", "region": "SG", "lat": 47.4245, "lng": 9.3767, "date": "27.11.-24.12.", "month": 11, "price": "Gratis", "description": "700 Sterne in der UNESCO-Altstadt.", "highlights": "700 Sterne", "website": "https://www.sternenstadt.ch", "is_highlight": False},
-        {"name": "Weihnachtsmarkt Konstanz", "category": "weihnachten", "location": "Konstanz", "region": "DE", "lat": 47.6603, "lng": 9.1753, "date": "26.11.-23.12.", "month": 11, "price": "Gratis", "description": "150 Stände, 1 Mio. Lichter.", "highlights": "150 Stände", "website": "https://www.weihnachtsmarkt-konstanz.de", "is_highlight": False},
-        {"name": "Vaduz on Ice", "category": "weihnachten", "location": "Vaduz", "region": "LI", "lat": 47.141, "lng": 9.5215, "date": "7.11.-6.1.", "month": 11, "price": "8 CHF", "description": "Eisbahn und Outdoor-Disco.", "highlights": "Eisbahn", "website": "https://www.vaduzonice.li", "is_highlight": False},
-        {"name": "Christkindlmarkt Zürich", "category": "weihnachten", "location": "Zürich HB", "region": "ZH", "lat": 47.3778, "lng": 8.5403, "date": "20.11.-23.12.", "month": 11, "price": "Gratis", "description": "Grösster überdachter Markt Europas.", "highlights": "130 Stände", "website": "https://www.christkindlimarkt.ch", "is_highlight": False},
-        {"name": "Winterland Locarno", "category": "weihnachten", "location": "Locarno", "region": "TI", "lat": 46.167, "lng": 8.794, "date": "20.11.-6.1.", "month": 11, "price": "Gratis", "description": "Winterzauber auf der Piazza Grande.", "highlights": "Eisbahn, Lichtshow", "website": "https://www.winterland-locarno.ch", "is_highlight": False},
-    ]
-    return pd.DataFrame(data)
+html = '''
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--bg:#1a1a2e;--card:#16213e;--hover:#1f2b47;--teal:#4ecca3;--pink:#e94560;--orange:#f39c12;--txt:#fff;--txt2:#a0a0a0;--border:rgba(255,255,255,0.1)}
+        body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--txt);overflow:hidden}
+        .wrap{display:flex;height:100vh}
+        .side{width:380px;background:linear-gradient(180deg,#16213e,#1a1a2e);display:flex;flex-direction:column;border-right:1px solid var(--border)}
+        .head{padding:16px;border-bottom:1px solid var(--border)}
+        .logo{display:flex;align-items:center;gap:10px}
+        .logo-i{width:40px;height:40px;background:linear-gradient(135deg,#e94560,#9b59b6);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px}
+        .logo h1{font-size:1.2rem}
+        .logo p{font-size:.65rem;color:var(--txt2)}
+        .stats{display:flex;gap:12px;margin-top:10px;font-size:.7rem;color:var(--txt2)}
+        .stats strong{color:var(--teal)}
+        .flt{padding:10px 16px;border-bottom:1px solid var(--border)}
+        .search{position:relative;margin-bottom:8px}
+        .search input{width:100%;padding:8px 12px 8px 32px;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-size:.8rem}
+        .search input:focus{outline:none;border-color:var(--pink)}
+        .search::before{content:"🔍";position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:.8rem}
+        .tabs{display:flex;gap:5px;flex-wrap:wrap}
+        .tab{padding:4px 8px;background:var(--card);border:1px solid var(--border);border-radius:12px;font-size:.65rem;color:var(--txt2);cursor:pointer}
+        .tab:hover{border-color:var(--pink)}
+        .tab.on{background:var(--pink);border-color:var(--pink);color:#fff}
+        .mons{padding:8px 16px;border-bottom:1px solid var(--border);display:flex;gap:4px;overflow-x:auto}
+        .mons::-webkit-scrollbar{display:none}
+        .mon{padding:4px 6px;background:0;border:1px solid var(--border);border-radius:4px;font-size:.6rem;color:var(--txt2);cursor:pointer;white-space:nowrap}
+        .mon:hover{border-color:var(--teal);color:var(--teal)}
+        .mon.on{background:var(--teal);border-color:var(--teal);color:#fff}
+        .list{flex:1;overflow-y:auto;padding:10px}
+        .list::-webkit-scrollbar{width:4px}
+        .list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+        .card{background:var(--card);border-radius:8px;padding:10px;margin-bottom:6px;cursor:pointer;border-left:3px solid var(--pink);transition:.2s}
+        .card:hover{background:var(--hover);transform:translateX(2px)}
+        .card.on{background:rgba(233,69,96,.15)}
+        .card-t{font-size:.85rem;font-weight:600;margin-bottom:2px}
+        .card-l{font-size:.65rem;color:var(--txt2);margin-bottom:5px}
+        .tags{display:flex;flex-wrap:wrap;gap:4px}
+        .tag{font-size:.55rem;padding:2px 6px;border-radius:8px}
+        .tag.d{background:rgba(233,69,96,.2);color:var(--pink)}
+        .tag.p{background:rgba(78,204,163,.2);color:var(--teal)}
+        .tag.h{background:rgba(243,156,18,.2);color:var(--orange)}
+        #map{flex:1;height:100%}
+        .leaflet-popup-content-wrapper{background:var(--card);color:var(--txt);border-radius:10px}
+        .leaflet-popup-tip{background:var(--card)}
+        .leaflet-popup-content{margin:0;width:260px!important}
+        .pop{padding:12px}
+        .pop-c{font-size:.6rem;text-transform:uppercase;color:var(--teal);margin-bottom:4px}
+        .pop-t{font-size:1rem;font-weight:700;margin-bottom:5px}
+        .pop-l{font-size:.75rem;color:var(--txt2);margin-bottom:8px}
+        .pop-d{font-size:.75rem;color:#ccc;line-height:1.4;margin-bottom:10px}
+        .pop-i{display:flex;gap:6px;margin-bottom:10px}
+        .pop-i>div{flex:1;background:rgba(255,255,255,.05);padding:6px;border-radius:5px}
+        .pop-i label{font-size:.55rem;color:var(--txt2);text-transform:uppercase}
+        .pop-i span{font-size:.75rem;font-weight:600;display:block}
+        .pop-b{display:flex;gap:6px}
+        .pop-b a{flex:1;padding:7px;border-radius:5px;font-size:.7rem;font-weight:600;text-decoration:none;text-align:center}
+        .pop-b .pr{background:var(--teal);color:#fff}
+        .pop-b .sc{background:rgba(255,255,255,.1);color:var(--txt2)}
+        .empty{text-align:center;padding:30px;color:var(--txt2)}
+        @media(max-width:768px){.wrap{flex-direction:column}.side{width:100%;height:45%;order:2}#map{height:55%}}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="side">
+        <div class="head">
+            <div class="logo">
+                <div class="logo-i">🗺️</div>
+                <div><h1>Jahresguide 2026</h1><p>Bodensee • Ostschweiz • Tessin • Graubünden</p></div>
+            </div>
+            <div class="stats"><span>📍 <strong id="cnt">0</strong> Orte</span><span>⭐ <strong>25</strong> Highlights</span></div>
+        </div>
+        <div class="flt">
+            <div class="search"><input type="text" id="src" placeholder="Suchen..."></div>
+            <div class="tabs" id="tabs">
+                <button class="tab on" data-c="all">Alle</button>
+                <button class="tab" data-c="festival">🎵 Festivals</button>
+                <button class="tab" data-c="volksfest">🎪 Feste</button>
+                <button class="tab" data-c="kultur">🎭 Kultur</button>
+                <button class="tab" data-c="sport">⚽ Sport</button>
+                <button class="tab" data-c="familie">👨‍👩‍👧 Familie</button>
+                <button class="tab" data-c="sehenswuerdigkeit">🏛️ Sights</button>
+                <button class="tab" data-c="weihnachten">🎄 Märkte</button>
+            </div>
+        </div>
+        <div class="mons" id="mons">
+            <button class="mon on" data-m="all">Alle</button>
+            <button class="mon" data-m="1">Jan</button>
+            <button class="mon" data-m="2">Feb</button>
+            <button class="mon" data-m="3">Mär</button>
+            <button class="mon" data-m="4">Apr</button>
+            <button class="mon" data-m="5">Mai</button>
+            <button class="mon" data-m="6">Jun</button>
+            <button class="mon" data-m="7">Jul</button>
+            <button class="mon" data-m="8">Aug</button>
+            <button class="mon" data-m="9">Sep</button>
+            <button class="mon" data-m="10">Okt</button>
+            <button class="mon" data-m="11">Nov</button>
+            <button class="mon" data-m="12">Dez</button>
+        </div>
+        <div class="list" id="list"></div>
+    </div>
+    <div id="map"></div>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const D=[
+{id:1,n:"OpenAir St. Gallen",c:"festival",l:"St. Gallen",r:"SG",lat:47.4245,lng:9.3767,d:"25.-28. Juni",m:6,p:"Ab 230 CHF",desc:"Legendäres Festival mit Twenty One Pilots, Nina Chuba und 45+ Acts.",w:"https://www.openairsg.ch",h:1},
+{id:2,n:"FL1.LIFE Festival",c:"festival",l:"Schaan",r:"LI",lat:47.165,lng:9.5094,d:"3.-4. Juli",m:7,p:"Ab 89 CHF",desc:"Liechtensteins grösstes Open-Air mit Mark Forster.",w:"https://www.fl1.life",h:0},
+{id:3,n:"OpenAir Frauenfeld",c:"festival",l:"Frauenfeld",r:"TG",lat:47.557,lng:8.8987,d:"9.-11. Juli",m:7,p:"Ab 199 CHF",desc:"Europas grösstes Hip-Hop Festival mit Sido, SSIO.",w:"https://www.openair-frauenfeld.ch",h:1},
+{id:4,n:"Moon & Stars",c:"festival",l:"Locarno",r:"TI",lat:46.167,lng:8.794,d:"9.-19. Juli",m:7,p:"Ab 79 CHF",desc:"Magische Nächte auf der Piazza Grande mit Neil Young, Jamiroquai.",w:"https://www.moonandstars.ch",h:1},
+{id:5,n:"VaduzSOUNDZ",c:"festival",l:"Vaduz",r:"LI",lat:47.141,lng:9.5215,d:"22.-25. Juli",m:7,p:"Kinder GRATIS",desc:"Familien-Festival vor der Schlosskulisse mit Jovanotti.",w:"https://www.vaduzsoundz.li",h:1},
+{id:6,n:"Bregenzer Festspiele",c:"festival",l:"Bregenz",r:"AT",lat:47.5027,lng:9.7472,d:"22.7.-23.8.",m:7,p:"Ab 35€",desc:"80 Jahre Jubiläum! Seebühne mit La traviata.",w:"https://bregenzerfestspiele.com",h:1},
+{id:7,n:"Street Parade",c:"festival",l:"Zürich",r:"ZH",lat:47.3669,lng:8.5417,d:"8. August",m:8,p:"Gratis",desc:"Grösste Techno-Parade der Welt, 1 Mio Teilnehmer.",w:"https://www.streetparade.com",h:1},
+{id:8,n:"Heiden Festival",c:"festival",l:"Heiden",r:"AR",lat:47.4432,lng:9.5322,d:"23.-25. Mai",m:5,p:"Ab 45 CHF",desc:"10 Jahre Jubiläum! 40h Live-Musik.",w:"https://www.heidenfestival.ch",h:0},
+{id:9,n:"Clanx Festival",c:"festival",l:"Appenzell",r:"AI",lat:47.3308,lng:9.4089,d:"28.-30. Aug",m:8,p:"Ab 60 CHF",desc:"Non-Profit Bergfestival mit Camping.",w:"https://www.clanx.ch",h:0},
+{id:10,n:"Estival Jazz",c:"festival",l:"Lugano",r:"TI",lat:46.0037,lng:8.9511,d:"15.-24. Juli",m:7,p:"Gratis",desc:"Jazz Festival mit Strassenumzug.",w:"https://www.estivaljazz.ch",h:0},
+{id:20,n:"Basler Fasnacht",c:"volksfest",l:"Basel",r:"BS",lat:47.5596,lng:7.5886,d:"23.-25. Feb",m:2,p:"Gratis",desc:"UNESCO-Weltkulturerbe! Morgestraich.",w:"https://www.fasnachts-comite.ch",h:1},
+{id:21,n:"Sechseläuten",c:"volksfest",l:"Zürich",r:"ZH",lat:47.3669,lng:8.5417,d:"17.-20. April",m:4,p:"Gratis",desc:"Böögg-Verbrennen, Gastkanton Graubünden.",w:"https://www.sechselaeuten.ch",h:1},
+{id:22,n:"Seenachtfest Konstanz",c:"volksfest",l:"Konstanz",r:"DE",lat:47.6603,lng:9.1753,d:"8. August",m:8,p:"Variiert",desc:"NEU: Drohnen-Show! 1 Mio+ Besucher.",w:"https://www.konstanzer-seenachtfest.de",h:1},
+{id:23,n:"Fantastical",c:"volksfest",l:"Kreuzlingen",r:"TG",lat:47.6467,lng:9.1781,d:"7.-9. Aug",m:8,p:"Gratis",desc:"Seenachtfest mit Feuerwerk am Bodensee.",w:"https://www.fantastical.ch",h:0},
+{id:24,n:"Churer Fest",c:"volksfest",l:"Chur",r:"GR",lat:46.8499,lng:9.5329,d:"14.-16. Aug",m:8,p:"Gratis",desc:"Grösstes Volksfest Graubündens.",w:"https://www.churerfest.ch",h:0},
+{id:25,n:"OLMA",c:"volksfest",l:"St. Gallen",r:"SG",lat:47.4245,lng:9.3767,d:"8.-18. Okt",m:10,p:"Ab 18 CHF",desc:"Grösste Schweizer Landwirtschaftsmesse.",w:"https://www.olma-messen.ch",h:0},
+{id:26,n:"Arbon Classics",c:"volksfest",l:"Arbon",r:"TG",lat:47.5168,lng:9.4321,d:"30.-31. Mai",m:5,p:"Gratis",desc:"10 Jahre Jubiläum! Oldtimer-Treffen.",w:"https://www.arbon-classics.ch",h:0},
+{id:30,n:"Zürich Marathon",c:"sport",l:"Zürich",r:"ZH",lat:47.3769,lng:8.5417,d:"12. April",m:4,p:"Ab 85 CHF",desc:"Schönster Stadt-Marathon der Schweiz.",w:"https://www.zurichmarathon.ch",h:0},
+{id:31,n:"IRONMAN 70.3",c:"sport",l:"Rapperswil",r:"SG",lat:47.2269,lng:8.818,d:"7. Juni",m:6,p:"Ab 399 CHF",desc:"Triathlon-Klassiker am Zürichsee.",w:"https://www.ironman.com",h:0},
+{id:32,n:"75. RUND UM Regatta",c:"sport",l:"Lindau",r:"DE",lat:47.546,lng:9.6842,d:"4.-6. Juni",m:6,p:"Gratis",desc:"75 Jahre Jubiläum! 350-400 Segelboote.",w:"https://www.rund-um.com",h:1},
+{id:33,n:"Eidg. Schützenfest",c:"sport",l:"Chur",r:"GR",lat:46.8499,lng:9.5329,d:"27.6.-25.7.",m:6,p:"Variiert",desc:"Grösster Sportanlass 2026! 36'000 Schützen.",w:"https://www.esf2026.ch",h:1},
+{id:34,n:"Weltklasse Zürich",c:"sport",l:"Zürich",r:"ZH",lat:47.3831,lng:8.5036,d:"26.-27. Aug",m:8,p:"Ab 45 CHF",desc:"Diamond League Leichtathletik.",w:"https://www.weltklassezuerich.ch",h:0},
+{id:35,n:"Giro d'Italia",c:"sport",l:"Bellinzona",r:"TI",lat:46.1952,lng:9.0241,d:"26. Mai",m:5,p:"Gratis",desc:"Etappe 16: 113km Bergetappe durchs Tessin.",w:"https://www.giroditalia.it",h:1},
+{id:36,n:"UCI MTB World Cup",c:"sport",l:"Lenzerheide",r:"GR",lat:46.7333,lng:9.55,d:"19.-21. Juni",m:6,p:"Gratis",desc:"Weltcup Mountainbike, Downhill.",w:"https://www.lenzerheide.swiss",h:0},
+{id:37,n:"3-Länder-Marathon",c:"sport",l:"Bodensee",r:"CH-AT-DE",lat:47.5,lng:9.5,d:"11. Okt",m:10,p:"Ab 65 CHF",desc:"Marathon durch 3 Länder am Bodensee.",w:"https://www.sparkasse-3-laender-marathon.at",h:0},
+{id:40,n:"Locarno Film Festival",c:"kultur",l:"Locarno",r:"TI",lat:46.167,lng:8.794,d:"5.-15. Aug",m:8,p:"Ab 25 CHF",desc:"Legendäres Open-Air Kino, Piazza Grande.",w:"https://www.locarnofestival.ch",h:1},
+{id:41,n:"Zurich Film Festival",c:"kultur",l:"Zürich",r:"ZH",lat:47.3769,lng:8.5417,d:"24.9.-4.10.",m:9,p:"Ab 22 CHF",desc:"Internationales Filmfestival mit Stars.",w:"https://zff.com",h:0},
+{id:42,n:"Asisi-Panorama",c:"kultur",l:"Konstanz",r:"DE",lat:47.6603,lng:9.1753,d:"Ab März",m:3,p:"Ca. 15€",desc:"NEU: 360-Grad-Rundbild der Bodenseeregion.",w:"https://www.asisi.de",h:1},
+{id:43,n:"150 J. Rätisches Museum",c:"kultur",l:"Chur",r:"GR",lat:46.8499,lng:9.5329,d:"Ganzjährig",m:0,p:"12 CHF",desc:"Jubiläumsausstellung mit 150 Objekten.",w:"https://www.raetischesmuseum.gr.ch",h:0},
+{id:44,n:"20. Museumsnacht",c:"kultur",l:"St. Gallen",r:"SG",lat:47.4245,lng:9.3767,d:"12. Sept",m:9,p:"25 CHF",desc:"Jubiläumsausgabe der Museumsnacht.",w:"https://www.museumsnacht.ch",h:0},
+{id:50,n:"Zoo Zürich",c:"familie",l:"Zürich",r:"ZH",lat:47.3846,lng:8.5749,d:"Ganzjährig",m:0,p:"29 CHF",desc:"360 Tierarten, Masoala Regenwaldhalle.",w:"https://www.zoo.ch",h:0},
+{id:51,n:"Wildnispark Langenberg",c:"familie",l:"Zürich",r:"ZH",lat:47.2852,lng:8.5445,d:"Ganzjährig",m:0,p:"GRATIS",desc:"Kostenlos! Bären, Wölfe, Luchse.",w:"https://www.wildnispark.ch",h:1},
+{id:52,n:"Technorama",c:"familie",l:"Winterthur",r:"ZH",lat:47.4993,lng:8.7268,d:"Ganzjährig",m:0,p:"32 CHF",desc:"500+ Experimente zum Anfassen.",w:"https://www.technorama.ch",h:1},
+{id:53,n:"Connyland",c:"familie",l:"Lipperswil",r:"TG",lat:47.6342,lng:9.0103,d:"April-Okt",m:0,p:"49 CHF",desc:"Grösster Freizeitpark der Schweiz.",w:"https://www.connyland.ch",h:0},
+{id:54,n:"100 J. Pfahlbaumuseum",c:"familie",l:"Unteruhldingen",r:"DE",lat:47.726,lng:9.2236,d:"Ganzjährig",m:0,p:"12€",desc:"UNESCO, 100 Jahre Jubiläum!",w:"https://www.pfahlbauten.de",h:1},
+{id:55,n:"Rheinfall",c:"familie",l:"Schaffhausen",r:"SH",lat:47.6778,lng:8.6156,d:"Ganzjährig",m:0,p:"5 CHF",desc:"Europas grösster Wasserfall, 150m breit.",w:"https://www.rheinfall.ch",h:1},
+{id:56,n:"Schaukelpfad Malbun",c:"familie",l:"Malbun",r:"LI",lat:47.1023,lng:9.6089,d:"Mai-Okt",m:0,p:"Gratis",desc:"10 Schaukeln mit Bergpanorama!",w:"https://www.malbun.li",h:1},
+{id:57,n:"Insel Mainau",c:"familie",l:"Konstanz",r:"DE",lat:47.7051,lng:9.1919,d:"Ganzjährig",m:0,p:"26€",desc:"45 ha Blumenparadies, Kinder gratis.",w:"https://www.mainau.de",h:0},
+{id:58,n:"Säntis",c:"familie",l:"Schwägalp",r:"AR",lat:47.2492,lng:9.3439,d:"Ganzjährig",m:0,p:"46 CHF",desc:"6-Länder-Panorama auf 2502m.",w:"https://www.saentisbahn.ch",h:0},
+{id:59,n:"Marienschlucht",c:"familie",l:"Bodanrück",r:"DE",lat:47.75,lng:9.05,d:"Ab 28. März",m:3,p:"Gratis",desc:"WIEDERERÖFFNUNG nach 11 Jahren!",w:"https://www.bodensee.eu",h:1},
+{id:60,n:"Sea Life",c:"familie",l:"Konstanz",r:"DE",lat:47.6603,lng:9.1753,d:"Ganzjährig",m:0,p:"18.50€",desc:"3000+ Fische, 8m Unterwassertunnel.",w:"https://www.visitsealife.com",h:0},
+{id:61,n:"Ravensburger Spieleland",c:"familie",l:"Meckenbeuren",r:"DE",lat:47.7022,lng:9.5736,d:"April-Okt",m:0,p:"46.50€",desc:"70+ Attraktionen für 2-12 Jahre.",w:"https://www.spieleland.de",h:0},
+{id:70,n:"Stiftsbibliothek",c:"sehenswuerdigkeit",l:"St. Gallen",r:"SG",lat:47.4232,lng:9.3772,d:"Ganzjährig",m:0,p:"18 CHF",desc:"UNESCO! 170'000 Bücher, Mumie.",w:"https://www.stiftsbibliothek.ch",h:1},
+{id:71,n:"UNESCO Burgen",c:"sehenswuerdigkeit",l:"Bellinzona",r:"TI",lat:46.1952,lng:9.0241,d:"Ganzjährig",m:0,p:"15 CHF",desc:"3 mittelalterliche UNESCO-Festungen.",w:"https://www.bellinzonaturismo.ch",h:1},
+{id:72,n:"1200 Jahre Radolfzell",c:"sehenswuerdigkeit",l:"Radolfzell",r:"DE",lat:47.7381,lng:8.9706,d:"Ganzjährig",m:0,p:"Variiert",desc:"Grosses Stadtjubiläum 2026!",w:"https://www.radolfzell.de",h:1},
+{id:73,n:"100 J. Flugplatz",c:"sehenswuerdigkeit",l:"Altenrhein",r:"SG",lat:47.485,lng:9.56,d:"28.-30. Aug",m:8,p:"Variiert",desc:"Jahrhundertfeier! 50-100'000 Besucher.",w:"https://www.peoples.ch",h:1},
+{id:74,n:"Burg Meersburg",c:"sehenswuerdigkeit",l:"Meersburg",r:"DE",lat:47.6957,lng:9.2711,d:"Ganzjährig",m:0,p:"14.80€",desc:"Älteste bewohnte Burg Deutschlands.",w:"https://www.burg-meersburg.de",h:0},
+{id:75,n:"Lindau Insel",c:"sehenswuerdigkeit",l:"Lindau",r:"DE",lat:47.546,lng:9.6842,d:"Ganzjährig",m:0,p:"Gratis",desc:"Leuchtturm und Bayerischer Löwe.",w:"https://www.lindau.de",h:0},
+{id:76,n:"Schloss Vaduz",c:"sehenswuerdigkeit",l:"Vaduz",r:"LI",lat:47.142,lng:9.523,d:"Nur aussen",m:0,p:"Gratis",desc:"Residenz des Fürstenhauses.",w:"https://www.tourismus.li",h:0},
+{id:80,n:"Sternenstadt",c:"weihnachten",l:"St. Gallen",r:"SG",lat:47.4245,lng:9.3767,d:"27.11.-24.12.",m:11,p:"Gratis",desc:"700 Sterne in der UNESCO-Altstadt.",w:"https://www.sternenstadt.ch",h:0},
+{id:81,n:"Weihnachtsmarkt",c:"weihnachten",l:"Konstanz",r:"DE",lat:47.6603,lng:9.1753,d:"26.11.-23.12.",m:11,p:"Gratis",desc:"150 Stände, 1 Mio. Lichter.",w:"https://www.weihnachtsmarkt-konstanz.de",h:0},
+{id:82,n:"Vaduz on Ice",c:"weihnachten",l:"Vaduz",r:"LI",lat:47.141,lng:9.5215,d:"7.11.-6.1.",m:11,p:"8 CHF",desc:"Eisbahn und Outdoor-Disco.",w:"https://www.vaduzonice.li",h:0},
+{id:83,n:"Christkindlmarkt",c:"weihnachten",l:"Zürich HB",r:"ZH",lat:47.3778,lng:8.5403,d:"20.11.-23.12.",m:11,p:"Gratis",desc:"Grösster überdachter Markt Europas.",w:"https://www.christkindlimarkt.ch",h:0},
+{id:84,n:"Winterland",c:"weihnachten",l:"Locarno",r:"TI",lat:46.167,lng:8.794,d:"20.11.-6.1.",m:11,p:"Gratis",desc:"Winterzauber auf der Piazza Grande.",w:"https://www.winterland-locarno.ch",h:0}
+];
 
-# ============================================
-# CONSTANTS
-# ============================================
-CATEGORY_ICONS = {"festival": "🎵", "volksfest": "🎪", "kultur": "🎭", "sport": "⚽", "familie": "👨‍👩‍👧", "sehenswuerdigkeit": "🏛️", "weihnachten": "🎄"}
-CATEGORY_NAMES = {"festival": "Festivals", "volksfest": "Volksfeste", "kultur": "Kultur", "sport": "Sport", "familie": "Familie", "sehenswuerdigkeit": "Sights", "weihnachten": "Weihnachten"}
-MONTHS = {0: "Ganzjährig", 1: "Januar", 2: "Februar", 3: "März", 4: "April", 5: "Mai", 6: "Juni", 7: "Juli", 8: "August", 9: "September", 10: "Oktober", 11: "November", 12: "Dezember"}
+const CC={festival:"#9b59b6",volksfest:"#f39c12",kultur:"#e94560",sport:"#4ecca3",familie:"#3498db",sehenswuerdigkeit:"#f1c40f",weihnachten:"#e94560"};
+const CI={festival:"🎵",volksfest:"🎪",kultur:"🎭",sport:"⚽",familie:"👨‍👩‍👧",sehenswuerdigkeit:"🏛️",weihnachten:"🎄"};
 
-# ============================================
-# MAIN
-# ============================================
-df = load_data()
+let map,M={},fC="all",fM="all",fS="";
 
-# SIDEBAR
-with st.sidebar:
-    st.markdown('<p class="main-title">🗺️ Jahresguide 2026</p>', unsafe_allow_html=True)
-    st.markdown('<p class="subtitle">Bodensee • Ostschweiz • Tessin • Graubünden</p>', unsafe_allow_html=True)
-    st.markdown("---")
-    
-    # Stats
-    c1, c2 = st.columns(2)
-    with c1:
-        st.markdown(f'<div class="stat-box"><div class="stat-number">{len(df)}</div><div class="stat-label">📍 Orte</div></div>', unsafe_allow_html=True)
-    with c2:
-        st.markdown(f'<div class="stat-box"><div class="stat-number">{len(df[df["is_highlight"]])}</div><div class="stat-label">⭐ Highlights</div></div>', unsafe_allow_html=True)
-    
-    st.markdown("---")
-    
-    # Filters
-    search = st.text_input("🔍 Suchen", placeholder="Event, Ort...")
-    
-    categories = st.multiselect(
-        "📂 Kategorien",
-        options=list(CATEGORY_NAMES.keys()),
-        format_func=lambda x: f"{CATEGORY_ICONS[x]} {CATEGORY_NAMES[x]}",
-        default=list(CATEGORY_NAMES.keys())
-    )
-    
-    month = st.select_slider("📅 Monat", options=list(MONTHS.keys()), format_func=lambda x: MONTHS[x], value=0)
-    
-    highlights_only = st.checkbox("⭐ Nur Highlights")
+function init(){
+    map=L.map("map").setView([47.2,9.2],8);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"©OSM"}).addTo(map);
+    document.getElementById("cnt").textContent=D.length;
+    render(D);
+    document.getElementById("src").addEventListener("input",e=>{fS=e.target.value;go();});
+    document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));b.classList.add("on");fC=b.dataset.c;go();}));
+    document.querySelectorAll(".mon").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".mon").forEach(x=>x.classList.remove("on"));b.classList.add("on");fM=b.dataset.m;go();}));
+}
 
-# FILTER
-df_f = df.copy()
-if search:
-    s = search.lower()
-    df_f = df_f[df_f['name'].str.lower().str.contains(s) | df_f['location'].str.lower().str.contains(s) | df_f['description'].str.lower().str.contains(s)]
-if categories:
-    df_f = df_f[df_f['category'].isin(categories)]
-if month != 0:
-    df_f = df_f[(df_f['month'] == month) | (df_f['month'] == 0)]
-if highlights_only:
-    df_f = df_f[df_f['is_highlight'] == True]
+function icon(c,h){
+    const col=CC[c]||"#3498db",ic=CI[c]||"📍",s=h?34:28;
+    return L.divIcon({className:"",html:`<div style="background:${col};width:${s}px;height:${s}px;border-radius:50%;border:3px solid #fff;box-shadow:0 3px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:${h?15:13}px">${ic}</div>`,iconSize:[s,s],iconAnchor:[s/2,s/2]});
+}
 
-# MAIN CONTENT
-st.markdown("## 🗺️ Jahresguide 2026")
-st.markdown(f"**{len(df_f)} Ergebnisse** • Klicke auf 📍 für Google Maps Route")
+function render(data){
+    Object.values(M).forEach(m=>map.removeLayer(m));M={};
+    data.forEach(p=>{
+        const m=L.marker([p.lat,p.lng],{icon:icon(p.c,p.h)}).addTo(map);
+        m.bindPopup(`<div class="pop"><div class="pop-c">${CI[p.c]} ${p.c}</div><div class="pop-t">${p.n}</div><div class="pop-l">📍 ${p.l} (${p.r})</div><div class="pop-d">${p.desc}</div><div class="pop-i"><div><label>Datum</label><span>${p.d}</span></div><div><label>Preis</label><span>${p.p}</span></div></div><div class="pop-b"><a href="https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}" target="_blank" class="pr">📍 Route</a><a href="${p.w}" target="_blank" class="sc">🔗 Web</a></div></div>`);
+        m.on("click",()=>hl(p.id));
+        M[p.id]=m;
+    });
+    const L1=document.getElementById("list");
+    if(!data.length){L1.innerHTML='<div class="empty">Keine Ergebnisse</div>';return;}
+    L1.innerHTML=data.map(p=>`<div class="card" data-id="${p.id}" style="border-left-color:${CC[p.c]}"><div class="card-t">${CI[p.c]} ${p.n}</div><div class="card-l">📍 ${p.l} (${p.r})</div><div class="tags"><span class="tag d">📅 ${p.d}</span><span class="tag p">💰 ${p.p}</span>${p.h?'<span class="tag h">⭐</span>':''}</div></div>`).join("");
+    L1.querySelectorAll(".card").forEach(c=>c.addEventListener("click",()=>{const id=+c.dataset.id,p=D.find(x=>x.id===id);if(p&&M[id]){map.setView([p.lat,p.lng],12);M[id].openPopup();hl(id);}}));
+}
 
-# Embedded Map (lightweight iframe)
-st.markdown("### 🗺️ Karte")
-map_html = f"""
-<iframe 
-    width="100%" 
-    height="400" 
-    frameborder="0" 
-    scrolling="no" 
-    marginheight="0" 
-    marginwidth="0" 
-    src="https://www.openstreetmap.org/export/embed.html?bbox=7.5%2C45.8%2C10.5%2C47.8&layer=mapnik"
-    style="border: 1px solid #16213e; border-radius: 10px;">
-</iframe>
-<p style="color: #a0a0a0; font-size: 0.8em; margin-top: 5px;">
-    💡 Klicke unten bei einem Event auf "📍 Route" für die genaue Position in Google Maps
-</p>
-"""
-st.markdown(map_html, unsafe_allow_html=True)
+function hl(id){document.querySelectorAll(".card").forEach(c=>c.classList.remove("on"));const c=document.querySelector(`.card[data-id="${id}"]`);if(c){c.classList.add("on");c.scrollIntoView({behavior:"smooth",block:"nearest"});}}
 
-st.markdown("---")
+function go(){
+    let f=D;
+    if(fC!=="all")f=f.filter(p=>p.c===fC);
+    if(fM!=="all"){const m=+fM;f=f.filter(p=>p.m===m||p.m===0);}
+    if(fS){const s=fS.toLowerCase();f=f.filter(p=>p.n.toLowerCase().includes(s)||p.l.toLowerCase().includes(s)||p.desc.toLowerCase().includes(s));}
+    render(f);
+    if(f.length)map.fitBounds(f.map(p=>[p.lat,p.lng]),{padding:[40,40]});
+}
 
-# POI LIST
-st.markdown("### 📋 Alle Events & Aktivitäten")
+document.addEventListener("DOMContentLoaded",init);
+</script>
+</body>
+</html>
+'''
 
-for cat in categories:
-    cat_df = df_f[df_f['category'] == cat]
-    if len(cat_df) > 0:
-        with st.expander(f"{CATEGORY_ICONS[cat]} {CATEGORY_NAMES[cat]} ({len(cat_df)})", expanded=True):
-            for _, row in cat_df.iterrows():
-                hl = '<span class="tag tag-highlight">⭐ Highlight</span>' if row['is_highlight'] else ''
-                
-                st.markdown(f"""
-                <div class="poi-card cat-{row['category']}">
-                    <div class="poi-title">{row['name']} {hl}</div>
-                    <div class="poi-location">📍 {row['location']} ({row['region']})</div>
-                    <div class="poi-desc">{row['description']}</div>
-                    <span class="tag tag-date">📅 {row['date']}</span>
-                    <span class="tag tag-price">💰 {row['price']}</span>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                c1, c2 = st.columns(2)
-                with c1:
-                    st.link_button("🔗 Website", row['website'], use_container_width=True)
-                with c2:
-                    st.link_button("📍 Route", f"https://www.google.com/maps/search/?api=1&query={row['lat']},{row['lng']}", use_container_width=True)
+components.html(html, height=850, scrolling=False)
