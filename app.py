@@ -209,7 +209,7 @@ const CATS={categories_json};
 const MONTHS=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 let map,markers=[],fCat=null,fMonth=null,fSearch='',fArea=false,areaBounds=null;
 map=L.map('map').setView([46.5,10],5);
-L.tileLayer('https://{{s}}.basemaps.cartocdn.com/dark_all/{{z}}/{{x}}/{{y}}{{r}}.png',{{attribution:'© OpenStreetMap © CARTO',maxZoom:19}}).addTo(map);
+L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png',{{attribution:'© OpenStreetMap',maxZoom:19}}).addTo(map);
 const regionDiv=document.getElementById('regionBtns');
 Object.entries(REGIONS).forEach(([k,v])=>{{const b=document.createElement('button');b.className='region-btn';b.textContent=v.name;b.onclick=()=>{{map.flyTo(v.center,v.zoom);fArea=false;updateAreaBtn()}};regionDiv.appendChild(b)}});
 const catDiv=document.getElementById('catBtns');
