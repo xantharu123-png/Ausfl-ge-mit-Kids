@@ -8,20 +8,36 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         
         html, body {
-            height: 100%;
-            width: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
+            height: 100% !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            background: #1a1a2e !important;
+        }
+        
+        .app-container {
+            display: flex !important;
+            height: 100vh !important;
+            width: 100vw !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
         
         :root {
             --bg-dark: #1a1a2e;
             --bg-card: #16213e;
             --bg-hover: #1f2b47;
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
             --accent-blue: #4ecca3;
             --accent-teal: #4ecca3;
             --accent-orange: #f39c12;
@@ -38,17 +54,7 @@
         
         body {
             font-family: 'DM Sans', sans-serif;
-            background: var(--bg-dark);
             color: var(--text-primary);
-        }
-        
-        .app-container {
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-            position: fixed;
-            top: 0;
-            left: 0;
         }
         
         /* Sidebar */
@@ -2043,6 +2049,402 @@
                 highlights: ["Römische Tradition", "Wellness"],
                 website: "https://www.carasana.de",
                 image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&q=80"
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // 🌊 BODENSEE REGION
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 385,
+                name: "Zeppelin Museum Friedrichshafen",
+                category: "kultur",
+                location: "Friedrichshafen",
+                country: "DE",
+                region: "BW",
+                lat: 47.6544,
+                lng: 9.4797,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 13 €",
+                description: "Weltgrösste Sammlung zur Geschichte der Luftschifffahrt.",
+                highlights: ["Zeppelin", "Luftfahrt"],
+                website: "https://www.zeppelin-museum.de",
+                image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80"
+            },
+            {
+                id: 386,
+                name: "Dornier Museum",
+                category: "kultur",
+                location: "Friedrichshafen",
+                country: "DE",
+                region: "BW",
+                lat: 47.6714,
+                lng: 9.5117,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 13 €",
+                description: "100 Jahre Luft- und Raumfahrtgeschichte am Bodensee.",
+                highlights: ["Flugzeuge", "Raumfahrt"],
+                website: "https://www.dorniermuseum.de",
+                image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80"
+            },
+            {
+                id: 387,
+                name: "Pfahlbauten Unteruhldingen",
+                category: "kultur",
+                location: "Uhldingen-Mühlhofen",
+                country: "DE",
+                region: "BW",
+                lat: 47.7261,
+                lng: 9.2286,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 12 €",
+                description: "UNESCO-Welterbe - Freilichtmuseum der Steinzeit und Bronzezeit.",
+                highlights: ["UNESCO", "Steinzeit"],
+                website: "https://www.pfahlbauten.de",
+                image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 388,
+                name: "Kloster und Schloss Salem",
+                category: "sehenswuerdigkeit",
+                location: "Salem",
+                country: "DE",
+                region: "BW",
+                lat: 47.7692,
+                lng: 9.2836,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 9 €",
+                description: "Ehemaliges Zisterzienserkloster mit barockem Schloss.",
+                highlights: ["Kloster", "Barock"],
+                website: "https://www.salem.de",
+                image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80"
+            },
+            {
+                id: 389,
+                name: "Burg Hohenzollern",
+                category: "sehenswuerdigkeit",
+                location: "Bisingen",
+                country: "DE",
+                region: "BW",
+                lat: 48.3233,
+                lng: 8.9672,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 12 €",
+                description: "Stammburg des Hauses Hohenzollern auf 855m.",
+                highlights: ["Stammburg", "Panorama"],
+                website: "https://www.burg-hohenzollern.com",
+                image: "https://images.unsplash.com/photo-1534313314376-a72289b6181e?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 390,
+                name: "Schloss Lichtenstein",
+                category: "sehenswuerdigkeit",
+                location: "Lichtenstein",
+                country: "DE",
+                region: "BW",
+                lat: 48.4069,
+                lng: 9.2594,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 10 €",
+                description: "Märchenschloss der Schwäbischen Alb auf steilem Felsen.",
+                highlights: ["Märchenschloss", "Schwäbische Alb"],
+                website: "https://www.schloss-lichtenstein.de",
+                image: "https://images.unsplash.com/photo-1534313314376-a72289b6181e?w=800&q=80"
+            },
+            {
+                id: 391,
+                name: "Scheidegger Wasserfälle",
+                category: "sehenswuerdigkeit",
+                location: "Scheidegg",
+                country: "DE",
+                region: "BY",
+                lat: 47.5831,
+                lng: 9.8503,
+                date: "April–Nov",
+                month: 0,
+                price: "Ab 5 €",
+                description: "Zwei spektakuläre Wasserfälle im Allgäu.",
+                highlights: ["Wasserfälle", "Allgäu"],
+                website: "https://www.scheidegger-wasserfaelle.de",
+                image: "https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=800&q=80"
+            },
+            {
+                id: 392,
+                name: "Skywalk Allgäu",
+                category: "familie",
+                location: "Scheidegg",
+                country: "DE",
+                region: "BY",
+                lat: 47.5819,
+                lng: 9.8469,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 14 €",
+                description: "Baumwipfelpfad mit 540m Länge und Aussichtsturm.",
+                highlights: ["Baumwipfelpfad", "Aussicht"],
+                website: "https://www.skywalk-allgaeu.de",
+                image: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&q=80"
+            },
+            {
+                id: 393,
+                name: "Therme Lindau",
+                category: "familie",
+                location: "Lindau",
+                country: "DE",
+                region: "BY",
+                lat: 47.5461,
+                lng: 9.6839,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 16 €",
+                description: "Therme direkt am Bodenseeufer mit Alpenpanorama.",
+                highlights: ["Bodensee", "Alpenpanorama"],
+                website: "https://www.therme-lindau.de",
+                image: "https://images.unsplash.com/photo-1519315901367-f34ff9154487?w=800&q=80"
+            },
+            {
+                id: 394,
+                name: "Bodensee-Therme Überlingen",
+                category: "familie",
+                location: "Überlingen",
+                country: "DE",
+                region: "BW",
+                lat: 47.7667,
+                lng: 9.1656,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 14 €",
+                description: "Therme mit direktem Seezugang und Saunalandschaft.",
+                highlights: ["Seezugang", "Sauna"],
+                website: "https://www.bodensee-therme.de",
+                image: "https://images.unsplash.com/photo-1519315901367-f34ff9154487?w=800&q=80"
+            },
+            {
+                id: 395,
+                name: "Bodensee-Therme Konstanz",
+                category: "familie",
+                location: "Konstanz",
+                country: "DE",
+                region: "BW",
+                lat: 47.6681,
+                lng: 9.1744,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 14 €",
+                description: "Wellness und Badespass mit Blick auf die Alpen.",
+                highlights: ["Wellness", "Alpenblick"],
+                website: "https://www.therme-konstanz.de",
+                image: "https://images.unsplash.com/photo-1519315901367-f34ff9154487?w=800&q=80"
+            },
+            {
+                id: 396,
+                name: "MeersburgTherme",
+                category: "familie",
+                location: "Meersburg",
+                country: "DE",
+                region: "BW",
+                lat: 47.6925,
+                lng: 9.2708,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 13 €",
+                description: "Thermalbad mit Panoramablick auf den Bodensee.",
+                highlights: ["Thermalbad", "Seeblick"],
+                website: "https://www.meersburg-therme.de",
+                image: "https://images.unsplash.com/photo-1519315901367-f34ff9154487?w=800&q=80"
+            },
+            {
+                id: 397,
+                name: "Thermen & Badewelt Sinsheim",
+                category: "familie",
+                location: "Sinsheim",
+                country: "DE",
+                region: "BW",
+                lat: 49.2506,
+                lng: 8.8681,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 30 €",
+                description: "Riesige Therme mit Palmenparadies und 400m Rutsche.",
+                highlights: ["Palmenparadies", "Rutschen"],
+                website: "https://www.badewelt-sinsheim.de",
+                image: "https://images.unsplash.com/photo-1519315901367-f34ff9154487?w=800&q=80"
+            },
+            {
+                id: 398,
+                name: "Wimsener Höhle",
+                category: "sehenswuerdigkeit",
+                location: "Hayingen",
+                country: "DE",
+                region: "BW",
+                lat: 48.2794,
+                lng: 9.4308,
+                date: "April–Okt",
+                month: 0,
+                price: "Ab 6 €",
+                description: "Einzige mit Boot befahrbare Schauhöhle Deutschlands.",
+                highlights: ["Bootsfahrt", "Höhle"],
+                website: "https://www.wimsen.de",
+                image: "https://images.unsplash.com/photo-1504699439244-b4ee66a11adf?w=800&q=80"
+            },
+            {
+                id: 399,
+                name: "Imperia Konstanz",
+                category: "sehenswuerdigkeit",
+                location: "Konstanz",
+                country: "DE",
+                region: "BW",
+                lat: 47.6606,
+                lng: 9.1783,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Ikonische 9m hohe Statue am Konstanzer Hafen.",
+                highlights: ["Wahrzeichen", "Hafen"],
+                website: "https://www.konstanz-tourismus.de",
+                image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
+            },
+            {
+                id: 400,
+                name: "Abenteuerpark Immenstaad",
+                category: "familie",
+                location: "Immenstaad",
+                country: "DE",
+                region: "BW",
+                lat: 47.6628,
+                lng: 9.3731,
+                date: "April–Okt",
+                month: 0,
+                price: "Ab 28 €",
+                description: "Kletterpark am Bodensee mit 10 Parcours.",
+                highlights: ["Klettern", "Parcours"],
+                website: "https://www.abenteuerpark.com",
+                image: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&q=80"
+            },
+            {
+                id: 401,
+                name: "Rapunzel Welt",
+                category: "familie",
+                location: "Legau",
+                country: "DE",
+                region: "BY",
+                lat: 47.8528,
+                lng: 10.1247,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Bio-Erlebniswelt mit Museum und Restaurant.",
+                highlights: ["Bio", "Erlebniswelt"],
+                website: "https://www.rapunzel.de",
+                image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
+            },
+            {
+                id: 402,
+                name: "Graf-Zeppelin-Haus",
+                category: "kultur",
+                location: "Friedrichshafen",
+                country: "DE",
+                region: "BW",
+                lat: 47.6536,
+                lng: 9.4811,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Variiert",
+                description: "Kultur- und Kongresszentrum direkt am Bodenseeufer.",
+                highlights: ["Kultur", "Konzerte"],
+                website: "https://www.gzh.de",
+                image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
+            },
+            {
+                id: 403,
+                name: "Bodensee Planetarium",
+                category: "familie",
+                location: "Kreuzlingen",
+                country: "DE",
+                region: "BW",
+                lat: 47.6500,
+                lng: 9.1833,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 8 €",
+                description: "Planetarium und Sternwarte am Bodensee.",
+                highlights: ["Sterne", "Planetarium"],
+                website: "https://www.planetarium-kreuzlingen.ch",
+                image: "https://images.unsplash.com/photo-1507400492013-162706c8c05e?w=800&q=80"
+            },
+            {
+                id: 404,
+                name: "Archäologisches Landesmuseum",
+                category: "kultur",
+                location: "Konstanz",
+                country: "DE",
+                region: "BW",
+                lat: 47.6625,
+                lng: 9.1758,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 6 €",
+                description: "Geschichte Baden-Württembergs von der Steinzeit bis heute.",
+                highlights: ["Archäologie", "Geschichte"],
+                website: "https://www.konstanz.alm-bw.de",
+                image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
+            },
+            {
+                id: 405,
+                name: "SEA LIFE Konstanz",
+                category: "familie",
+                location: "Konstanz",
+                country: "DE",
+                region: "BW",
+                lat: 47.6611,
+                lng: 9.1792,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 17 €",
+                description: "Aquarium mit über 3000 Tieren aus aller Welt.",
+                highlights: ["Aquarium", "Haie"],
+                website: "https://www.visitsealife.com/konstanz",
+                image: "https://images.unsplash.com/photo-1534043464124-3be32fe000c9?w=800&q=80"
+            },
+            {
+                id: 406,
+                name: "Affenberg Salem",
+                category: "familie",
+                location: "Salem",
+                country: "DE",
+                region: "BW",
+                lat: 47.7656,
+                lng: 9.2625,
+                date: "März–Okt",
+                month: 0,
+                price: "Ab 10 €",
+                description: "200 Berberaffen in freier Natur füttern.",
+                highlights: ["Affen", "Füttern"],
+                website: "https://www.affenberg-salem.de",
+                image: "https://images.unsplash.com/photo-1534567153574-2b12153a87f0?w=800&q=80"
+            },
+            {
+                id: 408,
+                name: "Auto & Traktor Museum",
+                category: "kultur",
+                location: "Uhldingen-Mühlhofen",
+                country: "DE",
+                region: "BW",
+                lat: 47.7278,
+                lng: 9.2300,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 12 €",
+                description: "Grösste Sammlung historischer Traktoren und Autos.",
+                highlights: ["Oldtimer", "Traktoren"],
+                website: "https://www.traktor-museum.de",
+                image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80"
             }
         ];
         
