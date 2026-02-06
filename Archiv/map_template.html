@@ -3,41 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Familienguide 2026 | Schweiz</title>
+    <title>Familienguide 2026 | Schweiz & Deutschland</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <style>
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        html, body {
-            height: 100% !important;
-            width: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            overflow: hidden !important;
-            background: #1a1a2e !important;
-        }
-        
-        .app-container {
-            display: flex !important;
-            height: 100vh !important;
-            width: 100vw !important;
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            bottom: 0 !important;
-            margin: 0 !important;
-            padding: 0 !important;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         :root {
             --bg-dark: #1a1a2e;
             --bg-card: #16213e;
             --bg-hover: #1f2b47;
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
             --accent-blue: #4ecca3;
             --accent-teal: #4ecca3;
             --accent-orange: #f39c12;
@@ -54,7 +30,15 @@
         
         body {
             font-family: 'DM Sans', sans-serif;
+            background: var(--bg-dark);
             color: var(--text-primary);
+            overflow: hidden;
+        }
+        
+        .app-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
         }
         
         /* Sidebar */
@@ -206,11 +190,15 @@
         
         /* Month Filter */
         .month-filter {
-            padding: 10px 16px;
+            padding: 12px 24px;
+            border-bottom: 1px solid var(--border);
             display: flex;
-            flex-wrap: wrap;
             gap: 6px;
+            overflow-x: auto;
+            scrollbar-width: none;
         }
+        
+        .month-filter::-webkit-scrollbar { display: none; }
         
         .month-btn {
             padding: 6px 10px;
@@ -233,87 +221,6 @@
             background: #4ecca3;
             border-color: #4ecca3;
             color: white;
-        }
-        
-        /* Collapsible Sections */
-        .filter-section {
-            border-bottom: 1px solid var(--border);
-        }
-        .filter-section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 16px;
-            cursor: pointer;
-            background: rgba(255,255,255,0.02);
-            transition: background 0.2s;
-            user-select: none;
-        }
-        .filter-section-header:hover {
-            background: rgba(255,255,255,0.05);
-        }
-        .filter-section-title {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .filter-section-toggle {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            transition: transform 0.3s;
-        }
-        .filter-section.collapsed .filter-section-toggle {
-            transform: rotate(-90deg);
-        }
-        .filter-section-content {
-            max-height: 500px;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-        .filter-section.collapsed .filter-section-content {
-            max-height: 0;
-        }
-        
-        /* Country Switch */
-        .country-switch {
-            display: flex;
-            flex-wrap: wrap;
-            padding: 10px 16px;
-            gap: 6px;
-            border-bottom: 1px solid var(--border);
-            align-items: center;
-        }
-        .home-link {
-            padding: 6px 10px;
-            font-size: 1rem;
-            text-decoration: none;
-            background: rgba(255,255,255,0.05);
-            border-radius: 6px;
-            transition: all 0.2s;
-        }
-        .home-link:hover {
-            background: rgba(255,255,255,0.1);
-        }
-        .country-link {
-            padding: 6px 10px;
-            text-align: center;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 1.1rem;
-            transition: all 0.2s;
-        }
-        .country-link.active {
-            background: #6366f1;
-        }
-        .country-link:not(.active) {
-            background: transparent;
-            opacity: 0.5;
-        }
-        .country-link:not(.active):hover {
-            opacity: 1;
-            background: rgba(255,255,255,0.05);
         }
         
         /* POI List */
@@ -785,7 +692,7 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 1000;
-            background: #6366f1;
+            background: var(--primary);
             color: white;
             border: none;
             padding: 10px 20px;
@@ -798,7 +705,7 @@
             font-size: 0.9rem;
         }
         .search-area-btn:hover {
-            background: #4f46e5;
+            background: var(--primary-dark);
             transform: translateX(-50%) scale(1.05);
         }
         .search-area-btn.visible {
@@ -806,29 +713,29 @@
             align-items: center;
             gap: 8px;
         }
+        .search-area-btn .icon {
+            font-size: 1.1rem;
+        }
         
         /* Clear Area Filter Button */
         .clear-area-btn {
             position: absolute;
-            top: 130px;
+            top: 80px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 1000;
-            background: #e94560;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-weight: 600;
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
             display: none;
             transition: all 0.3s ease;
-            font-size: 0.9rem;
         }
         .clear-area-btn:hover {
-            background: #d63651;
-            transform: translateX(-50%) scale(1.05);
+            background: var(--hover);
         }
         .clear-area-btn.visible {
             display: flex;
@@ -955,6 +862,42 @@
             display: block;
         }
         
+        /* Country Selector */
+        .country-selector {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+        }
+        .country-btn {
+            flex: 1;
+            padding: 10px 12px;
+            border: 2px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .country-btn:hover {
+            background: var(--hover);
+            border-color: var(--text-muted);
+        }
+        .country-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .country-btn span:first-child {
+            font-size: 1.1rem;
+        }
         
         /* Region Filter (dynamic based on country) */
         .region-filter {
@@ -993,7 +936,7 @@
 <body>
     <div class="loading-overlay" id="loading">
         <div class="loading-spinner"></div>
-        <p style="color: var(--text-secondary);">Lade Familienguide Schweiz 2026...</p>
+        <p style="color: var(--text-secondary);">Lade Familienguide 2026...</p>
     </div>
 
     <div class="app-container">
@@ -1003,20 +946,21 @@
                     <div class="logo-icon">🗺️</div>
                     <div class="logo-text">
                         <h1>Familienguide 2026</h1>
-                        <p id="region-subtitle">Events • Ausflüge • Sehenswürdigkeiten</p>
+                        <p id="region-subtitle">Schweiz & Deutschland</p>
                     </div>
                 </div>
                 
-                <!-- Country Switch -->
-                <div class="country-switch">
-                    <a href="index.html" class="home-link" title="Übersicht">🏠</a>
-                    <a href="map_deutschland.html" class="country-link" title="Deutschland">🇩🇪</a>
-                    <a href="map_schweiz.html" class="country-link active" title="Schweiz">🇨🇭</a>
-                    <a href="map_italien.html" class="country-link" title="Italien">🇮🇹</a>
-                    <a href="map_frankreich.html" class="country-link" title="Frankreich">🇫🇷</a>
-                    <a href="map_spanien.html" class="country-link" title="Spanien">🇪🇸</a>
-                    <a href="map_portugal.html" class="country-link" title="Portugal">🇵🇹</a>
-                    <a href="map_kroatien.html" class="country-link" title="Kroatien">🇭🇷</a>
+                <!-- Country Selector -->
+                <div class="country-selector">
+                    <button class="country-btn active" data-country="all">
+                        <span>🌍</span> Alle
+                    </button>
+                    <button class="country-btn" data-country="CH">
+                        <span>🇨🇭</span> Schweiz
+                    </button>
+                    <button class="country-btn" data-country="DE">
+                        <span>🇩🇪</span> Deutschland
+                    </button>
                 </div>
                 
                 <div class="stats-bar">
@@ -1035,108 +979,72 @@
                 </div>
             </div>
             
-            <!-- Suche -->
             <div class="filters-section">
                 <div class="search-box">
                     <input type="text" id="search-input" placeholder="Suchen nach Event, Ort...">
                 </div>
-            </div>
-            
-            <!-- Kategorien (collapsible) -->
-            <div class="filter-section" id="section-categories">
-                <div class="filter-section-header" onclick="toggleSection('section-categories')">
-                    <span class="filter-section-title">📂 Kategorien</span>
-                    <span class="filter-section-toggle">▼</span>
-                </div>
-                <div class="filter-section-content">
-                    <div class="filter-tabs" id="category-filters">
-                        <button class="filter-tab active" data-category="all">
-                            <span>Alle</span>
-                            <span class="count" id="count-all">0</span>
-                        </button>
-                        <button class="filter-tab" data-category="festival">
-                            <span>🎵 Festivals</span>
-                            <span class="count" id="count-festival">0</span>
-                        </button>
-                        <button class="filter-tab" data-category="volksfest">
-                            <span>🎪 Volksfeste</span>
-                            <span class="count" id="count-volksfest">0</span>
-                        </button>
-                        <button class="filter-tab" data-category="kultur">
-                            <span>🎭 Kultur</span>
-                            <span class="count" id="count-kultur">0</span>
-                        </button>
-                        <button class="filter-tab" data-category="sport">
-                            <span>⚽ Sport</span>
-                            <span class="count" id="count-sport">0</span>
-                        </button>
-                        <button class="filter-tab" data-category="familie">
-                            <span>👨‍👩‍👧 Familie</span>
-                            <span class="count" id="count-familie">0</span>
-                        </button>
-                        <button class="filter-tab" data-category="sehenswuerdigkeit">
-                            <span>🏛️ Sights</span>
-                            <span class="count" id="count-sehenswuerdigkeit">0</span>
-                        </button>
-                        <button class="filter-tab" data-category="weihnachten">
-                            <span>🎄 Märkte</span>
-                            <span class="count" id="count-weihnachten">0</span>
-                        </button>
-                    </div>
+                <div class="filter-tabs" id="category-filters">
+                    <button class="filter-tab active" data-category="all">
+                        <span>Alle</span>
+                        <span class="count" id="count-all">0</span>
+                    </button>
+                    <button class="filter-tab" data-category="festival">
+                        <span>🎵 Festivals</span>
+                        <span class="count" id="count-festival">0</span>
+                    </button>
+                    <button class="filter-tab" data-category="volksfest">
+                        <span>🎪 Volksfeste</span>
+                        <span class="count" id="count-volksfest">0</span>
+                    </button>
+                    <button class="filter-tab" data-category="kultur">
+                        <span>🎭 Kultur</span>
+                        <span class="count" id="count-kultur">0</span>
+                    </button>
+                    <button class="filter-tab" data-category="sport">
+                        <span>⚽ Sport</span>
+                        <span class="count" id="count-sport">0</span>
+                    </button>
+                    <button class="filter-tab" data-category="familie">
+                        <span>👨‍👩‍👧 Familie</span>
+                        <span class="count" id="count-familie">0</span>
+                    </button>
+                    <button class="filter-tab" data-category="sehenswuerdigkeit">
+                        <span>🏛️ Sights</span>
+                        <span class="count" id="count-sehenswuerdigkeit">0</span>
+                    </button>
+                    <button class="filter-tab" data-category="weihnachten">
+                        <span>🎄 Märkte</span>
+                        <span class="count" id="count-weihnachten">0</span>
+                    </button>
                 </div>
             </div>
             
-            <!-- Monate (collapsible) -->
-            <div class="filter-section" id="section-months">
-                <div class="filter-section-header" onclick="toggleSection('section-months')">
-                    <span class="filter-section-title">📅 Monate</span>
-                    <span class="filter-section-toggle">▼</span>
-                </div>
-                <div class="filter-section-content">
-                    <div class="month-filter" id="month-filter">
-                        <button class="month-btn active" data-month="all">Ganzjährig</button>
-                        <button class="month-btn" data-month="1">Jan</button>
-                        <button class="month-btn" data-month="2">Feb</button>
-                        <button class="month-btn" data-month="3">Mär</button>
-                        <button class="month-btn" data-month="4">Apr</button>
-                        <button class="month-btn" data-month="5">Mai</button>
-                        <button class="month-btn" data-month="6">Jun</button>
-                        <button class="month-btn" data-month="7">Jul</button>
-                        <button class="month-btn" data-month="8">Aug</button>
-                        <button class="month-btn" data-month="9">Sep</button>
-                        <button class="month-btn" data-month="10">Okt</button>
-                        <button class="month-btn" data-month="11">Nov</button>
-                        <button class="month-btn" data-month="12">Dez</button>
-                    </div>
-                </div>
+            <div class="month-filter" id="month-filter">
+                <button class="month-btn active" data-month="all">Ganzjährig</button>
+                <button class="month-btn" data-month="1">Jan</button>
+                <button class="month-btn" data-month="2">Feb</button>
+                <button class="month-btn" data-month="3">Mär</button>
+                <button class="month-btn" data-month="4">Apr</button>
+                <button class="month-btn" data-month="5">Mai</button>
+                <button class="month-btn" data-month="6">Jun</button>
+                <button class="month-btn" data-month="7">Jul</button>
+                <button class="month-btn" data-month="8">Aug</button>
+                <button class="month-btn" data-month="9">Sep</button>
+                <button class="month-btn" data-month="10">Okt</button>
+                <button class="month-btn" data-month="11">Nov</button>
+                <button class="month-btn" data-month="12">Dez</button>
             </div>
             
-            <!-- Region Filter (collapsible) -->
-            <div class="filter-section" id="section-regions">
-                <div class="filter-section-header" onclick="toggleSection('section-regions')">
-                    <span class="filter-section-title">📍 Kantone</span>
-                    <span class="filter-section-toggle">▼</span>
-                </div>
-                <div class="filter-section-content">
-                    <div class="region-filter" id="region-filter">
-                        <!-- Will be populated dynamically -->
-                    </div>
-                </div>
+            <!-- Region Filter (dynamic) -->
+            <div class="region-filter" id="region-filter">
+                <!-- Will be populated dynamically based on country selection -->
             </div>
             
-            <!-- Besucht Filter (collapsible) -->
-            <div class="filter-section collapsed" id="section-visited">
-                <div class="filter-section-header" onclick="toggleSection('section-visited')">
-                    <span class="filter-section-title">✓ Besucht</span>
-                    <span class="filter-section-toggle">▼</span>
-                </div>
-                <div class="filter-section-content">
-                    <div class="visited-filter">
-                        <button class="visited-filter-btn active" data-filter="all">Alle</button>
-                        <button class="visited-filter-btn" data-filter="visited">✓ Besucht</button>
-                        <button class="visited-filter-btn" data-filter="unvisited">○ Offen</button>
-                    </div>
-                </div>
+            <!-- Visited Filter -->
+            <div class="visited-filter">
+                <button class="visited-filter-btn active" data-filter="all">Alle</button>
+                <button class="visited-filter-btn" data-filter="visited">✓ Besucht</button>
+                <button class="visited-filter-btn" data-filter="unvisited">○ Offen</button>
             </div>
             
             <!-- Visited Stats -->
@@ -4369,8 +4277,972 @@
                 highlights: ["Bernhardiner", "Museum"],
                 website: "https://www.fondation-barry.ch",
                 image: "https://images.unsplash.com/photo-1534361960057-19889db9621e?w=800&q=80"
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // 🇩🇪 DEUTSCHLAND - POIs
+            // ═══════════════════════════════════════════════════════════════
+            
+            // ═══════════════════════════════════════════════════════════════
+            // 🎢 FREIZEITPARKS DEUTSCHLAND
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 300,
+                name: "Europa-Park",
+                category: "familie",
+                location: "Rust",
+                country: "DE",
+                region: "BW",
+                lat: 48.2660,
+                lng: 7.7220,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 62.50 €",
+                description: "Grösster Freizeitpark Deutschlands mit 18 Themenbereichen.",
+                highlights: ["Grösster Park DE", "100+ Attraktionen"],
+                website: "https://www.europapark.de",
+                image: "https://images.unsplash.com/photo-1536768139911-e290a59011e4?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 301,
+                name: "Phantasialand",
+                category: "familie",
+                location: "Brühl",
+                country: "DE",
+                region: "NW",
+                lat: 50.7999,
+                lng: 6.8792,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 57 €",
+                description: "Spektakulärer Themenpark mit preisgekrönten Achterbahnen.",
+                highlights: ["Taron", "F.L.Y."],
+                website: "https://www.phantasialand.de",
+                image: "https://images.unsplash.com/photo-1536768139911-e290a59011e4?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 302,
+                name: "Legoland Deutschland",
+                category: "familie",
+                location: "Günzburg",
+                country: "DE",
+                region: "BY",
+                lat: 48.4263,
+                lng: 10.2970,
+                date: "März–Nov",
+                month: 0,
+                price: "Ab 51.50 €",
+                description: "Freizeitpark für Familien mit über 55 Millionen Legosteinen.",
+                highlights: ["55 Mio. Legosteine", "Miniland"],
+                website: "https://www.legoland.de",
+                image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
+            },
+            {
+                id: 303,
+                name: "Movie Park Germany",
+                category: "familie",
+                location: "Bottrop",
+                country: "DE",
+                region: "NW",
+                lat: 51.6178,
+                lng: 6.9731,
+                date: "März–Nov",
+                month: 0,
+                price: "Ab 49.90 €",
+                description: "Film- und Entertainmentpark mit Hollywood-Flair.",
+                highlights: ["Hollywood", "Star Trek"],
+                website: "https://www.movieparkgermany.de",
+                image: "https://images.unsplash.com/photo-1536768139911-e290a59011e4?w=800&q=80"
+            },
+            {
+                id: 304,
+                name: "Heide Park Resort",
+                category: "familie",
+                location: "Soltau",
+                country: "DE",
+                region: "NI",
+                lat: 53.0244,
+                lng: 9.8786,
+                date: "März–Nov",
+                month: 0,
+                price: "Ab 52 €",
+                description: "Norddeutschlands grösster Freizeitpark.",
+                highlights: ["Colossos", "Krake"],
+                website: "https://www.heide-park.de",
+                image: "https://images.unsplash.com/photo-1536768139911-e290a59011e4?w=800&q=80"
+            },
+            {
+                id: 305,
+                name: "Hansa-Park",
+                category: "familie",
+                location: "Sierksdorf",
+                country: "DE",
+                region: "SH",
+                lat: 54.0747,
+                lng: 10.7778,
+                date: "März–Okt",
+                month: 0,
+                price: "Ab 49 €",
+                description: "Einziger Freizeitpark Deutschlands am Meer.",
+                highlights: ["Ostsee", "Fluch von Novgorod"],
+                website: "https://www.hansapark.de",
+                image: "https://images.unsplash.com/photo-1536768139911-e290a59011e4?w=800&q=80"
+            },
+            {
+                id: 306,
+                name: "Tripsdrill",
+                category: "familie",
+                location: "Cleebronn",
+                country: "DE",
+                region: "BW",
+                lat: 49.0319,
+                lng: 9.0575,
+                date: "März–Nov",
+                month: 0,
+                price: "Ab 43 €",
+                description: "Erlebnispark mit schwäbischem Charme und Wildparadies.",
+                highlights: ["Wildparadies", "Karacho"],
+                website: "https://www.tripsdrill.de",
+                image: "https://images.unsplash.com/photo-1536768139911-e290a59011e4?w=800&q=80"
+            },
+            {
+                id: 307,
+                name: "Tropical Islands",
+                category: "familie",
+                location: "Krausnick",
+                country: "DE",
+                region: "BB",
+                lat: 52.0388,
+                lng: 13.7522,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 47 €",
+                description: "Grösste tropische Urlaubswelt Europas in ehemaliger Luftschiffhalle.",
+                highlights: ["Grösste Halle", "Tropisch"],
+                website: "https://www.tropical-islands.de",
+                image: "https://images.unsplash.com/photo-1519315901367-f34ff9154487?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 308,
+                name: "Ravensburger Spieleland",
+                category: "familie",
+                location: "Meckenbeuren",
+                country: "DE",
+                region: "BW",
+                lat: 47.7097,
+                lng: 9.5619,
+                date: "April–Okt",
+                month: 0,
+                price: "Ab 42.50 €",
+                description: "Freizeitpark mit Ravensburger-Spieleklassikern.",
+                highlights: ["Memory", "Käpt'n Blaubär"],
+                website: "https://www.spieleland.de",
+                image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // 🦁 ZOOS & TIERPARKS DEUTSCHLAND
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 310,
+                name: "Zoo Berlin",
+                category: "familie",
+                location: "Berlin",
+                country: "DE",
+                region: "BE",
+                lat: 52.5077,
+                lng: 13.3378,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 22 €",
+                description: "Artenreichster Zoo der Welt mit Panda-Garten.",
+                highlights: ["Artenreichster der Welt", "Pandas"],
+                website: "https://www.zoo-berlin.de",
+                image: "https://images.unsplash.com/photo-1534567153574-2b12153a87f0?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 311,
+                name: "Tierpark Hagenbeck",
+                category: "familie",
+                location: "Hamburg",
+                country: "DE",
+                region: "HH",
+                lat: 53.5964,
+                lng: 9.9378,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 26 €",
+                description: "Legendärer Tierpark mit gitterlosen Gehegen seit 1907.",
+                highlights: ["Gitterlos", "Tropen-Aquarium"],
+                website: "https://www.hagenbeck.de",
+                image: "https://images.unsplash.com/photo-1534567153574-2b12153a87f0?w=800&q=80"
+            },
+            {
+                id: 312,
+                name: "Wilhelma Stuttgart",
+                category: "familie",
+                location: "Stuttgart",
+                country: "DE",
+                region: "BW",
+                lat: 48.8047,
+                lng: 9.2067,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 20 €",
+                description: "Einziger Zoo Deutschlands mit grossem Botanischem Garten.",
+                highlights: ["Zoo + Botanik", "Menschenaffen"],
+                website: "https://www.wilhelma.de",
+                image: "https://images.unsplash.com/photo-1534567153574-2b12153a87f0?w=800&q=80"
+            },
+            {
+                id: 313,
+                name: "Zoo Leipzig",
+                category: "familie",
+                location: "Leipzig",
+                country: "DE",
+                region: "SN",
+                lat: 51.3500,
+                lng: 12.3700,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 23 €",
+                description: "Zoo der Zukunft mit Gondwanaland-Tropenhalle.",
+                highlights: ["Gondwanaland", "Tropenhalle"],
+                website: "https://www.zoo-leipzig.de",
+                image: "https://images.unsplash.com/photo-1534567153574-2b12153a87f0?w=800&q=80"
+            },
+            {
+                id: 314,
+                name: "Erlebnis-Zoo Hannover",
+                category: "familie",
+                location: "Hannover",
+                country: "DE",
+                region: "NI",
+                lat: 52.3803,
+                lng: 9.7019,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 29.50 €",
+                description: "Spektakulärer Erlebniszoo mit Themenwelten.",
+                highlights: ["Yukon Bay", "Sambesi"],
+                website: "https://www.zoo-hannover.de",
+                image: "https://images.unsplash.com/photo-1534567153574-2b12153a87f0?w=800&q=80"
+            },
+            {
+                id: 315,
+                name: "Kölner Zoo",
+                category: "familie",
+                location: "Köln",
+                country: "DE",
+                region: "NW",
+                lat: 50.9581,
+                lng: 6.9739,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 24 €",
+                description: "Drittältester Zoo Deutschlands mit Elefantenpark.",
+                highlights: ["Elefantenpark", "Hippodom"],
+                website: "https://www.koelnerzoo.de",
+                image: "https://images.unsplash.com/photo-1534567153574-2b12153a87f0?w=800&q=80"
+            },
+            {
+                id: 316,
+                name: "SeaLife & Legoland Discovery München",
+                category: "familie",
+                location: "München",
+                country: "DE",
+                region: "BY",
+                lat: 48.1306,
+                lng: 11.6019,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 21 €",
+                description: "Aquarium und Indoor-Lego-Erlebniswelt im Olympiapark.",
+                highlights: ["Aquarium", "Lego"],
+                website: "https://www.visitsealife.com",
+                image: "https://images.unsplash.com/photo-1534043464124-3be32fe000c9?w=800&q=80"
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // 🏛️ SEHENSWÜRDIGKEITEN DEUTSCHLAND
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 320,
+                name: "Schloss Neuschwanstein",
+                category: "sehenswuerdigkeit",
+                location: "Schwangau",
+                country: "DE",
+                region: "BY",
+                lat: 47.5576,
+                lng: 10.7498,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 15 €",
+                description: "Das Märchenschloss von König Ludwig II.",
+                highlights: ["Märchenschloss", "Ludwig II"],
+                website: "https://www.neuschwanstein.de",
+                image: "https://images.unsplash.com/photo-1534313314376-a72289b6181e?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 321,
+                name: "Brandenburger Tor",
+                category: "sehenswuerdigkeit",
+                location: "Berlin",
+                country: "DE",
+                region: "BE",
+                lat: 52.5163,
+                lng: 13.3777,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Wahrzeichen Berlins und Symbol der deutschen Einheit.",
+                highlights: ["Wahrzeichen", "Deutsche Einheit"],
+                website: "https://www.visitberlin.de",
+                image: "https://images.unsplash.com/photo-1560969184-10fe8719e047?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 322,
+                name: "Kölner Dom",
+                category: "sehenswuerdigkeit",
+                location: "Köln",
+                country: "DE",
+                region: "NW",
+                lat: 50.9413,
+                lng: 6.9583,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis (Turm 6 €)",
+                description: "Gotisches Meisterwerk und UNESCO-Welterbe.",
+                highlights: ["UNESCO", "Gotik"],
+                website: "https://www.koelner-dom.de",
+                image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 323,
+                name: "Miniatur Wunderland",
+                category: "familie",
+                location: "Hamburg",
+                country: "DE",
+                region: "HH",
+                lat: 53.5439,
+                lng: 9.9886,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 20 €",
+                description: "Grösste Modelleisenbahnanlage der Welt.",
+                highlights: ["Grösste der Welt", "Modellbahn"],
+                website: "https://www.miniatur-wunderland.de",
+                image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 324,
+                name: "Zugspitze",
+                category: "sehenswuerdigkeit",
+                location: "Garmisch-Partenkirchen",
+                country: "DE",
+                region: "BY",
+                lat: 47.4211,
+                lng: 10.9853,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 63 €",
+                description: "Höchster Berg Deutschlands (2.962 m).",
+                highlights: ["Höchster Berg DE", "Gletscherskigebiet"],
+                website: "https://www.zugspitze.de",
+                image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 325,
+                name: "Heidelberger Schloss",
+                category: "sehenswuerdigkeit",
+                location: "Heidelberg",
+                country: "DE",
+                region: "BW",
+                lat: 49.4106,
+                lng: 8.7153,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 9 €",
+                description: "Romantische Schlossruine über der Altstadt.",
+                highlights: ["Schlossruine", "Romantik"],
+                website: "https://www.schloss-heidelberg.de",
+                image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80"
+            },
+            {
+                id: 326,
+                name: "Rothenburg ob der Tauber",
+                category: "sehenswuerdigkeit",
+                location: "Rothenburg ob der Tauber",
+                country: "DE",
+                region: "BY",
+                lat: 49.3780,
+                lng: 10.1780,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Besterhaltene mittelalterliche Altstadt Deutschlands.",
+                highlights: ["Mittelalter", "Altstadt"],
+                website: "https://www.rothenburg-tourismus.de",
+                image: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=800&q=80"
+            },
+            {
+                id: 327,
+                name: "Schwarzwald",
+                category: "sehenswuerdigkeit",
+                location: "Schwarzwald",
+                country: "DE",
+                region: "BW",
+                lat: 48.1500,
+                lng: 8.1500,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Deutschlands grösstes Mittelgebirge mit Kuckucksuhren.",
+                highlights: ["Wandern", "Kuckucksuhren"],
+                website: "https://www.schwarzwald-tourismus.info",
+                image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80"
+            },
+            {
+                id: 328,
+                name: "Königssee",
+                category: "sehenswuerdigkeit",
+                location: "Berchtesgaden",
+                country: "DE",
+                region: "BY",
+                lat: 47.5530,
+                lng: 12.9875,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 19.50 € (Schiff)",
+                description: "Smaragdgrüner Alpensee mit St. Bartholomä.",
+                highlights: ["St. Bartholomä", "Elektroboote"],
+                website: "https://www.seenschifffahrt.de",
+                image: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 329,
+                name: "Loreley",
+                category: "sehenswuerdigkeit",
+                location: "St. Goarshausen",
+                country: "DE",
+                region: "RP",
+                lat: 50.1414,
+                lng: 7.7328,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Legendärer Felsen am Rhein mit UNESCO-Kulturerbe.",
+                highlights: ["UNESCO", "Rhein"],
+                website: "https://www.loreley-touristik.de",
+                image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+            },
+            {
+                id: 330,
+                name: "Elbphilharmonie",
+                category: "kultur",
+                location: "Hamburg",
+                country: "DE",
+                region: "HH",
+                lat: 53.5413,
+                lng: 9.9842,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 2 € (Plaza)",
+                description: "Spektakuläres Konzerthaus mit Aussichtsplattform.",
+                highlights: ["Architektur", "Konzerte"],
+                website: "https://www.elbphilharmonie.de",
+                image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
+            },
+            {
+                id: 331,
+                name: "Frauenkirche Dresden",
+                category: "sehenswuerdigkeit",
+                location: "Dresden",
+                country: "DE",
+                region: "SN",
+                lat: 51.0519,
+                lng: 13.7416,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis (Kuppel 8 €)",
+                description: "Wiederaufgebautes Barockjuwel als Symbol der Versöhnung.",
+                highlights: ["Barock", "Wiederaufbau"],
+                website: "https://www.frauenkirche-dresden.de",
+                image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80"
+            },
+            {
+                id: 332,
+                name: "Bodensee",
+                category: "sehenswuerdigkeit",
+                location: "Konstanz / Lindau",
+                country: "DE",
+                region: "BW",
+                lat: 47.6633,
+                lng: 9.1750,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Drittgrösster See Mitteleuropas mit Alpenpanorama.",
+                highlights: ["Alpenpanorama", "Insel Mainau"],
+                website: "https://www.bodensee.eu",
+                image: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=800&q=80"
+            },
+            {
+                id: 333,
+                name: "Insel Mainau",
+                category: "sehenswuerdigkeit",
+                location: "Konstanz",
+                country: "DE",
+                region: "BW",
+                lat: 47.7050,
+                lng: 9.1919,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 26 €",
+                description: "Blumeninsel im Bodensee mit tropischem Schmetterlingshaus.",
+                highlights: ["Blumeninsel", "Schmetterlinge"],
+                website: "https://www.mainau.de",
+                image: "https://images.unsplash.com/photo-1502086223501-7ea6ecd65d99?w=800&q=80"
+            },
+            {
+                id: 334,
+                name: "Basteibrücke",
+                category: "sehenswuerdigkeit",
+                location: "Lohmen (Sächsische Schweiz)",
+                country: "DE",
+                region: "SN",
+                lat: 50.9617,
+                lng: 14.0722,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Spektakuläre Felsbrücke in der Sächsischen Schweiz.",
+                highlights: ["Felsbrücke", "Sächsische Schweiz"],
+                website: "https://www.saechsische-schweiz.de",
+                image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 335,
+                name: "Schloss Sanssouci",
+                category: "sehenswuerdigkeit",
+                location: "Potsdam",
+                country: "DE",
+                region: "BB",
+                lat: 52.4042,
+                lng: 13.0386,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 14 €",
+                description: "Preussisches Versailles und UNESCO-Welterbe.",
+                highlights: ["UNESCO", "Friedrich der Grosse"],
+                website: "https://www.spsg.de",
+                image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80"
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // 🎵 FESTIVALS DEUTSCHLAND
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 340,
+                name: "Rock am Ring",
+                category: "festival",
+                location: "Nürburg",
+                country: "DE",
+                region: "RP",
+                lat: 50.3340,
+                lng: 6.9433,
+                date: "6.–8. Juni 2026",
+                month: 6,
+                price: "Ab 229 €",
+                description: "Legendäres Rock-Festival am Nürburgring.",
+                highlights: ["Nürburgring", "Rock"],
+                website: "https://www.rock-am-ring.com",
+                image: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 341,
+                name: "Wacken Open Air",
+                category: "festival",
+                location: "Wacken",
+                country: "DE",
+                region: "SH",
+                lat: 54.0250,
+                lng: 9.3714,
+                date: "30. Juli – 1. Aug 2026",
+                month: 7,
+                price: "Ab 299 €",
+                description: "Grösstes Metal-Festival der Welt.",
+                highlights: ["Grösstes Metal-Festival", "Heavy Metal"],
+                website: "https://www.wacken.com",
+                image: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 342,
+                name: "Hurricane Festival",
+                category: "festival",
+                location: "Scheeßel",
+                country: "DE",
+                region: "NI",
+                lat: 53.1667,
+                lng: 9.4833,
+                date: "19.–21. Juni 2026",
+                month: 6,
+                price: "Ab 199 €",
+                description: "Grosses Indie- und Alternative-Festival.",
+                highlights: ["Indie", "Alternative"],
+                website: "https://www.hurricane.de",
+                image: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80"
+            },
+            {
+                id: 343,
+                name: "Southside Festival",
+                category: "festival",
+                location: "Neuhausen ob Eck",
+                country: "DE",
+                region: "BW",
+                lat: 47.9667,
+                lng: 8.9500,
+                date: "19.–21. Juni 2026",
+                month: 6,
+                price: "Ab 199 €",
+                description: "Süddeutsches Pendant zum Hurricane.",
+                highlights: ["Alternative", "Rock"],
+                website: "https://www.southside.de",
+                image: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80"
+            },
+            {
+                id: 344,
+                name: "Parookaville",
+                category: "festival",
+                location: "Weeze",
+                country: "DE",
+                region: "NW",
+                lat: 51.6244,
+                lng: 6.1994,
+                date: "17.–19. Juli 2026",
+                month: 7,
+                price: "Ab 169 €",
+                description: "Spektakuläres EDM-Festival mit eigener Stadt.",
+                highlights: ["EDM", "Madness City"],
+                website: "https://www.parookaville.com",
+                image: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&q=80"
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // 🎪 VOLKSFESTE DEUTSCHLAND
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 350,
+                name: "Oktoberfest München",
+                category: "volksfest",
+                location: "München",
+                country: "DE",
+                region: "BY",
+                lat: 48.1317,
+                lng: 11.5497,
+                date: "19. Sept – 4. Okt 2026",
+                month: 9,
+                price: "Eintritt frei",
+                description: "Grösstes Volksfest der Welt mit 6 Millionen Besuchern.",
+                highlights: ["Grösstes der Welt", "6 Mio. Besucher"],
+                website: "https://www.oktoberfest.de",
+                image: "https://images.unsplash.com/photo-1505489435671-80b5c9c4e8b1?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 351,
+                name: "Cannstatter Wasen",
+                category: "volksfest",
+                location: "Stuttgart",
+                country: "DE",
+                region: "BW",
+                lat: 48.7919,
+                lng: 9.2247,
+                date: "25. Sept – 11. Okt 2026",
+                month: 9,
+                price: "Eintritt frei",
+                description: "Zweitgrösstes Volksfest Deutschlands.",
+                highlights: ["Zweitgrösstes", "Stuttgart"],
+                website: "https://www.cannstatter-volksfest.de",
+                image: "https://images.unsplash.com/photo-1505489435671-80b5c9c4e8b1?w=800&q=80"
+            },
+            {
+                id: 352,
+                name: "Hamburger Dom",
+                category: "volksfest",
+                location: "Hamburg",
+                country: "DE",
+                region: "HH",
+                lat: 53.5544,
+                lng: 9.9689,
+                date: "März, Juli, Nov",
+                month: 0,
+                price: "Eintritt frei",
+                description: "Norddeutschlands grösstes Volksfest – dreimal jährlich.",
+                highlights: ["3x jährlich", "Hamburg"],
+                website: "https://www.hamburger-dom.de",
+                image: "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&q=80"
+            },
+            {
+                id: 353,
+                name: "Rhein in Flammen",
+                category: "volksfest",
+                location: "Koblenz",
+                country: "DE",
+                region: "RP",
+                lat: 50.3569,
+                lng: 7.5889,
+                date: "8. Aug 2026",
+                month: 8,
+                price: "Variiert",
+                description: "Spektakuläres Feuerwerk entlang des Rheins.",
+                highlights: ["Feuerwerk", "Rhein"],
+                website: "https://www.rhein-in-flammen.com",
+                image: "https://images.unsplash.com/photo-1498931299351-aff385757dea?w=800&q=80"
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // 🎄 WEIHNACHTSMÄRKTE DEUTSCHLAND
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 360,
+                name: "Nürnberger Christkindlesmarkt",
+                category: "weihnachten",
+                location: "Nürnberg",
+                country: "DE",
+                region: "BY",
+                lat: 49.4539,
+                lng: 11.0775,
+                date: "27. Nov – 24. Dez",
+                month: 12,
+                price: "Gratis",
+                description: "Berühmtester Weihnachtsmarkt Deutschlands.",
+                highlights: ["Berühmtester", "Lebkuchen"],
+                website: "https://www.christkindlesmarkt.de",
+                image: "https://images.unsplash.com/photo-1512389142860-9c449e58a814?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 361,
+                name: "Dresdner Striezelmarkt",
+                category: "weihnachten",
+                location: "Dresden",
+                country: "DE",
+                region: "SN",
+                lat: 51.0504,
+                lng: 13.7373,
+                date: "26. Nov – 24. Dez",
+                month: 12,
+                price: "Gratis",
+                description: "Ältester Weihnachtsmarkt Deutschlands (seit 1434).",
+                highlights: ["Ältester seit 1434", "Stollen"],
+                website: "https://www.striezelmarkt.dresden.de",
+                image: "https://images.unsplash.com/photo-1544551763-92ab472cad1f?w=800&q=80"
+            },
+            {
+                id: 362,
+                name: "Kölner Weihnachtsmarkt am Dom",
+                category: "weihnachten",
+                location: "Köln",
+                country: "DE",
+                region: "NW",
+                lat: 50.9413,
+                lng: 6.9583,
+                date: "25. Nov – 23. Dez",
+                month: 12,
+                price: "Gratis",
+                description: "Weihnachtsmarkt direkt vor dem Kölner Dom.",
+                highlights: ["Dom-Kulisse", "7 Märkte"],
+                website: "https://www.koelnerweihnachtsmarkt.com",
+                image: "https://images.unsplash.com/photo-1576919228236-a097c32a5cd4?w=800&q=80"
+            },
+            {
+                id: 363,
+                name: "Stuttgarter Weihnachtsmarkt",
+                category: "weihnachten",
+                location: "Stuttgart",
+                country: "DE",
+                region: "BW",
+                lat: 48.7758,
+                lng: 9.1829,
+                date: "26. Nov – 23. Dez",
+                month: 12,
+                price: "Gratis",
+                description: "Einer der ältesten und schönsten Weihnachtsmärkte.",
+                highlights: ["300+ Stände", "Altstadt"],
+                website: "https://www.stuttgarter-weihnachtsmarkt.de",
+                image: "https://images.unsplash.com/photo-1512389142860-9c449e58a814?w=800&q=80"
+            },
+            {
+                id: 364,
+                name: "Münchner Christkindlmarkt",
+                category: "weihnachten",
+                location: "München",
+                country: "DE",
+                region: "BY",
+                lat: 48.1375,
+                lng: 11.5755,
+                date: "27. Nov – 24. Dez",
+                month: 12,
+                price: "Gratis",
+                description: "Traditioneller Christkindlmarkt auf dem Marienplatz.",
+                highlights: ["Marienplatz", "Krippe"],
+                website: "https://www.muenchen.de",
+                image: "https://images.unsplash.com/photo-1544551763-92ab472cad1f?w=800&q=80"
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // 🎭 KULTUR & MUSEEN DEUTSCHLAND
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 370,
+                name: "Deutsches Museum München",
+                category: "kultur",
+                location: "München",
+                country: "DE",
+                region: "BY",
+                lat: 48.1298,
+                lng: 11.5833,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 15 €",
+                description: "Grösstes Technikmuseum der Welt.",
+                highlights: ["Grösstes Technikmuseum", "Interaktiv"],
+                website: "https://www.deutsches-museum.de",
+                image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 371,
+                name: "Museumsinsel Berlin",
+                category: "kultur",
+                location: "Berlin",
+                country: "DE",
+                region: "BE",
+                lat: 52.5169,
+                lng: 13.4019,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 19 €",
+                description: "UNESCO-Welterbe mit 5 weltberühmten Museen.",
+                highlights: ["UNESCO", "5 Museen"],
+                website: "https://www.smb.museum",
+                image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
+            },
+            {
+                id: 372,
+                name: "Mercedes-Benz Museum",
+                category: "kultur",
+                location: "Stuttgart",
+                country: "DE",
+                region: "BW",
+                lat: 48.7882,
+                lng: 9.2339,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 12 €",
+                description: "Automobilgeschichte vom ersten Auto bis heute.",
+                highlights: ["Automobilgeschichte", "160 Fahrzeuge"],
+                website: "https://www.mercedes-benz.com/museum",
+                image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80"
+            },
+            {
+                id: 373,
+                name: "BMW Welt & Museum",
+                category: "kultur",
+                location: "München",
+                country: "DE",
+                region: "BY",
+                lat: 48.1769,
+                lng: 11.5567,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 10 €",
+                description: "Erlebniswelt und Museum rund um BMW.",
+                highlights: ["Architektur", "BMW"],
+                website: "https://www.bmw-welt.com",
+                image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80"
+            },
+            {
+                id: 374,
+                name: "Porsche Museum",
+                category: "kultur",
+                location: "Stuttgart",
+                country: "DE",
+                region: "BW",
+                lat: 48.8344,
+                lng: 9.1531,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 10 €",
+                description: "Die Geschichte des Sportwagenherstellers.",
+                highlights: ["Sportwagen", "80+ Fahrzeuge"],
+                website: "https://www.porsche.com/museum",
+                image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80"
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // 🛁 THERMEN DEUTSCHLAND
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 380,
+                name: "Therme Erding",
+                category: "familie",
+                location: "Erding",
+                country: "DE",
+                region: "BY",
+                lat: 48.2892,
+                lng: 11.9153,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 35 €",
+                description: "Grösste Therme der Welt mit 27 Rutschen.",
+                highlights: ["Grösste der Welt", "27 Rutschen"],
+                website: "https://www.therme-erding.de",
+                image: "https://images.unsplash.com/photo-1519315901367-f34ff9154487?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 381,
+                name: "Badeparadies Schwarzwald",
+                category: "familie",
+                location: "Titisee-Neustadt",
+                country: "DE",
+                region: "BW",
+                lat: 47.9081,
+                lng: 8.1533,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 33 €",
+                description: "Tropisches Badeparadies mit Palmen.",
+                highlights: ["Palmenparadies", "Rutschen"],
+                website: "https://www.badeparadies-schwarzwald.de",
+                image: "https://images.unsplash.com/photo-1519315901367-f34ff9154487?w=800&q=80"
+            },
+            {
+                id: 382,
+                name: "Caracalla Therme Baden-Baden",
+                category: "familie",
+                location: "Baden-Baden",
+                country: "DE",
+                region: "BW",
+                lat: 48.7606,
+                lng: 8.2442,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 23 €",
+                description: "Elegante Therme mit 2000 Jahre alter Badetradition.",
+                highlights: ["Römische Tradition", "Wellness"],
+                website: "https://www.carasana.de",
+                image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&q=80"
             }
         ];
+        
         // ============================================
         // APP-LOGIK
         // ============================================
@@ -4378,6 +5250,7 @@
         let markers = {};
         let activeFilter = 'all';
         let activeMonth = 'all';
+        let activeCountry = 'all';
         let activeRegion = 'all';
         let searchTerm = '';
         let selectedPOIs = [];
@@ -4386,18 +5259,41 @@
         let visitedFilter = 'all'; // 'all', 'visited', 'unvisited'
         
         // Load visited POIs from localStorage
-        let visitedPOIs = JSON.parse(localStorage.getItem('visitedPOIsCH') || '[]');
+        let visitedPOIs = JSON.parse(localStorage.getItem('visitedPOIs') || '[]');
         
-        // Kantone configuration
-        const kantone = {
-            "all": "Alle Kantone",
-            "ZH": "Zürich", "BE": "Bern", "LU": "Luzern", "UR": "Uri",
-            "SZ": "Schwyz", "OW": "Obwalden", "NW": "Nidwalden", "GL": "Glarus",
-            "ZG": "Zug", "FR": "Freiburg", "SO": "Solothurn", "BS": "Basel-Stadt",
-            "BL": "Basel-Land", "SH": "Schaffhausen", "AR": "Appenzell AR",
-            "AI": "Appenzell AI", "SG": "St. Gallen", "GR": "Graubünden",
-            "AG": "Aargau", "TG": "Thurgau", "TI": "Tessin", "VD": "Waadt",
-            "VS": "Wallis", "NE": "Neuenburg", "GE": "Genf", "JU": "Jura"
+        // Region configurations per country
+        const regionConfig = {
+            CH: {
+                name: "Schweiz",
+                flag: "🇨🇭",
+                center: [46.8182, 8.2275],
+                zoom: 8,
+                regions: {
+                    "all": "Alle Kantone",
+                    "ZH": "Zürich", "BE": "Bern", "LU": "Luzern", "UR": "Uri",
+                    "SZ": "Schwyz", "OW": "Obwalden", "NW": "Nidwalden", "GL": "Glarus",
+                    "ZG": "Zug", "FR": "Freiburg", "SO": "Solothurn", "BS": "Basel-Stadt",
+                    "BL": "Basel-Land", "SH": "Schaffhausen", "AR": "Appenzell AR",
+                    "AI": "Appenzell AI", "SG": "St. Gallen", "GR": "Graubünden",
+                    "AG": "Aargau", "TG": "Thurgau", "TI": "Tessin", "VD": "Waadt",
+                    "VS": "Wallis", "NE": "Neuenburg", "GE": "Genf", "JU": "Jura"
+                }
+            },
+            DE: {
+                name: "Deutschland",
+                flag: "🇩🇪",
+                center: [51.1657, 10.4515],
+                zoom: 6,
+                regions: {
+                    "all": "Alle Bundesländer",
+                    "BW": "Baden-Württemberg", "BY": "Bayern", "BE": "Berlin",
+                    "BB": "Brandenburg", "HB": "Bremen", "HH": "Hamburg",
+                    "HE": "Hessen", "MV": "Mecklenburg-Vorp.", "NI": "Niedersachsen",
+                    "NW": "Nordrhein-Westfalen", "RP": "Rheinland-Pfalz", "SL": "Saarland",
+                    "SN": "Sachsen", "ST": "Sachsen-Anhalt", "SH": "Schleswig-Holstein",
+                    "TH": "Thüringen"
+                }
+            }
         };
         
         const categoryColors = {
@@ -4603,7 +5499,12 @@
         function filterPOIs(fitBounds = true) {
             let filtered = allPOIs;
             
-            // Region filter (Kanton)
+            // Country filter
+            if (activeCountry !== 'all') {
+                filtered = filtered.filter(p => p.country === activeCountry);
+            }
+            
+            // Region filter
             if (activeRegion !== 'all') {
                 filtered = filtered.filter(p => p.region === activeRegion);
             }
@@ -4655,8 +5556,11 @@
         }
         
         function updateCounts() {
-            // Get base filtered POIs (by region/Kanton)
+            // Get base filtered POIs (by country and region)
             let basePOIs = allPOIs;
+            if (activeCountry !== 'all') {
+                basePOIs = basePOIs.filter(p => p.country === activeCountry);
+            }
             if (activeRegion !== 'all') {
                 basePOIs = basePOIs.filter(p => p.region === activeRegion);
             }
@@ -4674,15 +5578,27 @@
             });
         }
         
-        // Update region filter (Kantone)
+        // Update region filter based on selected country
         function updateRegionFilter() {
             const container = document.getElementById('region-filter');
             
+            if (activeCountry === 'all') {
+                container.classList.remove('visible');
+                container.innerHTML = '';
+                return;
+            }
+            
+            const config = regionConfig[activeCountry];
+            if (!config) return;
+            
+            // Get POIs for this country to show counts
+            const countryPOIs = allPOIs.filter(p => p.country === activeCountry);
+            
             let html = '';
-            Object.entries(kantone).forEach(([code, name]) => {
+            Object.entries(config.regions).forEach(([code, name]) => {
                 const count = code === 'all' 
-                    ? allPOIs.length 
-                    : allPOIs.filter(p => p.region === code).length;
+                    ? countryPOIs.length 
+                    : countryPOIs.filter(p => p.region === code).length;
                 
                 if (count > 0 || code === 'all') {
                     const isActive = activeRegion === code ? 'active' : '';
@@ -4702,7 +5618,11 @@
                     filterPOIs();
                 });
             });
+            
+            // Update subtitle
+            document.getElementById('region-subtitle').textContent = config.name;
         }
+        
         // Toggle visited status
         function toggleVisited(poiId, element) {
             const index = visitedPOIs.indexOf(poiId);
@@ -4713,7 +5633,7 @@
             }
             
             // Save to localStorage
-            localStorage.setItem('visitedPOIsCH', JSON.stringify(visitedPOIs));
+            localStorage.setItem('visitedPOIs', JSON.stringify(visitedPOIs));
             
             // Update UI
             const isVisited = visitedPOIs.includes(poiId);
@@ -4785,25 +5705,35 @@
             }
         }
         
-        // Toggle collapsible sections
-        function toggleSection(sectionId) {
-            const section = document.getElementById(sectionId);
-            if (section) {
-                section.classList.toggle('collapsed');
-            }
-        }
-        
         // Event Listeners
         document.addEventListener('DOMContentLoaded', () => {
             initMap();
             updateVisitedStats();
             updateCounts();
-            updateRegionFilter(); // Initialize Kanton filter
             
             // Search
             document.getElementById('search-input').addEventListener('input', (e) => {
                 searchTerm = e.target.value;
                 filterPOIs();
+            });
+            
+            // Country filters
+            document.querySelectorAll('.country-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.country-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    activeCountry = btn.dataset.country;
+                    activeRegion = 'all'; // Reset region when country changes
+                    
+                    // Update map view based on country
+                    if (activeCountry !== 'all' && regionConfig[activeCountry]) {
+                        const config = regionConfig[activeCountry];
+                        map.setView(config.center, config.zoom);
+                    }
+                    
+                    updateRegionFilter();
+                    filterPOIs(activeCountry === 'all');
+                });
             });
             
             // Category filters

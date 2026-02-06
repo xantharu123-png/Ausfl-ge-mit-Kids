@@ -1,0 +1,2057 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Familienguide 2026 | Frankreich</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        html, body {
+            height: 100% !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            background: #1a1a2e !important;
+        }
+        
+        .app-container {
+            display: flex !important;
+            height: 100vh !important;
+            width: 100vw !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        :root {
+            --bg-dark: #1a1a2e;
+            --bg-card: #16213e;
+            --bg-hover: #1f2b47;
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --accent-blue: #4ecca3;
+            --accent-teal: #4ecca3;
+            --accent-orange: #f39c12;
+            --accent-pink: #e94560;
+            --accent-purple: #9b59b6;
+            --accent-yellow: #f1c40f;
+            --accent-red: #e94560;
+            --accent-green: #4ecca3;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #7f8c8d;
+            --border: rgba(255,255,255,0.1);
+        }
+        
+        body {
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text-primary);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 420px;
+            background: linear-gradient(180deg, #16213e 0%, #1a1a2e 100%);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+            z-index: 1000;
+        }
+        
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(22,33,62,0.95);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #e94560, #9b59b6);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .logo-text h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .logo-text p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+        
+        .stats-bar {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .stat-item strong {
+            color: #4ecca3;
+        }
+        
+        /* Search & Filters */
+        .filters-section {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .search-box {
+            position: relative;
+            margin-bottom: 12px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: #e94560;
+            box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.15);
+        }
+        
+        .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .search-box::before {
+            content: "🔍";
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1rem;
+        }
+        
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-tab {
+            padding: 6px 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .filter-tab:hover {
+            background: var(--bg-hover);
+            border-color: #e94560;
+        }
+        
+        .filter-tab.active {
+            background: #e94560;
+            border-color: #e94560;
+            color: white;
+        }
+        
+        .filter-tab .count {
+            background: rgba(255,255,255,0.15);
+            padding: 1px 6px;
+            border-radius: 10px;
+            font-size: 0.65rem;
+        }
+        
+        /* Month Filter */
+        .month-filter {
+            padding: 10px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        
+        .month-btn {
+            padding: 6px 10px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .month-btn:hover {
+            border-color: #4ecca3;
+            color: #4ecca3;
+        }
+        
+        .month-btn.active {
+            background: #4ecca3;
+            border-color: #4ecca3;
+            color: white;
+        }
+        
+        /* Collapsible Sections */
+        .filter-section {
+            border-bottom: 1px solid var(--border);
+        }
+        .filter-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            cursor: pointer;
+            background: rgba(255,255,255,0.02);
+            transition: background 0.2s;
+            user-select: none;
+        }
+        .filter-section-header:hover {
+            background: rgba(255,255,255,0.05);
+        }
+        .filter-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .filter-section-toggle {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            transition: transform 0.3s;
+        }
+        .filter-section.collapsed .filter-section-toggle {
+            transform: rotate(-90deg);
+        }
+        .filter-section-content {
+            max-height: 500px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .filter-section.collapsed .filter-section-content {
+            max-height: 0;
+        }
+        
+        /* Country Switch */
+        .country-switch {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 10px 16px;
+            gap: 6px;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+        }
+        .home-link {
+            padding: 6px 10px;
+            font-size: 1rem;
+            text-decoration: none;
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .home-link:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .country-link {
+            padding: 6px 10px;
+            text-align: center;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+        }
+        .country-link.active {
+            background: #6366f1;
+        }
+        .country-link:not(.active) {
+            background: transparent;
+            opacity: 0.5;
+        }
+        .country-link:not(.active):hover {
+            opacity: 1;
+            background: rgba(255,255,255,0.05);
+        }
+        
+        /* POI List */
+        .poi-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .poi-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .poi-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .poi-list::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+        
+        .category-section {
+            margin-bottom: 20px;
+        }
+        
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 10px;
+        }
+        
+        .poi-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: 1px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .poi-card::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--cat-color, var(--accent-blue));
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .poi-card:hover {
+            background: var(--bg-hover);
+            border-color: var(--border);
+            transform: translateX(4px);
+        }
+        
+        .poi-card:hover::before {
+            opacity: 1;
+        }
+        
+        .poi-card.active {
+            background: rgba(233, 69, 96, 0.15);
+            border-color: #e94560;
+        }
+        
+        .poi-card.active::before {
+            opacity: 1;
+        }
+        
+        .poi-header {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .poi-image {
+            width: 70px;
+            height: 70px;
+            border-radius: 10px;
+            object-fit: cover;
+            background: var(--bg-hover);
+            flex-shrink: 0;
+        }
+        
+        .poi-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .poi-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+        
+        .poi-location {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 6px;
+        }
+        
+        .poi-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .poi-tag {
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+            color: var(--text-secondary);
+        }
+        
+        .poi-tag.date {
+            background: rgba(233, 69, 96, 0.15);
+            color: #e94560;
+        }
+        
+        .poi-tag.price {
+            background: rgba(78, 204, 163, 0.15);
+            color: #4ecca3;
+        }
+        
+        .poi-tag.highlight {
+            background: rgba(243, 156, 18, 0.15);
+            color: #f39c12;
+        }
+        
+        /* Map */
+        #map {
+            flex: 1;
+            height: 100%;
+        }
+        
+        /* Custom Markers */
+        .custom-marker {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+        
+        .custom-marker:hover {
+            transform: scale(1.2);
+        }
+        
+        /* Popup */
+        .leaflet-popup-content-wrapper {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .leaflet-popup-tip {
+            background: var(--bg-card);
+        }
+        
+        .leaflet-popup-content {
+            margin: 0;
+            width: 320px !important;
+        }
+        
+        .popup-content {
+            padding: 0;
+        }
+        
+        .popup-image {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+        }
+        
+        .popup-body {
+            padding: 16px;
+        }
+        
+        .popup-category {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #4ecca3;
+            margin-bottom: 6px;
+        }
+        
+        .popup-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+        
+        .popup-location {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        
+        .popup-description {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+        
+        .popup-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        
+        .popup-detail {
+            background: rgba(255,255,255,0.03);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .popup-detail-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        
+        .popup-detail-value {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .popup-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .popup-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .popup-btn.primary {
+            background: #4ecca3;
+            color: white;
+            border: none;
+        }
+        
+        .popup-btn.primary:hover {
+            background: #3db892;
+        }
+        
+        .popup-btn.secondary {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+        
+        .popup-btn.secondary:hover {
+            background: var(--bg-hover);
+            border-color: var(--text-muted);
+        }
+        
+        /* Route Panel */
+        .route-panel {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 16px 24px;
+            display: none;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            border: 1px solid var(--border);
+            z-index: 1000;
+        }
+        
+        .route-panel.visible {
+            display: flex;
+        }
+        
+        .route-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .route-stops {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .route-stop {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            background: #e94560;
+            color: white;
+            border: 2px solid white;
+        }
+        
+        .route-stop.more {
+            background: var(--bg-hover);
+            color: var(--text-secondary);
+            font-size: 10px;
+        }
+        
+        .route-connector {
+            width: 20px;
+            height: 2px;
+            background: var(--border);
+        }
+        
+        .route-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .route-text strong {
+            color: var(--text-primary);
+        }
+        
+        .route-btn {
+            padding: 10px 20px;
+            background: #4ecca3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .route-btn:hover {
+            background: #3db892;
+        }
+        
+        .route-clear {
+            padding: 8px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        /* Mobile */
+        @media (max-width: 900px) {
+            .app-container {
+                flex-direction: column;
+            },
+            
+            .sidebar {
+                width: 100%;
+                height: 50%;
+                order: 2;
+            },
+            
+            #map {
+                height: 50%;
+            },
+            
+            .route-panel {
+                bottom: 52%;
+                width: calc(100% - 32px);
+                flex-wrap: wrap;
+            },
+        }
+        
+        /* Loading state */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 9999;
+            transition: opacity 0.5s;
+        }
+        
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top-color: #4ecca3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+        
+        .no-results-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+        /* Search in Area Button */
+        .search-area-btn {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            display: none;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        .search-area-btn:hover {
+            background: #4f46e5;
+            transform: translateX(-50%) scale(1.05);
+        }
+        .search-area-btn.visible {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* Clear Area Filter Button */
+        .clear-area-btn {
+            position: absolute;
+            top: 130px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: #e94560;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+            display: none;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        .clear-area-btn:hover {
+            background: #d63651;
+            transform: translateX(-50%) scale(1.05);
+        }
+        .clear-area-btn.visible {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        /* Visited Checkbox Styles */
+        .visited-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .visited-toggle:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .visited-toggle input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--success);
+            cursor: pointer;
+        }
+        .visited-toggle label {
+            font-size: 0.85rem;
+            cursor: pointer;
+            user-select: none;
+        }
+        .visited-toggle.checked {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--success);
+        }
+        .visited-toggle.checked label {
+            color: var(--success);
+        }
+        
+        /* POI Card Visited Indicator */
+        .poi-card.visited {
+            border-left: 3px solid var(--success);
+        }
+        .poi-card.visited::after {
+            content: '✓';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--success);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        .poi-card {
+            position: relative;
+        }
+        
+        /* Visited Filter in Sidebar */
+        .visited-filter {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+        }
+        .visited-filter-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+        .visited-filter-btn:hover {
+            background: var(--hover);
+        }
+        .visited-filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        /* Visited marker icon adjustment */
+        .marker-visited {
+            position: relative;
+        }
+        .marker-visited::after {
+            content: '✓';
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--success);
+            color: white;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            font-size: 0.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Stats for visited */
+        .visited-stats {
+            padding: 8px 16px;
+            background: rgba(16, 185, 129, 0.1);
+            border-bottom: 1px solid var(--border);
+            font-size: 0.8rem;
+            color: var(--success);
+            display: none;
+        }
+        .visited-stats.visible {
+            display: block;
+        }
+        
+        
+        /* Region Filter (dynamic based on country) */
+        .region-filter {
+            display: none;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 10px 16px;
+            background: var(--sidebar-bg);
+            border-bottom: 1px solid var(--border);
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        .region-filter.visible {
+            display: flex;
+        }
+        .region-btn {
+            padding: 5px 10px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+        }
+        .region-btn:hover {
+            background: var(--hover);
+        }
+        .region-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loading">
+        <div class="loading-spinner"></div>
+        <p style="color: var(--text-secondary);">Lade Familienguide Schweiz 2026...</p>
+    </div>
+
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">🗺️</div>
+                    <div class="logo-text">
+                        <h1>Familienguide 2026</h1>
+                        <p id="region-subtitle">Events • Ausflüge • Sehenswürdigkeiten</p>
+                    </div>
+                </div>
+                
+                <!-- Country Switch -->
+                <div class="country-switch">
+                    <a href="index.html" class="home-link" title="Übersicht">🏠</a>
+                    <a href="map_deutschland.html" class="country-link" title="Deutschland">🇩🇪</a>
+                    <a href="map_schweiz.html" class="country-link" title="Schweiz">🇨🇭</a>
+                    <a href="map_italien.html" class="country-link" title="Italien">🇮🇹</a>
+                    <a href="map_frankreich.html" class="country-link active" title="Frankreich">🇫🇷</a>
+                    <a href="map_spanien.html" class="country-link" title="Spanien">🇪🇸</a>
+                    <a href="map_portugal.html" class="country-link" title="Portugal">🇵🇹</a>
+                    <a href="map_kroatien.html" class="country-link" title="Kroatien">🇭🇷</a>
+                </div>
+                
+                <div class="stats-bar">
+                    <div class="stat-item">
+                        <span>📍</span>
+                        <strong id="total-pois">0</strong> Orte
+                    </div>
+                    <div class="stat-item">
+                        <span>🎉</span>
+                        <strong id="total-events">0</strong> Events
+                    </div>
+                    <div class="stat-item">
+                        <span>⭐</span>
+                        <strong>50+</strong> Highlights
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Suche -->
+            <div class="filters-section">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Suchen nach Event, Ort...">
+                </div>
+            </div>
+            
+            <!-- Kategorien (collapsible) -->
+            <div class="filter-section" id="section-categories">
+                <div class="filter-section-header" onclick="toggleSection('section-categories')">
+                    <span class="filter-section-title">📂 Kategorien</span>
+                    <span class="filter-section-toggle">▼</span>
+                </div>
+                <div class="filter-section-content">
+                    <div class="filter-tabs" id="category-filters">
+                        <button class="filter-tab active" data-category="all">
+                            <span>Alle</span>
+                            <span class="count" id="count-all">0</span>
+                        </button>
+                        <button class="filter-tab" data-category="festival">
+                            <span>🎵 Festivals</span>
+                            <span class="count" id="count-festival">0</span>
+                        </button>
+                        <button class="filter-tab" data-category="volksfest">
+                            <span>🎪 Volksfeste</span>
+                            <span class="count" id="count-volksfest">0</span>
+                        </button>
+                        <button class="filter-tab" data-category="kultur">
+                            <span>🎭 Kultur</span>
+                            <span class="count" id="count-kultur">0</span>
+                        </button>
+                        <button class="filter-tab" data-category="sport">
+                            <span>⚽ Sport</span>
+                            <span class="count" id="count-sport">0</span>
+                        </button>
+                        <button class="filter-tab" data-category="familie">
+                            <span>👨‍👩‍👧 Familie</span>
+                            <span class="count" id="count-familie">0</span>
+                        </button>
+                        <button class="filter-tab" data-category="sehenswuerdigkeit">
+                            <span>🏛️ Sights</span>
+                            <span class="count" id="count-sehenswuerdigkeit">0</span>
+                        </button>
+                        <button class="filter-tab" data-category="weihnachten">
+                            <span>🎄 Märkte</span>
+                            <span class="count" id="count-weihnachten">0</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Monate (collapsible) -->
+            <div class="filter-section" id="section-months">
+                <div class="filter-section-header" onclick="toggleSection('section-months')">
+                    <span class="filter-section-title">📅 Monate</span>
+                    <span class="filter-section-toggle">▼</span>
+                </div>
+                <div class="filter-section-content">
+                    <div class="month-filter" id="month-filter">
+                        <button class="month-btn active" data-month="all">Ganzjährig</button>
+                        <button class="month-btn" data-month="1">Jan</button>
+                        <button class="month-btn" data-month="2">Feb</button>
+                        <button class="month-btn" data-month="3">Mär</button>
+                        <button class="month-btn" data-month="4">Apr</button>
+                        <button class="month-btn" data-month="5">Mai</button>
+                        <button class="month-btn" data-month="6">Jun</button>
+                        <button class="month-btn" data-month="7">Jul</button>
+                        <button class="month-btn" data-month="8">Aug</button>
+                        <button class="month-btn" data-month="9">Sep</button>
+                        <button class="month-btn" data-month="10">Okt</button>
+                        <button class="month-btn" data-month="11">Nov</button>
+                        <button class="month-btn" data-month="12">Dez</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Region Filter (collapsible) -->
+            <div class="filter-section" id="section-regions">
+                <div class="filter-section-header" onclick="toggleSection('section-regions')">
+                    <span class="filter-section-title">📍 Regionen</span>
+                    <span class="filter-section-toggle">▼</span>
+                </div>
+                <div class="filter-section-content">
+                    <div class="region-filter" id="region-filter">
+                        <!-- Will be populated dynamically -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Besucht Filter (collapsible) -->
+            <div class="filter-section collapsed" id="section-visited">
+                <div class="filter-section-header" onclick="toggleSection('section-visited')">
+                    <span class="filter-section-title">✓ Besucht</span>
+                    <span class="filter-section-toggle">▼</span>
+                </div>
+                <div class="filter-section-content">
+                    <div class="visited-filter">
+                        <button class="visited-filter-btn active" data-filter="all">Alle</button>
+                        <button class="visited-filter-btn" data-filter="visited">✓ Besucht</button>
+                        <button class="visited-filter-btn" data-filter="unvisited">○ Offen</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Visited Stats -->
+            <div class="visited-stats" id="visited-stats"></div>
+            
+            <div class="poi-list" id="poi-list">
+                <!-- POIs werden hier dynamisch eingefügt -->
+            </div>
+        </div>
+        
+        <div id="map"></div>
+        <button id="search-area-btn" class="search-area-btn">
+            <span class="icon">🔍</span>
+            <span>In diesem Bereich suchen</span>
+        </button>
+        <button id="clear-area-btn" class="clear-area-btn">
+            <span>✕</span>
+            <span>Bereichsfilter aufheben</span>
+        </button>
+    </div>
+    
+    <div class="route-panel" id="route-panel">
+        <div class="route-info">
+            <div class="route-stops" id="route-stops"></div>
+            <div class="route-text">
+                <strong id="route-count">0</strong> Stopps ausgewählt
+            </div>
+        </div>
+        <button class="route-btn" id="plan-route">
+            <span>📍</span> Route planen
+        </button>
+        <button class="route-clear" id="clear-route" title="Route löschen">✕</button>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // ============================================
+        // DATEN: Alle POIs aus dem Jahresguide 2026
+        // ============================================
+        const allPOIs = [
+            // 🇫🇷 FRANKREICH - POIs
+            // ═══════════════════════════════════════════════════════════════
+            
+            // === FREIZEITPARKS ===
+            {
+                id: 600,
+                name: "Disneyland Paris",
+                category: "familie",
+                location: "Marne-la-Vallée",
+                country: "FR", region: "IDF",
+                lat: 48.8722,
+                lng: 2.7758,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 56 €",
+                description: "Der magische Disney-Freizeitpark mit zwei Parks.",
+                highlights: ["Disney Park", "Walt Disney Studios", "Feuerwerk"],
+                isHighlight: true
+            },
+            {
+                id: 601,
+                name: "Parc Astérix",
+                category: "familie",
+                location: "Plailly (Paris)",
+                country: "FR", region: "IDF",
+                lat: 49.1347,
+                lng: 2.5728,
+                date: "April - November",
+                month: 4,
+                price: "Ab 53 €",
+                description: "Gallischer Themenpark mit rasanten Achterbahnen.",
+                highlights: ["Oziris", "Toutatis Coaster", "Gallisches Dorf"],
+                isHighlight: true
+            },
+            {
+                id: 602,
+                name: "Futuroscope",
+                category: "familie",
+                location: "Poitiers",
+                country: "FR", region: "NAQ",
+                lat: 46.6697,
+                lng: 0.3672,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 42 €",
+                description: "Futuristischer Park mit VR und Multimedia-Attraktionen.",
+                highlights: ["VR Erlebnisse", "Nachtshows", "Lernpark"],
+                isHighlight: true
+            },
+            {
+                id: 603,
+                name: "Puy du Fou",
+                category: "familie",
+                location: "Les Epesses",
+                country: "FR", region: "PDL",
+                lat: 46.8897,
+                lng: -0.9308,
+                date: "April - November",
+                month: 4,
+                price: "Ab 46 €",
+                description: "Historischer Themenpark mit spektakulären Live-Shows.",
+                highlights: ["Beste Shows Europas", "Cinéscénie", "Wikinger"],
+                isHighlight: true
+            },
+            {
+                id: 604,
+                name: "Nigloland",
+                category: "familie",
+                location: "Dolancourt",
+                country: "FR", region: "GES",
+                lat: 48.2500,
+                lng: 4.6000,
+                date: "April - November",
+                month: 4,
+                price: "Ab 35 €",
+                description: "Familienfreundlicher Park in der Champagne.",
+                highlights: ["Alpina Blitz", "Donjon Extreme"],
+                isHighlight: false
+            },
+            {
+                id: 605,
+                name: "Walibi Rhône-Alpes",
+                category: "familie",
+                location: "Les Avenières",
+                country: "FR", region: "ARA",
+                lat: 45.6167,
+                lng: 5.5667,
+                date: "April - Oktober",
+                month: 4,
+                price: "Ab 38 €",
+                description: "Achterbahn-Park mit Wasserattraktionen.",
+                highlights: ["Timber", "Mystic", "Aqualibi"],
+                isHighlight: false
+            },
+            
+            // === ZOOS & AQUARIEN ===
+            {
+                id: 610,
+                name: "ZooParc de Beauval",
+                category: "familie",
+                location: "Saint-Aignan",
+                country: "FR", region: "CVL",
+                lat: 47.2489,
+                lng: 1.3536,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 36 €",
+                description: "Einer der schönsten Zoos der Welt mit Pandas.",
+                highlights: ["Pandas", "Koalas", "Savanne"],
+                isHighlight: true
+            },
+            {
+                id: 611,
+                name: "Parc Zoologique de Paris",
+                category: "familie",
+                location: "Paris",
+                country: "FR", region: "IDF",
+                lat: 48.8333,
+                lng: 2.4167,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 22 €",
+                description: "Komplett renovierter Zoo im Bois de Vincennes.",
+                highlights: ["Biozonen", "Grand Rocher"],
+                isHighlight: false
+            },
+            {
+                id: 612,
+                name: "Océanopolis",
+                category: "familie",
+                location: "Brest",
+                country: "FR", region: "BRE",
+                lat: 48.3903,
+                lng: -4.4389,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 22 €",
+                description: "Grosses Meeresaquarium mit drei Pavillons.",
+                highlights: ["Haie", "Pinguine", "Seeotter"],
+                isHighlight: false
+            },
+            {
+                id: 613,
+                name: "Nausicaá",
+                category: "familie",
+                location: "Boulogne-sur-Mer",
+                country: "FR", region: "HDF",
+                lat: 50.7258,
+                lng: 1.6050,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 28 €",
+                description: "Grösstes Aquarium Europas mit 58.000 Tieren.",
+                highlights: ["Grösstes Aquarium EU", "Mantarochen", "Haie"],
+                isHighlight: true
+            },
+            {
+                id: 614,
+                name: "La Palmyre Zoo",
+                category: "familie",
+                location: "Les Mathes",
+                country: "FR", region: "NAQ",
+                lat: 45.6833,
+                lng: -1.1667,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 23 €",
+                description: "Meistbesuchter privater Zoo Frankreichs.",
+                highlights: ["1600 Tiere", "Flamingos"],
+                isHighlight: false
+            },
+            
+            // === SEHENSWÜRDIGKEITEN ===
+            {
+                id: 620,
+                name: "Eiffelturm",
+                category: "sehenswuerdigkeit",
+                location: "Paris",
+                country: "FR", region: "IDF",
+                lat: 48.8584,
+                lng: 2.2945,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 11 € (Treppen)",
+                description: "Das Wahrzeichen von Paris mit 324m Höhe.",
+                highlights: ["Aussichtsplattformen", "Restaurant"],
+                isHighlight: true
+            },
+            {
+                id: 621,
+                name: "Schloss Versailles",
+                category: "sehenswuerdigkeit",
+                location: "Versailles",
+                country: "FR", region: "IDF",
+                lat: 48.8049,
+                lng: 2.1204,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 21 €",
+                description: "Das prächtigste Schloss Europas mit Gärten.",
+                highlights: ["UNESCO Welterbe", "Spiegelsaal", "Gärten"],
+                isHighlight: true
+            },
+            {
+                id: 622,
+                name: "Mont Saint-Michel",
+                category: "sehenswuerdigkeit",
+                location: "Normandie",
+                country: "FR", region: "NOR",
+                lat: 48.6361,
+                lng: -1.5114,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 11 €",
+                description: "Klosterinsel mit dramatischen Gezeiten.",
+                highlights: ["UNESCO Welterbe", "Gezeiten", "Abtei"],
+                isHighlight: true
+            },
+            {
+                id: 623,
+                name: "Louvre Museum",
+                category: "kultur",
+                location: "Paris",
+                country: "FR", region: "IDF",
+                lat: 48.8606,
+                lng: 2.3376,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 17 €",
+                description: "Grösstes Kunstmuseum der Welt mit Mona Lisa.",
+                highlights: ["Mona Lisa", "Venus de Milo", "380.000 Werke"],
+                isHighlight: true
+            },
+            {
+                id: 624,
+                name: "Côte d'Azur",
+                category: "sehenswuerdigkeit",
+                location: "Nizza",
+                country: "FR", region: "PAC",
+                lat: 43.7102,
+                lng: 7.2620,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Die glamouröse französische Riviera.",
+                highlights: ["Nizza", "Cannes", "Monaco"],
+                isHighlight: true
+            },
+            {
+                id: 625,
+                name: "Pont du Gard",
+                category: "sehenswuerdigkeit",
+                location: "Vers-Pont-du-Gard",
+                country: "FR", region: "OCC",
+                lat: 43.9472,
+                lng: 4.5353,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 9.50 €",
+                description: "Römisches Aquädukt aus dem 1. Jahrhundert.",
+                highlights: ["UNESCO Welterbe", "Baden möglich"],
+                isHighlight: true
+            },
+            {
+                id: 626,
+                name: "Schlösser der Loire",
+                category: "sehenswuerdigkeit",
+                location: "Chambord",
+                country: "FR", region: "CVL",
+                lat: 47.6161,
+                lng: 1.5172,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 14.50 €",
+                description: "Über 300 Renaissance-Schlösser an der Loire.",
+                highlights: ["Chambord", "Chenonceau", "UNESCO Welterbe"],
+                isHighlight: true
+            },
+            {
+                id: 627,
+                name: "Carcassonne",
+                category: "sehenswuerdigkeit",
+                location: "Carcassonne",
+                country: "FR", region: "OCC",
+                lat: 43.2069,
+                lng: 2.3636,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 11 €",
+                description: "Grösste mittelalterliche Festungsstadt Europas.",
+                highlights: ["UNESCO Welterbe", "52 Türme"],
+                isHighlight: true
+            },
+            
+            // === STRÄNDE & NATUR ===
+            {
+                id: 630,
+                name: "Dune du Pilat",
+                category: "sehenswuerdigkeit",
+                location: "La Teste-de-Buch",
+                country: "FR", region: "NAQ",
+                lat: 44.5897,
+                lng: -1.2111,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Höchste Düne Europas mit 110m Höhe.",
+                highlights: ["110m hoch", "Paragliding", "Sonnenuntergang"],
+                isHighlight: true
+            },
+            {
+                id: 631,
+                name: "Gorges du Verdon",
+                category: "sehenswuerdigkeit",
+                location: "Provence",
+                country: "FR", region: "PAC",
+                lat: 43.7486,
+                lng: 6.3283,
+                date: "April - Oktober",
+                month: 4,
+                price: "Gratis",
+                description: "Der Grand Canyon Europas mit türkisblauem Wasser.",
+                highlights: ["Kajak", "Wandern", "700m tiefe Schlucht"],
+                isHighlight: true
+            },
+            {
+                id: 632,
+                name: "Provence Lavendelfelder",
+                category: "sehenswuerdigkeit",
+                location: "Valensole",
+                country: "FR", region: "PAC",
+                lat: 43.8372,
+                lng: 5.9847,
+                date: "Mitte Juni - Mitte Juli",
+                month: 6,
+                price: "Gratis",
+                description: "Endlose violette Lavendelfelder.",
+                highlights: ["Fotomotiv", "Lavendelöl"],
+                isHighlight: true
+            },
+            {
+                id: 633,
+                name: "Biarritz Strände",
+                category: "familie",
+                location: "Biarritz",
+                country: "FR", region: "NAQ",
+                lat: 43.4832,
+                lng: -1.5586,
+                date: "Mai - September",
+                month: 5,
+                price: "Gratis",
+                description: "Eleganter Badeort mit Surfstränden.",
+                highlights: ["Surfen", "Grande Plage"],
+                isHighlight: false
+            },
+            
+            // === KULTUR & MUSEEN ===
+            {
+                id: 640,
+                name: "Cité de l'Espace",
+                category: "kultur",
+                location: "Toulouse",
+                country: "FR", region: "OCC",
+                lat: 43.5872,
+                lng: 1.4928,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 25 €",
+                description: "Interaktiver Weltraum-Themenpark.",
+                highlights: ["Ariane 5 Rakete", "Planetarium", "Mir Station"],
+                isHighlight: true
+            },
+            {
+                id: 641,
+                name: "Musée d'Orsay",
+                category: "kultur",
+                location: "Paris",
+                country: "FR", region: "IDF",
+                lat: 48.8600,
+                lng: 2.3266,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 16 €",
+                description: "Impressionismus-Museum im ehemaligen Bahnhof.",
+                highlights: ["Van Gogh", "Monet", "Renoir"],
+                isHighlight: true
+            },
+            {
+                id: 642,
+                name: "Lascaux IV",
+                category: "kultur",
+                location: "Montignac",
+                country: "FR", region: "NAQ",
+                lat: 45.0553,
+                lng: 1.1694,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 22 €",
+                description: "Perfekte Nachbildung der prähistorischen Höhlenmalereien.",
+                highlights: ["17.000 Jahre alt", "Höhlenmalerei"],
+                isHighlight: true
+            }
+        ];
+        // ============================================
+        // APP-LOGIK
+        // ============================================
+        let map;
+        let markers = {};
+        let activeFilter = 'all';
+        let activeMonth = 'all';
+        let activeRegion = 'all';
+        let searchTerm = '';
+        let selectedPOIs = [];
+        let areaFilterActive = false;
+        let areaBounds = null;
+        let visitedFilter = 'all'; // 'all', 'visited', 'unvisited'
+        
+        // Load visited POIs from localStorage
+        let visitedPOIs = JSON.parse(localStorage.getItem('visitedPOIsFR') || '[]');
+        
+        // Kantone configuration
+        const regionen = {
+            "all": "Alle Regionen",
+            "IDF": "Île-de-France", "PAC": "Provence-Alpes-Côte d'Azur", "OCC": "Okzitanien",
+            "NAQ": "Nouvelle-Aquitaine", "ARA": "Auvergne-Rhône-Alpes", "BRE": "Bretagne",
+            "NOR": "Normandie", "HDF": "Hauts-de-France", "GES": "Grand Est",
+            "PDL": "Pays de la Loire", "CVL": "Centre-Val de Loire", "COR": "Korsika"
+        };
+        
+        const categoryColors = {
+            festival: '#9b59b6',
+            volksfest: '#f39c12',
+            kultur: '#e94560',
+            sport: '#4ecca3',
+            familie: '#3498db',
+            sehenswuerdigkeit: '#f1c40f',
+            weihnachten: '#e94560'
+        };
+        
+        const categoryIcons = {
+            festival: '🎵',
+            volksfest: '🎪',
+            kultur: '🎭',
+            sport: '⚽',
+            familie: '👨‍👩‍👧',
+            sehenswuerdigkeit: '🏛️',
+            weihnachten: '🎄'
+        };
+        
+        function initMap() {
+            map = L.map('map', {
+                zoomControl: true,
+                scrollWheelZoom: true
+            }).setView([46.6, 2.5], 6);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+            
+            addMarkers(allPOIs);
+            updateCounts();
+            renderPOIList(allPOIs);
+            
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+            }, 500);
+        }
+        
+        function createMarkerIcon(category, isHighlight) {
+            const color = categoryColors[category] || '#3b82f6';
+            const icon = categoryIcons[category] || '📍';
+            const size = isHighlight ? 40 : 32;
+            
+            return L.divIcon({
+                className: 'custom-marker-wrapper',
+                html: `<div class="custom-marker" style="background:${color};width:${size}px;height:${size}px;${isHighlight ? 'box-shadow: 0 0 20px ' + color + '60;' : ''}">${icon}</div>`,
+                iconSize: [size, size],
+                iconAnchor: [size/2, size/2]
+            });
+        }
+        
+        function addMarkers(pois) {
+            // Clear existing markers
+            Object.values(markers).forEach(m => map.removeLayer(m));
+            markers = {};
+            
+            pois.forEach(poi => {
+                const marker = L.marker([poi.lat, poi.lng], {
+                    icon: createMarkerIcon(poi.category, poi.isHighlight)
+                }).addTo(map);
+                
+                const popupContent = createPopupContent(poi);
+                marker.bindPopup(popupContent, {
+                    maxWidth: 320,
+                    className: 'custom-popup'
+                });
+                
+                marker.on('click', () => {
+                    highlightPOICard(poi.id);
+                });
+                
+                markers[poi.id] = marker;
+            });
+        }
+        
+        function createPopupContent(poi) {
+            const highlightsHTML = poi.highlights ? 
+                poi.highlights.map(h => `<span style="background:rgba(255,255,255,0.1);padding:3px 8px;border-radius:4px;font-size:0.7rem;margin-right:4px;">${h}</span>`).join('') : '';
+            
+            const isVisited = visitedPOIs.includes(poi.id);
+            
+            return `
+                <div class="popup-content">
+                    <img src="${poi.image}" alt="${poi.name}" class="popup-image" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80'">
+                    <div class="popup-body">
+                        <div class="popup-category">${categoryIcons[poi.category]} ${poi.category}</div>
+                        <h3 class="popup-title">${poi.name}</h3>
+                        <div class="popup-location">📍 ${poi.location} (${poi.region})</div>
+                        <p class="popup-description">${poi.description}</p>
+                        <div style="margin-bottom:12px;">${highlightsHTML}</div>
+                        <div class="popup-details">
+                            <div class="popup-detail">
+                                <div class="popup-detail-label">Datum</div>
+                                <div class="popup-detail-value">${poi.date}</div>
+                            </div>
+                            <div class="popup-detail">
+                                <div class="popup-detail-label">Preis</div>
+                                <div class="popup-detail-value">${poi.price}</div>
+                            </div>
+                        </div>
+                        <div class="visited-toggle ${isVisited ? 'checked' : ''}" onclick="toggleVisited(${poi.id}, this)">
+                            <input type="checkbox" ${isVisited ? 'checked' : ''} onclick="event.stopPropagation()">
+                            <label>${isVisited ? '✓ Besucht' : 'Als besucht markieren'}</label>
+                        </div>
+                        <div class="popup-actions">
+                            <a href="https://www.google.com/maps/search/?api=1&query=${poi.lat},${poi.lng}" target="_blank" class="popup-btn primary">
+                                📍 Route planen
+                            </a>
+                            ${poi.website ? `<a href="${poi.website}" target="_blank" class="popup-btn secondary">🔗 Website</a>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderPOIList(pois) {
+            const container = document.getElementById('poi-list');
+            
+            if (pois.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <div class="no-results-icon">🔍</div>
+                        <p>Keine Ergebnisse gefunden</p>
+                        <p style="font-size: 0.8rem; margin-top: 8px;">Versuche andere Filter</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Group by category
+            const categories = {};
+            pois.forEach(poi => {
+                if (!categories[poi.category]) {
+                    categories[poi.category] = [];
+                }
+                categories[poi.category].push(poi);
+            });
+            
+            let html = '';
+            
+            Object.entries(categories).forEach(([category, items]) => {
+                html += `
+                    <div class="category-section">
+                        <div class="category-header">
+                            <span>${categoryIcons[category] || '📍'}</span>
+                            <span>${category.charAt(0).toUpperCase() + category.slice(1)}</span>
+                            <span style="margin-left:auto;color:var(--text-muted);">(${items.length})</span>
+                        </div>
+                `;
+                
+                items.forEach(poi => {
+                    const isVisited = visitedPOIs.includes(poi.id);
+                    html += `
+                        <div class="poi-card ${isVisited ? 'visited' : ''}" data-id="${poi.id}" style="--cat-color: ${categoryColors[poi.category]}">
+                            <div class="poi-header">
+                                <img src="${poi.image}" alt="${poi.name}" class="poi-image" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80'">
+                                <div class="poi-info">
+                                    <div class="poi-title">${poi.name}</div>
+                                    <div class="poi-location">📍 ${poi.location}</div>
+                                    <div class="poi-meta">
+                                        <span class="poi-tag date">📅 ${poi.date}</span>
+                                        <span class="poi-tag price">💰 ${poi.price}</span>
+                                        ${poi.isHighlight ? '<span class="poi-tag highlight">⭐ Highlight</span>' : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+            });
+            
+            container.innerHTML = html;
+            
+            // Add click listeners
+            container.querySelectorAll('.poi-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const id = parseInt(card.dataset.id);
+                    const poi = allPOIs.find(p => p.id === id);
+                    if (poi && markers[id]) {
+                        map.setView([poi.lat, poi.lng], 12);
+                        markers[id].openPopup();
+                        highlightPOICard(id);
+                    }
+                });
+            });
+        }
+        
+        function highlightPOICard(id) {
+            document.querySelectorAll('.poi-card').forEach(c => c.classList.remove('active'));
+            const card = document.querySelector(`.poi-card[data-id="${id}"]`);
+            if (card) {
+                card.classList.add('active');
+                card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+        
+        function filterPOIs(fitBounds = true) {
+            let filtered = allPOIs;
+            
+            // Region filter (Kanton)
+            if (activeRegion !== 'all') {
+                filtered = filtered.filter(p => p.region === activeRegion);
+            }
+            
+            // Category filter
+            if (activeFilter !== 'all') {
+                filtered = filtered.filter(p => p.category === activeFilter);
+            }
+            
+            // Month filter
+            if (activeMonth !== 'all') {
+                const month = parseInt(activeMonth);
+                filtered = filtered.filter(p => p.month === month || p.month === 0);
+            }
+            
+            // Search filter
+            if (searchTerm) {
+                const term = searchTerm.toLowerCase();
+                filtered = filtered.filter(p => 
+                    p.name.toLowerCase().includes(term) ||
+                    p.location.toLowerCase().includes(term) ||
+                    p.description.toLowerCase().includes(term) ||
+                    (p.highlights && p.highlights.some(h => h.toLowerCase().includes(term)))
+                );
+            }
+            
+            // Area filter
+            if (areaFilterActive && areaBounds) {
+                filtered = filtered.filter(p => areaBounds.contains([p.lat, p.lng]));
+            }
+            
+            // Visited filter
+            if (visitedFilter === 'visited') {
+                filtered = filtered.filter(p => visitedPOIs.includes(p.id));
+            } else if (visitedFilter === 'unvisited') {
+                filtered = filtered.filter(p => !visitedPOIs.includes(p.id));
+            }
+            
+            addMarkers(filtered);
+            renderPOIList(filtered);
+            updateVisitedStats();
+            updateCounts();
+            
+            // Fit map to filtered results (only if requested)
+            if (fitBounds && filtered.length > 0 && !areaFilterActive) {
+                const bounds = L.latLngBounds(filtered.map(p => [p.lat, p.lng]));
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
+        }
+        
+        function updateCounts() {
+            // Get base filtered POIs (by region/Kanton)
+            let basePOIs = allPOIs;
+            if (activeRegion !== 'all') {
+                basePOIs = basePOIs.filter(p => p.region === activeRegion);
+            }
+            
+            document.getElementById('total-pois').textContent = basePOIs.length;
+            document.getElementById('total-events').textContent = basePOIs.filter(p => p.month > 0).length;
+            document.getElementById('count-all').textContent = basePOIs.length;
+            
+            const categories = ['festival', 'volksfest', 'kultur', 'sport', 'familie', 'sehenswuerdigkeit', 'weihnachten'];
+            categories.forEach(cat => {
+                const el = document.getElementById(`count-${cat}`);
+                if (el) {
+                    el.textContent = basePOIs.filter(p => p.category === cat).length;
+                }
+            });
+        }
+        
+        // Update region filter (Kantone)
+        function updateRegionFilter() {
+            const container = document.getElementById('region-filter');
+            
+            let html = '';
+            Object.entries(regionen).forEach(([code, name]) => {
+                const count = code === 'all' 
+                    ? allPOIs.length 
+                    : allPOIs.filter(p => p.region === code).length;
+                
+                if (count > 0 || code === 'all') {
+                    const isActive = activeRegion === code ? 'active' : '';
+                    html += `<button class="region-btn ${isActive}" data-region="${code}">${name} (${count})</button>`;
+                }
+            });
+            
+            container.innerHTML = html;
+            container.classList.add('visible');
+            
+            // Add event listeners to new buttons
+            container.querySelectorAll('.region-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    container.querySelectorAll('.region-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    activeRegion = btn.dataset.region;
+                    filterPOIs();
+                });
+            });
+        }
+        // Toggle visited status
+        function toggleVisited(poiId, element) {
+            const index = visitedPOIs.indexOf(poiId);
+            if (index > -1) {
+                visitedPOIs.splice(index, 1);
+            } else {
+                visitedPOIs.push(poiId);
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('visitedPOIsFR', JSON.stringify(visitedPOIs));
+            
+            // Update UI
+            const isVisited = visitedPOIs.includes(poiId);
+            if (element) {
+                element.classList.toggle('checked', isVisited);
+                const checkbox = element.querySelector('input');
+                const label = element.querySelector('label');
+                if (checkbox) checkbox.checked = isVisited;
+                if (label) label.textContent = isVisited ? '✓ Besucht' : 'Als besucht markieren';
+            }
+            
+            // Update card
+            const card = document.querySelector(`.poi-card[data-id="${poiId}"]`);
+            if (card) {
+                card.classList.toggle('visited', isVisited);
+            }
+            
+            updateVisitedStats();
+        }
+        
+        // Update visited statistics
+        function updateVisitedStats() {
+            const statsEl = document.getElementById('visited-stats');
+            const visitedCount = visitedPOIs.length;
+            const totalCount = allPOIs.length;
+            const percentage = Math.round((visitedCount / totalCount) * 100);
+            
+            if (visitedCount > 0) {
+                statsEl.innerHTML = `✓ ${visitedCount} von ${totalCount} besucht (${percentage}%)`;
+                statsEl.classList.add('visible');
+            } else {
+                statsEl.classList.remove('visible');
+            }
+        }
+        
+        // Search in visible area
+        function searchInArea() {
+            areaBounds = map.getBounds();
+            areaFilterActive = true;
+            
+            // Update buttons
+            document.getElementById('search-area-btn').classList.remove('visible');
+            document.getElementById('clear-area-btn').classList.add('visible');
+            
+            filterPOIs(false);
+        }
+        
+        // Clear area filter
+        function clearAreaFilter() {
+            areaFilterActive = false;
+            areaBounds = null;
+            
+            // Update buttons
+            document.getElementById('clear-area-btn').classList.remove('visible');
+            
+            filterPOIs();
+        }
+        
+        // Show/hide search area button based on zoom
+        function updateSearchAreaButton() {
+            const btn = document.getElementById('search-area-btn');
+            const clearBtn = document.getElementById('clear-area-btn');
+            
+            // Only show if zoom is high enough and area filter is not active
+            if (map.getZoom() >= 9 && !areaFilterActive) {
+                btn.classList.add('visible');
+            } else if (!areaFilterActive) {
+                btn.classList.remove('visible');
+            }
+        }
+        
+        // Toggle collapsible sections
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.classList.toggle('collapsed');
+            }
+        }
+        
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            initMap();
+            updateVisitedStats();
+            updateCounts();
+            updateRegionFilter(); // Initialize Kanton filter
+            
+            // Search
+            document.getElementById('search-input').addEventListener('input', (e) => {
+                searchTerm = e.target.value;
+                filterPOIs();
+            });
+            
+            // Category filters
+            document.querySelectorAll('.filter-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    activeFilter = btn.dataset.category;
+                    filterPOIs();
+                });
+            });
+            
+            // Month filters
+            document.querySelectorAll('.month-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.month-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    activeMonth = btn.dataset.month;
+                    filterPOIs();
+                });
+            });
+            
+            // Visited filters
+            document.querySelectorAll('.visited-filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.visited-filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    visitedFilter = btn.dataset.filter;
+                    filterPOIs();
+                });
+            });
+            
+            // Search in area button
+            document.getElementById('search-area-btn').addEventListener('click', searchInArea);
+            
+            // Clear area filter button
+            document.getElementById('clear-area-btn').addEventListener('click', clearAreaFilter);
+            
+            // Map zoom/move events for search area button
+            map.on('zoomend', updateSearchAreaButton);
+            map.on('moveend', updateSearchAreaButton);
+        });
+    </script>
+</body>
+</html>

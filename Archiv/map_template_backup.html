@@ -1,0 +1,2869 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jahresguide 2026 | Schweiz komplett · Alle Kantone · 2026</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-dark: #1a1a2e;
+            --bg-card: #16213e;
+            --bg-hover: #1f2b47;
+            --accent-blue: #4ecca3;
+            --accent-teal: #4ecca3;
+            --accent-orange: #f39c12;
+            --accent-pink: #e94560;
+            --accent-purple: #9b59b6;
+            --accent-yellow: #f1c40f;
+            --accent-red: #e94560;
+            --accent-green: #4ecca3;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #7f8c8d;
+            --border: rgba(255,255,255,0.1);
+        }
+        
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+        
+        .app-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 420px;
+            background: linear-gradient(180deg, #16213e 0%, #1a1a2e 100%);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+            z-index: 1000;
+        }
+        
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(22,33,62,0.95);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #e94560, #9b59b6);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .logo-text h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .logo-text p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+        
+        .stats-bar {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .stat-item strong {
+            color: #4ecca3;
+        }
+        
+        /* Search & Filters */
+        .filters-section {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .search-box {
+            position: relative;
+            margin-bottom: 12px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: #e94560;
+            box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.15);
+        }
+        
+        .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .search-box::before {
+            content: "🔍";
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1rem;
+        }
+        
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-tab {
+            padding: 6px 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .filter-tab:hover {
+            background: var(--bg-hover);
+            border-color: #e94560;
+        }
+        
+        .filter-tab.active {
+            background: #e94560;
+            border-color: #e94560;
+            color: white;
+        }
+        
+        .filter-tab .count {
+            background: rgba(255,255,255,0.15);
+            padding: 1px 6px;
+            border-radius: 10px;
+            font-size: 0.65rem;
+        }
+        
+        /* Month Filter */
+        .month-filter {
+            padding: 12px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        
+        .month-filter::-webkit-scrollbar { display: none; }
+        
+        .month-btn {
+            padding: 6px 10px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .month-btn:hover {
+            border-color: #4ecca3;
+            color: #4ecca3;
+        }
+        
+        .month-btn.active {
+            background: #4ecca3;
+            border-color: #4ecca3;
+            color: white;
+        }
+        
+        /* POI List */
+        .poi-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .poi-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .poi-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .poi-list::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+        
+        .category-section {
+            margin-bottom: 20px;
+        }
+        
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 10px;
+        }
+        
+        .poi-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: 1px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .poi-card::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--cat-color, var(--accent-blue));
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .poi-card:hover {
+            background: var(--bg-hover);
+            border-color: var(--border);
+            transform: translateX(4px);
+        }
+        
+        .poi-card:hover::before {
+            opacity: 1;
+        }
+        
+        .poi-card.active {
+            background: rgba(233, 69, 96, 0.15);
+            border-color: #e94560;
+        }
+        
+        .poi-card.active::before {
+            opacity: 1;
+        }
+        
+        .poi-header {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .poi-image {
+            width: 70px;
+            height: 70px;
+            border-radius: 10px;
+            object-fit: cover;
+            background: var(--bg-hover);
+            flex-shrink: 0;
+        }
+        
+        .poi-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .poi-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+        
+        .poi-location {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 6px;
+        }
+        
+        .poi-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .poi-tag {
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+            color: var(--text-secondary);
+        }
+        
+        .poi-tag.date {
+            background: rgba(233, 69, 96, 0.15);
+            color: #e94560;
+        }
+        
+        .poi-tag.price {
+            background: rgba(78, 204, 163, 0.15);
+            color: #4ecca3;
+        }
+        
+        .poi-tag.highlight {
+            background: rgba(243, 156, 18, 0.15);
+            color: #f39c12;
+        }
+        
+        /* Map */
+        #map {
+            flex: 1;
+            height: 100%;
+        }
+        
+        /* Custom Markers */
+        .custom-marker {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+        
+        .custom-marker:hover {
+            transform: scale(1.2);
+        }
+        
+        /* Popup */
+        .leaflet-popup-content-wrapper {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .leaflet-popup-tip {
+            background: var(--bg-card);
+        }
+        
+        .leaflet-popup-content {
+            margin: 0;
+            width: 320px !important;
+        }
+        
+        .popup-content {
+            padding: 0;
+        }
+        
+        .popup-image {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+        }
+        
+        .popup-body {
+            padding: 16px;
+        }
+        
+        .popup-category {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #4ecca3;
+            margin-bottom: 6px;
+        }
+        
+        .popup-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+        
+        .popup-location {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        
+        .popup-description {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+        
+        .popup-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        
+        .popup-detail {
+            background: rgba(255,255,255,0.03);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .popup-detail-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        
+        .popup-detail-value {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .popup-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .popup-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .popup-btn.primary {
+            background: #4ecca3;
+            color: white;
+            border: none;
+        }
+        
+        .popup-btn.primary:hover {
+            background: #3db892;
+        }
+        
+        .popup-btn.secondary {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+        
+        .popup-btn.secondary:hover {
+            background: var(--bg-hover);
+            border-color: var(--text-muted);
+        }
+        
+        /* Route Panel */
+        .route-panel {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 16px 24px;
+            display: none;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            border: 1px solid var(--border);
+            z-index: 1000;
+        }
+        
+        .route-panel.visible {
+            display: flex;
+        }
+        
+        .route-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .route-stops {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .route-stop {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            background: #e94560;
+            color: white;
+            border: 2px solid white;
+        }
+        
+        .route-stop.more {
+            background: var(--bg-hover);
+            color: var(--text-secondary);
+            font-size: 10px;
+        }
+        
+        .route-connector {
+            width: 20px;
+            height: 2px;
+            background: var(--border);
+        }
+        
+        .route-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .route-text strong {
+            color: var(--text-primary);
+        }
+        
+        .route-btn {
+            padding: 10px 20px;
+            background: #4ecca3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .route-btn:hover {
+            background: #3db892;
+        }
+        
+        .route-clear {
+            padding: 8px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        /* Mobile */
+        @media (max-width: 900px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: 50%;
+                order: 2;
+            }
+            
+            #map {
+                height: 50%;
+            }
+            
+            .route-panel {
+                bottom: 52%;
+                width: calc(100% - 32px);
+                flex-wrap: wrap;
+            }
+        }
+        
+        /* Loading state */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 9999;
+            transition: opacity 0.5s;
+        }
+        
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top-color: #4ecca3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+        
+        .no-results-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loading">
+        <div class="loading-spinner"></div>
+        <p style="color: var(--text-secondary);">Lade Jahresguide 2026...</p>
+    </div>
+
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">🗺️</div>
+                    <div class="logo-text">
+                        <h1>Jahresguide 2026</h1>
+                        <p>Schweiz komplett · Alle Kantone · 2026</p>
+                    </div>
+                </div>
+                <div class="stats-bar">
+                    <div class="stat-item">
+                        <span>📍</span>
+                        <strong id="total-pois">0</strong> Orte
+                    </div>
+                    <div class="stat-item">
+                        <span>🎉</span>
+                        <strong id="total-events">0</strong> Events
+                    </div>
+                    <div class="stat-item">
+                        <span>⭐</span>
+                        <strong>50+</strong> Highlights
+                    </div>
+                </div>
+            </div>
+            
+            <div class="filters-section">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Suchen nach Event, Ort...">
+                </div>
+                <div class="filter-tabs" id="category-filters">
+                    <button class="filter-tab active" data-category="all">
+                        <span>Alle</span>
+                        <span class="count" id="count-all">0</span>
+                    </button>
+                    <button class="filter-tab" data-category="festival">
+                        <span>🎵 Festivals</span>
+                        <span class="count" id="count-festival">0</span>
+                    </button>
+                    <button class="filter-tab" data-category="volksfest">
+                        <span>🎪 Volksfeste</span>
+                        <span class="count" id="count-volksfest">0</span>
+                    </button>
+                    <button class="filter-tab" data-category="kultur">
+                        <span>🎭 Kultur</span>
+                        <span class="count" id="count-kultur">0</span>
+                    </button>
+                    <button class="filter-tab" data-category="sport">
+                        <span>⚽ Sport</span>
+                        <span class="count" id="count-sport">0</span>
+                    </button>
+                    <button class="filter-tab" data-category="familie">
+                        <span>👨‍👩‍👧 Familie</span>
+                        <span class="count" id="count-familie">0</span>
+                    </button>
+                    <button class="filter-tab" data-category="sehenswuerdigkeit">
+                        <span>🏛️ Sights</span>
+                        <span class="count" id="count-sehenswuerdigkeit">0</span>
+                    </button>
+                    <button class="filter-tab" data-category="weihnachten">
+                        <span>🎄 Märkte</span>
+                        <span class="count" id="count-weihnachten">0</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="month-filter" id="month-filter">
+                <button class="month-btn active" data-month="all">Ganzjährig</button>
+                <button class="month-btn" data-month="1">Jan</button>
+                <button class="month-btn" data-month="2">Feb</button>
+                <button class="month-btn" data-month="3">Mär</button>
+                <button class="month-btn" data-month="4">Apr</button>
+                <button class="month-btn" data-month="5">Mai</button>
+                <button class="month-btn" data-month="6">Jun</button>
+                <button class="month-btn" data-month="7">Jul</button>
+                <button class="month-btn" data-month="8">Aug</button>
+                <button class="month-btn" data-month="9">Sep</button>
+                <button class="month-btn" data-month="10">Okt</button>
+                <button class="month-btn" data-month="11">Nov</button>
+                <button class="month-btn" data-month="12">Dez</button>
+            </div>
+            
+            <div class="poi-list" id="poi-list">
+                <!-- POIs werden hier dynamisch eingefügt -->
+            </div>
+        </div>
+        
+        <div id="map"></div>
+    </div>
+    
+    <div class="route-panel" id="route-panel">
+        <div class="route-info">
+            <div class="route-stops" id="route-stops"></div>
+            <div class="route-text">
+                <strong id="route-count">0</strong> Stopps ausgewählt
+            </div>
+        </div>
+        <button class="route-btn" id="plan-route">
+            <span>📍</span> Route planen
+        </button>
+        <button class="route-clear" id="clear-route" title="Route löschen">✕</button>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // ============================================
+        // DATEN: Alle POIs aus dem Jahresguide 2026
+        // ============================================
+        const allPOIs = [
+            // ═══════════════════════════════════════════
+            // 🎵 MUSIK-FESTIVALS (18)
+            // ═══════════════════════════════════════════
+            {
+                id: 1,
+                name: "OpenAir St. Gallen",
+                category: "festival",
+                location: "St. Gallen",
+                region: "SG",
+                lat: 47.4245,
+                lng: 9.3767,
+                date: "25.–28. Juni",
+                month: 6,
+                price: "Ab 230 CHF",
+                description: "Das legendäre Schweizer Festival mit Top-Acts wie Twenty One Pilots, Nina Chuba und über 45 Acts auf mehreren Bühnen im Sittertobel.",
+                highlights: ["Twenty One Pilots", "Nina Chuba", "45+ Acts"],
+                website: "https://www.openairsg.ch",
+                image: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 2,
+                name: "OpenAir Frauenfeld",
+                category: "festival",
+                location: "Frauenfeld",
+                region: "TG",
+                lat: 47.5570,
+                lng: 8.8987,
+                date: "9.–11. Juli",
+                month: 7,
+                price: "Ab 199 CHF",
+                description: "Europas grösstes Hip-Hop Festival mit internationalen Rap-Stars auf der Grossen Allmend.",
+                highlights: ["Grösstes Hip-Hop Festival Europas", "3 Tage"],
+                website: "https://www.openair-frauenfeld.ch",
+                image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 3,
+                name: "Moon & Stars Locarno",
+                category: "festival",
+                location: "Locarno",
+                region: "TI",
+                lat: 46.1670,
+                lng: 8.7940,
+                date: "9.–19. Juli",
+                month: 7,
+                price: "Ab 79 CHF",
+                description: "Magische Konzertnächte auf der Piazza Grande mit internationalen Weltstars unter freiem Himmel.",
+                highlights: ["Piazza Grande", "Weltstars", "10 Nächte"],
+                website: "https://www.moonandstars.ch",
+                image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 4,
+                name: "Paléo Festival Nyon",
+                category: "festival",
+                location: "Nyon",
+                region: "VD",
+                lat: 46.3833,
+                lng: 6.2396,
+                date: "21.–26. Juli",
+                month: 7,
+                price: "Ab 72 CHF",
+                description: "Das grösste Open-Air der Westschweiz mit über 250'000 Besuchern und internationalen Top-Acts.",
+                highlights: ["250'000 Besucher", "6 Bühnen", "Westschweiz"],
+                website: "https://www.paleo.ch",
+                image: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 5,
+                name: "Montreux Jazz Festival",
+                category: "festival",
+                location: "Montreux",
+                region: "VD",
+                lat: 46.4312,
+                lng: 6.9107,
+                date: "3.–18. Juli",
+                month: 7,
+                price: "Ab 59 CHF / Gratis-Bühnen",
+                description: "Weltberühmtes Musikfestival am Genfersee – Jazz, Rock, Pop und elektronische Musik seit 1967.",
+                highlights: ["Weltberühmt seit 1967", "Gratis-Konzerte", "Genfersee"],
+                website: "https://www.montreuxjazzfestival.com",
+                image: "https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 6,
+                name: "Gurtenfestival",
+                category: "festival",
+                location: "Bern",
+                region: "BE",
+                lat: 46.9210,
+                lng: 7.4260,
+                date: "16.–19. Juli",
+                month: 7,
+                price: "Ab 89 CHF",
+                description: "Berns Hausberg-Festival auf dem Gurten mit Panoramablick über die Alpen und vielfältigem Line-up.",
+                highlights: ["Gurten-Hausberg", "Alpen-Panorama", "4 Tage"],
+                website: "https://www.gurtenfestival.ch",
+                image: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&q=80"
+            },
+            {
+                id: 7,
+                name: "Zürich Openair",
+                category: "festival",
+                location: "Zürich",
+                region: "ZH",
+                lat: 47.4050,
+                lng: 8.6120,
+                date: "26.–28. Aug",
+                month: 8,
+                price: "Ab 119 CHF",
+                description: "Zürichs grösstes Open-Air Festival auf der Glattbrugger Allmend mit elektronischer Musik und Pop.",
+                highlights: ["Elektronik", "Pop", "Zürich"],
+                website: "https://www.zurichopenair.ch",
+                image: "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=800&q=80"
+            },
+            {
+                id: 8,
+                name: "Estival Jazz Lugano",
+                category: "festival",
+                location: "Lugano",
+                region: "TI",
+                lat: 46.0037,
+                lng: 8.9511,
+                date: "10.–12. Juli",
+                month: 7,
+                price: "Gratis",
+                description: "Kostenloses Open-Air Jazzfestival auf der Piazza della Riforma im Herzen von Lugano.",
+                highlights: ["Gratis-Eintritt", "Piazza della Riforma", "Jazz & Soul"],
+                website: "https://www.estivaljazz.ch",
+                image: "https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=800&q=80"
+            },
+            {
+                id: 9,
+                name: "Heitere Open Air Zofingen",
+                category: "festival",
+                location: "Zofingen",
+                region: "AG",
+                lat: 47.2888,
+                lng: 7.9461,
+                date: "7.–9. Aug",
+                month: 8,
+                price: "Ab 95 CHF",
+                description: "Traditionsreiches Open-Air in der Aargauer Kleinstadt mit Mundart- und Indie-Acts.",
+                highlights: ["Aargau", "Mundart", "Indie"],
+                website: "https://www.heitere.ch",
+                image: "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800&q=80"
+            },
+            {
+                id: 10,
+                name: "Greenfield Festival",
+                category: "festival",
+                location: "Interlaken",
+                region: "BE",
+                lat: 46.6863,
+                lng: 7.8632,
+                date: "11.–13. Juni",
+                month: 6,
+                price: "Ab 199 CHF",
+                description: "Rock- und Metal-Festival vor der Eiger-Nordwand – die härteste Kulisse der Schweiz.",
+                highlights: ["Rock & Metal", "Eiger-Nordwand", "Interlaken"],
+                website: "https://www.greenfieldfestival.ch",
+                image: "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=800&q=80"
+            },
+            {
+                id: 11,
+                name: "Rock Oz'Arènes",
+                category: "festival",
+                location: "Avenches",
+                region: "VD",
+                lat: 46.8800,
+                lng: 7.0417,
+                date: "13.–16. Aug",
+                month: 8,
+                price: "Ab 65 CHF",
+                description: "Einzigartiges Festival im römischen Amphitheater von Avenches mit Pop, Rock und Chanson.",
+                highlights: ["Römisches Amphitheater", "Pop & Rock"],
+                website: "https://www.rockozarenes.com",
+                image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=80"
+            },
+            {
+                id: 12,
+                name: "Verbier Festival",
+                category: "festival",
+                location: "Verbier",
+                region: "VS",
+                lat: 46.0964,
+                lng: 7.2283,
+                date: "17. Juli – 3. Aug",
+                month: 7,
+                price: "Ab 40 CHF",
+                description: "Weltklasse-Klassik-Festival in den Walliser Alpen mit internationalen Orchestern und Solisten.",
+                highlights: ["Klassik-Weltklasse", "Walliser Alpen", "Meisterkurse"],
+                website: "https://www.verbierfestival.com",
+                image: "https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=800&q=80"
+            },
+            {
+                id: 13,
+                name: "Blue Balls Festival",
+                category: "festival",
+                location: "Luzern",
+                region: "LU",
+                lat: 47.0502,
+                lng: 8.3093,
+                date: "17.–25. Juli",
+                month: 7,
+                price: "Ab 49 CHF / Gratis-Bühnen",
+                description: "Musik, Film und Kunst direkt am Vierwaldstättersee beim KKL Luzern.",
+                highlights: ["KKL Luzern", "Vierwaldstättersee", "9 Tage"],
+                website: "https://www.blueballs.ch",
+                image: "https://images.unsplash.com/photo-1504704911898-68304a7d2571?w=800&q=80"
+            },
+            {
+                id: 14,
+                name: "Caribana Festival",
+                category: "festival",
+                location: "Crans-près-Céligny",
+                region: "VD",
+                lat: 46.3872,
+                lng: 6.1883,
+                date: "4.–7. Juni",
+                month: 6,
+                price: "Ab 59 CHF",
+                description: "Charmantes Festival am Genfersee mit den Füssen im Gras und Blick auf den Mont Blanc.",
+                highlights: ["Genfersee", "Mont Blanc-Blick", "Charme"],
+                website: "https://www.caribana-festival.ch",
+                image: "https://images.unsplash.com/photo-1472653431158-6364773b2a56?w=800&q=80"
+            },
+            {
+                id: 15,
+                name: "Stars of Sounds Murten",
+                category: "festival",
+                location: "Murten",
+                region: "FR",
+                lat: 46.9282,
+                lng: 7.1176,
+                date: "26.–27. Juni",
+                month: 6,
+                price: "Ab 89 CHF",
+                description: "Open-Air vor der mittelalterlichen Kulisse Murtens mit nationalen und internationalen Acts.",
+                highlights: ["Mittelalter-Kulisse", "Murtensee"],
+                website: "https://www.starsofsounds.ch",
+                image: "https://images.unsplash.com/photo-1468359601543-843bfaef291a?w=800&q=80"
+            },
+            {
+                id: 16,
+                name: "Openair Lumnezia",
+                category: "festival",
+                location: "Degen (Val Lumnezia)",
+                region: "GR",
+                lat: 46.7200,
+                lng: 9.1600,
+                date: "24.–26. Juli",
+                month: 7,
+                price: "Ab 129 CHF",
+                description: "Das höchstgelegene Open-Air der Schweiz im Bündner Tal der Lichter – familiär und magisch.",
+                highlights: ["Höchstes Open-Air CH", "Val Lumnezia", "Familiär"],
+                website: "https://www.openairlumnezia.ch",
+                image: "https://images.unsplash.com/photo-1528495612343-9ca9f755e412?w=800&q=80"
+            },
+            {
+                id: 17,
+                name: "Seaside Festival",
+                category: "festival",
+                location: "Spiez",
+                region: "BE",
+                lat: 46.6847,
+                lng: 7.6770,
+                date: "15.–16. Aug",
+                month: 8,
+                price: "Ab 79 CHF",
+                description: "Kleines feines Festival am Thunersee vor dem Schloss Spiez mit Schweizer und internationalen Acts.",
+                highlights: ["Thunersee", "Schloss Spiez"],
+                website: "https://www.seasidefestival.ch",
+                image: "https://images.unsplash.com/photo-1464375117522-1311d6a5b81f?w=800&q=80"
+            },
+            {
+                id: 18,
+                name: "Balélec Festival",
+                category: "festival",
+                location: "Lausanne (EPFL)",
+                region: "VD",
+                lat: 46.5200,
+                lng: 6.5660,
+                date: "8. Mai",
+                month: 5,
+                price: "Ab 35 CHF",
+                description: "Grösstes Studenten-Open-Air Europas auf dem EPFL-Campus mit über 15'000 Besuchern.",
+                highlights: ["Studenten-Festival", "EPFL", "15'000 Besucher"],
+                website: "https://www.balelec.ch",
+                image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80"
+            },
+
+            // ═══════════════════════════════════════════
+            // 🎪 VOLKSFESTE & BRAUCHTUM (16)
+            // ═══════════════════════════════════════════
+            {
+                id: 19,
+                name: "Basler Fasnacht",
+                category: "volksfest",
+                location: "Basel",
+                region: "BS",
+                lat: 47.5596,
+                lng: 7.5886,
+                date: "16.–18. Feb",
+                month: 2,
+                price: "Gratis",
+                description: "Die drey scheenschte Dääg – UNESCO-Weltkulturerbe. Morgenstreich um 4 Uhr morgens durch die dunkle Altstadt.",
+                highlights: ["UNESCO-Welterbe", "Morgenstreich", "Laternen & Cliquen"],
+                website: "https://www.fasnachts-comite.ch",
+                image: "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 20,
+                name: "Sechseläuten",
+                category: "volksfest",
+                location: "Zürich",
+                region: "ZH",
+                lat: 47.3667,
+                lng: 8.5462,
+                date: "20. April",
+                month: 4,
+                price: "Gratis",
+                description: "Zürichs Frühlingsfest mit dem Böögg – je schneller der Kopf explodiert, desto schöner wird der Sommer.",
+                highlights: ["Böögg-Verbrennung", "Zunftumzug", "Tradition seit 1902"],
+                website: "https://www.sechselaeuten.ch",
+                image: "https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 21,
+                name: "Luzerner Fasnacht",
+                category: "volksfest",
+                location: "Luzern",
+                region: "LU",
+                lat: 47.0502,
+                lng: 8.3093,
+                date: "12.–17. Feb",
+                month: 2,
+                price: "Gratis",
+                description: "Die fünfte Jahreszeit in Luzern – mit Fritschi-Umzug, Guggenmusig und dem legendären Schmutzigen Donnerstag.",
+                highlights: ["Fritschi-Umzug", "Guggenmusig", "5. Jahreszeit"],
+                website: "https://www.luzerner-fasnacht.ch",
+                image: "https://images.unsplash.com/photo-1551524559-8af4e6624178?w=800&q=80"
+            },
+            {
+                id: 22,
+                name: "Fête des Vignerons",
+                category: "volksfest",
+                location: "Vevey",
+                region: "VD",
+                lat: 46.4603,
+                lng: 6.8432,
+                date: "Nächste: ca. 2040–2046",
+                month: 0,
+                price: "—",
+                description: "Das legendäre Winzerfest findet nur ca. alle 25 Jahre statt – aber die Weinkultur ist ganzjährig erlebbar.",
+                highlights: ["UNESCO-Welterbe", "Nur alle ~25 Jahre", "Lavaux-Terrassen"],
+                website: "https://www.fetedesvignerons.ch",
+                image: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=800&q=80"
+            },
+            {
+                id: 23,
+                name: "Alpabfahrt Urnäsch",
+                category: "volksfest",
+                location: "Urnäsch",
+                region: "AR",
+                lat: 47.3180,
+                lng: 9.2810,
+                date: "Ende Sept / Anfang Okt",
+                month: 9,
+                price: "Gratis",
+                description: "Traditionelle Alpabfahrt im Appenzellerland – geschmückte Kühe, Sennen in Tracht und Naturjodel.",
+                highlights: ["Geschmückte Kühe", "Appenzeller Brauchtum", "Trachten"],
+                website: "https://www.appenzellerland.ch",
+                image: "https://images.unsplash.com/photo-1551524559-8af4e6624178?w=800&q=80"
+            },
+            {
+                id: 24,
+                name: "Schwägalp Schwinget",
+                category: "volksfest",
+                location: "Schwägalp / Säntis",
+                region: "AR",
+                lat: 47.2770,
+                lng: 9.3430,
+                date: "16. Aug",
+                month: 8,
+                price: "Ab 25 CHF",
+                description: "Bergschwinget am Fusse des Säntis – einer der traditionsreichsten Schwingfeste der Ostschweiz.",
+                highlights: ["Schwingen", "Säntis-Kulisse", "Tradition"],
+                website: "https://www.schwingen.ch",
+                image: "https://images.unsplash.com/photo-1570710891163-6d3b5c47248b?w=800&q=80"
+            },
+            {
+                id: 25,
+                name: "Chalandamarz",
+                category: "volksfest",
+                location: "Engadin",
+                region: "GR",
+                lat: 46.4908,
+                lng: 9.8355,
+                date: "1. März",
+                month: 3,
+                price: "Gratis",
+                description: "Engadiner Frühlingsfest – Kinder und Jugendliche vertreiben mit Glocken und Peitschen den Winter.",
+                highlights: ["Winteraustreibung", "Glocken & Peitschen", "Rätoromanisch"],
+                website: "https://www.engadin.ch",
+                image: "https://images.unsplash.com/photo-1489245328952-78aab1e10e03?w=800&q=80"
+            },
+            {
+                id: 26,
+                name: "Unspunnenfest",
+                category: "volksfest",
+                location: "Interlaken",
+                region: "BE",
+                lat: 46.6863,
+                lng: 7.8632,
+                date: "Sept (alle 12 Jahre)",
+                month: 0,
+                price: "Ab 30 CHF",
+                description: "Legendäres Alphirtenfest mit Schwingen, Steinstossen und Hornussen – nächste Ausgabe voraussichtlich 2029.",
+                highlights: ["Steinstossen", "Hornussen", "Alle 12 Jahre"],
+                website: "https://www.unspunnenfest.ch",
+                image: "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800&q=80"
+            },
+            {
+                id: 27,
+                name: "Zibelemärit Bern",
+                category: "volksfest",
+                location: "Bern",
+                region: "BE",
+                lat: 46.9480,
+                lng: 7.4474,
+                date: "4. Montag im Nov",
+                month: 11,
+                price: "Gratis",
+                description: "Berns berühmter Zwiebelmarkt – 50 Tonnen Zwiebeln, Konfettischlachten und Glühwein ab 4 Uhr morgens.",
+                highlights: ["50 Tonnen Zwiebeln", "Konfettischlacht", "Tradition"],
+                website: "https://www.bern.com",
+                image: "https://images.unsplash.com/photo-1508747703725-719f80c8512f?w=800&q=80"
+            },
+            {
+                id: 28,
+                name: "Fête de l'Escalade",
+                category: "volksfest",
+                location: "Genf",
+                region: "GE",
+                lat: 46.2044,
+                lng: 6.1432,
+                date: "12.–13. Dez",
+                month: 12,
+                price: "Gratis",
+                description: "Genfs historisches Fest zur Erinnerung an die Abwehr des Savoyer-Angriffs 1602 – Umzüge in historischen Kostümen.",
+                highlights: ["Historische Kostüme", "Marmite-Schokolade", "1602"],
+                website: "https://www.escalade.ch",
+                image: "https://images.unsplash.com/photo-1513297887119-d46091b24bfb?w=800&q=80"
+            },
+            {
+                id: 29,
+                name: "Rabadan Bellinzona",
+                category: "volksfest",
+                location: "Bellinzona",
+                region: "TI",
+                lat: 46.1952,
+                lng: 9.0237,
+                date: "12.–17. Feb",
+                month: 2,
+                price: "Gratis / Partys ab 20 CHF",
+                description: "Grösste Fasnacht der italienischen Schweiz mit Umzügen, Risotto und legendären Nachtpartys.",
+                highlights: ["Grösste Tessiner Fasnacht", "Umzüge", "Risotto"],
+                website: "https://www.rabadan.ch",
+                image: "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=800&q=80"
+            },
+            {
+                id: 30,
+                name: "Fête de la Musique Lausanne",
+                category: "volksfest",
+                location: "Lausanne",
+                region: "VD",
+                lat: 46.5197,
+                lng: 6.6323,
+                date: "21. Juni",
+                month: 6,
+                price: "Gratis",
+                description: "Kostenlose Konzerte in der ganzen Stadt zum Sommeranfang – über 100 Bühnen und alle Musikrichtungen.",
+                highlights: ["100+ Bühnen", "Gratis", "Sommeranfang"],
+                website: "https://www.fetedelamusique.ch",
+                image: "https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=800&q=80"
+            },
+            {
+                id: 31,
+                name: "Bundesfeier 1. August",
+                category: "volksfest",
+                location: "Rütli / Ganze Schweiz",
+                region: "UR",
+                lat: 46.9673,
+                lng: 8.5925,
+                date: "1. August",
+                month: 8,
+                price: "Gratis",
+                description: "Nationalfeiertag mit Feuerwerk, Brunch auf dem Bauernhof und der legendären Feier auf dem Rütli.",
+                highlights: ["Rütli-Feier", "Feuerwerk", "1. August-Brunch"],
+                website: "https://www.myswitzerland.com",
+                image: "https://images.unsplash.com/photo-1530224264768-7ff8c1789d79?w=800&q=80"
+            },
+            {
+                id: 32,
+                name: "Olma Messe",
+                category: "volksfest",
+                location: "St. Gallen",
+                region: "SG",
+                lat: 47.4239,
+                lng: 9.3631,
+                date: "8.–18. Okt",
+                month: 10,
+                price: "Ab 18 CHF",
+                description: "Grösste Messe der Ostschweiz mit Degustationen, Viehschau, Bratwurst und Olma-Bratwurst-Legende.",
+                highlights: ["Olma-Bratwurst", "Degustationen", "Viehschau"],
+                website: "https://www.olma-messen.ch",
+                image: "https://images.unsplash.com/photo-1569517282132-25d22f4573e6?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 33,
+                name: "Silvesterzauber Zürich",
+                category: "volksfest",
+                location: "Zürich",
+                region: "ZH",
+                lat: 47.3667,
+                lng: 8.5400,
+                date: "31. Dez",
+                month: 12,
+                price: "Gratis",
+                description: "Zürichs Silvesterfeier am See mit grossem Feuerwerk über dem Zürichsee und Live-Programm.",
+                highlights: ["Feuerwerk am See", "Live-Musik", "Silvester"],
+                website: "https://www.zuerich.com",
+                image: "https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=800&q=80"
+            },
+
+            // ═══════════════════════════════════════════
+            // 🎭 KULTUR & EVENTS (14)
+            // ═══════════════════════════════════════════
+            {
+                id: 34,
+                name: "Art Basel",
+                category: "kultur",
+                location: "Basel",
+                region: "BS",
+                lat: 47.5596,
+                lng: 7.5886,
+                date: "18.–22. Juni",
+                month: 6,
+                price: "Ab 55 CHF",
+                description: "Die weltweit wichtigste Messe für moderne und zeitgenössische Kunst mit 200+ Galerien.",
+                highlights: ["200+ Galerien", "Weltweit führend", "Zeitgenössische Kunst"],
+                website: "https://www.artbasel.com",
+                image: "https://images.unsplash.com/photo-1531243269054-5ebf6f34081e?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 35,
+                name: "Locarno Film Festival",
+                category: "kultur",
+                location: "Locarno",
+                region: "TI",
+                lat: 46.1670,
+                lng: 8.7940,
+                date: "5.–15. Aug",
+                month: 8,
+                price: "Ab 23 CHF",
+                description: "Eines der ältesten Filmfestivals der Welt mit Open-Air-Kino auf der Piazza Grande (8'000 Plätze).",
+                highlights: ["Piazza Grande", "8'000 Plätze Open-Air", "Seit 1946"],
+                website: "https://www.locarnofestival.ch",
+                image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 36,
+                name: "Lucerne Festival",
+                category: "kultur",
+                location: "Luzern",
+                region: "LU",
+                lat: 47.0502,
+                lng: 8.3093,
+                date: "8. Aug – 14. Sept",
+                month: 8,
+                price: "Ab 35 CHF",
+                description: "Weltklasse-Klassik im KKL Luzern mit den besten Orchestern und Dirigenten der Welt.",
+                highlights: ["KKL Luzern", "Weltklasse-Klassik", "Jean Nouvel-Bau"],
+                website: "https://www.lucernefestival.ch",
+                image: "https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=800&q=80"
+            },
+            {
+                id: 37,
+                name: "Theaterspektakel Zürich",
+                category: "kultur",
+                location: "Zürich",
+                region: "ZH",
+                lat: 47.3544,
+                lng: 8.5365,
+                date: "13. Aug – 1. Sept",
+                month: 8,
+                price: "Ab 20 CHF / Gratis",
+                description: "Internationales Theater-, Tanz- und Performance-Festival am Zürichsee mit 100'000 Besuchern.",
+                highlights: ["Zürichsee", "Theater & Tanz", "International"],
+                website: "https://www.theaterspektakel.ch",
+                image: "https://images.unsplash.com/photo-1503095396549-807759245b35?w=800&q=80"
+            },
+            {
+                id: 38,
+                name: "Menuhin Festival Gstaad",
+                category: "kultur",
+                location: "Gstaad",
+                region: "BE",
+                lat: 46.4749,
+                lng: 7.2865,
+                date: "11. Juli – 6. Sept",
+                month: 7,
+                price: "Ab 45 CHF",
+                description: "Hochklassiges Kammermusik- und Orchestermusik-Festival in der Bergwelt des Saanenlands.",
+                highlights: ["Yehudi Menuhin-Erbe", "Bergkirchen", "Kammermusik"],
+                website: "https://www.menuhinfestivalgstaad.ch",
+                image: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=800&q=80"
+            },
+            {
+                id: 39,
+                name: "Fumetto Comic Festival",
+                category: "kultur",
+                location: "Luzern",
+                region: "LU",
+                lat: 47.0502,
+                lng: 8.3093,
+                date: "28. März – 5. April",
+                month: 3,
+                price: "Ab 15 CHF",
+                description: "Internationales Comix-Festival mit Ausstellungen, Workshops und Signierstunden in der ganzen Altstadt.",
+                highlights: ["Comix & Illustration", "Altstadt Luzern", "International"],
+                website: "https://www.fumetto.ch",
+                image: "https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?w=800&q=80"
+            },
+            {
+                id: 40,
+                name: "Solothurner Filmtage",
+                category: "kultur",
+                location: "Solothurn",
+                region: "SO",
+                lat: 47.2088,
+                lng: 7.5323,
+                date: "21.–28. Jan",
+                month: 1,
+                price: "Ab 18 CHF",
+                description: "Das wichtigste Festival des Schweizer Films – Premiere-Plattform für nationale Produktionen.",
+                highlights: ["Schweizer Film", "Premieren", "Branchentreff"],
+                website: "https://www.solothurnerfilmtage.ch",
+                image: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=800&q=80"
+            },
+            {
+                id: 41,
+                name: "Kunsthaus Zürich",
+                category: "kultur",
+                location: "Zürich",
+                region: "ZH",
+                lat: 47.3703,
+                lng: 8.5488,
+                date: "Ganzjährig",
+                month: 0,
+                price: "25 CHF (Mi gratis)",
+                description: "Eines der bedeutendsten Kunstmuseen Europas – mit Chipperfield-Erweiterungsbau und Sammlung Bührle.",
+                highlights: ["Chipperfield-Bau", "Giacometti", "Monet bis Picasso"],
+                website: "https://www.kunsthaus.ch",
+                image: "https://images.unsplash.com/photo-1554907984-15263bfd63bd?w=800&q=80"
+            },
+            {
+                id: 42,
+                name: "Fondation Beyeler",
+                category: "kultur",
+                location: "Riehen bei Basel",
+                region: "BS",
+                lat: 47.5912,
+                lng: 7.6510,
+                date: "Ganzjährig",
+                month: 0,
+                price: "25 CHF",
+                description: "Meistbesuchtes Kunstmuseum der Schweiz im Renzo-Piano-Bau – Monet, Warhol, Basquiat und Sonderausstellungen.",
+                highlights: ["Renzo Piano", "Monet & Warhol", "Meistbesucht"],
+                website: "https://www.fondationbeyeler.ch",
+                image: "https://images.unsplash.com/photo-1566054757965-8c4085344c96?w=800&q=80"
+            },
+            {
+                id: 43,
+                name: "Chaplin's World",
+                category: "kultur",
+                location: "Corsier-sur-Vevey",
+                region: "VD",
+                lat: 46.4685,
+                lng: 6.8610,
+                date: "Ganzjährig",
+                month: 0,
+                price: "33 CHF",
+                description: "Interaktives Museum im ehemaligen Wohnsitz von Charlie Chaplin am Genfersee.",
+                highlights: ["Charlie Chaplin", "Interaktiv", "Genfersee"],
+                website: "https://www.chaplinsworld.com",
+                image: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&q=80"
+            },
+            {
+                id: 44,
+                name: "Landesmuseum Zürich",
+                category: "kultur",
+                location: "Zürich",
+                region: "ZH",
+                lat: 47.3796,
+                lng: 8.5397,
+                date: "Ganzjährig",
+                month: 0,
+                price: "10 CHF (unter 16 gratis)",
+                description: "Schweizer Geschichte erleben im märchenhaften Schloss-Bau beim Hauptbahnhof – mit modernem Erweiterungsbau.",
+                highlights: ["Schweizer Geschichte", "Beim HB Zürich", "Kinder gratis"],
+                website: "https://www.landesmuseum.ch",
+                image: "https://images.unsplash.com/photo-1564399579883-451a5d44ec08?w=800&q=80"
+            },
+            {
+                id: 45,
+                name: "CERN (Teilchenbeschleuniger)",
+                category: "kultur",
+                location: "Meyrin bei Genf",
+                region: "GE",
+                lat: 46.2330,
+                lng: 6.0461,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Wo das Higgs-Boson entdeckt wurde – kostenlose Führungen durch das grösste Physiklabor der Welt.",
+                highlights: ["Higgs-Boson", "Gratis-Führungen", "Weltlabor"],
+                website: "https://visit.cern",
+                image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 46,
+                name: "Zentrum Paul Klee",
+                category: "kultur",
+                location: "Bern",
+                region: "BE",
+                lat: 46.9488,
+                lng: 7.4744,
+                date: "Ganzjährig",
+                month: 0,
+                price: "22 CHF",
+                description: "Renzo Piano-Meisterwerk mit der weltweit grössten Paul-Klee-Sammlung – Kunst, Musik und Kinderatelier.",
+                highlights: ["Paul Klee", "Renzo Piano", "Kindermuseum Creaviva"],
+                website: "https://www.zpk.org",
+                image: "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&q=80"
+            },
+            {
+                id: 47,
+                name: "Internationale Kurzfilmtage Winterthur",
+                category: "kultur",
+                location: "Winterthur",
+                region: "ZH",
+                lat: 47.4984,
+                lng: 8.7268,
+                date: "4.–9. Nov",
+                month: 11,
+                price: "Ab 16 CHF",
+                description: "Das wichtigste Kurzfilmfestival der Schweiz – innovative Filme aus aller Welt in der Altstadt.",
+                highlights: ["Kurzfilm", "Innovative Werke", "Winterthur Altstadt"],
+                website: "https://www.kurzfilmtage.ch",
+                image: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&q=80"
+            },
+
+            // ═══════════════════════════════════════════
+            // ⚽ SPORT & ABENTEUER (16)
+            // ═══════════════════════════════════════════
+            {
+                id: 48,
+                name: "Lauberhornrennen Wengen",
+                category: "sport",
+                location: "Wengen",
+                region: "BE",
+                lat: 46.6083,
+                lng: 7.9220,
+                date: "16.–18. Jan",
+                month: 1,
+                price: "Ab 40 CHF",
+                description: "Die längste und gefährlichste Ski-Abfahrt der Welt – über 30'000 Zuschauer am Steilhang.",
+                highlights: ["Längste Abfahrt der Welt", "30'000 Zuschauer", "Ski-Weltcup"],
+                website: "https://www.lauberhorn.ch",
+                image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 49,
+                name: "White Turf St. Moritz",
+                category: "sport",
+                location: "St. Moritz",
+                region: "GR",
+                lat: 46.4908,
+                lng: 9.8355,
+                date: "1.–15. Feb",
+                month: 2,
+                price: "Ab 30 CHF",
+                description: "Spektakuläre Pferderennen auf dem zugefrorenen St. Moritzersee – Glamour und Sport auf Eis.",
+                highlights: ["Pferderennen auf Eis", "Glamour", "St. Moritzersee"],
+                website: "https://www.whiteturf.ch",
+                image: "https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 50,
+                name: "Jungfrau Marathon",
+                category: "sport",
+                location: "Interlaken → Kleine Scheidegg",
+                region: "BE",
+                lat: 46.6863,
+                lng: 7.8632,
+                date: "12. Sept",
+                month: 9,
+                price: "Ab 120 CHF",
+                description: "Einer der schönsten Bergmarathons der Welt – von Interlaken hinauf zur Kleinen Scheidegg auf 2'061 m.",
+                highlights: ["Bergmarathon", "2'061 m", "Eiger-Nordwand"],
+                website: "https://www.jungfrau-marathon.ch",
+                image: "https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?w=800&q=80"
+            },
+            {
+                id: 51,
+                name: "Tour de Suisse",
+                category: "sport",
+                location: "Diverse Etappen",
+                region: "CH",
+                lat: 46.9480,
+                lng: 7.4474,
+                date: "7.–15. Juni",
+                month: 6,
+                price: "Gratis (Strassenrand)",
+                description: "Einwöchiges Radrennen quer durch die Schweiz – eine der wichtigsten Vorbereitungen auf die Tour de France.",
+                highlights: ["Radrennen", "Alpenpässe", "9 Etappen"],
+                website: "https://www.tourdesuisse.ch",
+                image: "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=800&q=80"
+            },
+            {
+                id: 52,
+                name: "Swiss Ice Hockey Final",
+                category: "sport",
+                location: "Diverse Städte",
+                region: "CH",
+                lat: 46.9480,
+                lng: 7.4474,
+                date: "April",
+                month: 4,
+                price: "Ab 35 CHF",
+                description: "Die Playoff-Finals der National League – packende Atmosphäre in den grossen Schweizer Eishallen.",
+                highlights: ["National League", "Playoff-Fieber", "Eishockey"],
+                website: "https://www.sihf.ch",
+                image: "https://images.unsplash.com/photo-1580748142157-414b09c6e608?w=800&q=80"
+            },
+            {
+                id: 53,
+                name: "Inferno Triathlon",
+                category: "sport",
+                location: "Thun → Schilthorn",
+                region: "BE",
+                lat: 46.7520,
+                lng: 7.6315,
+                date: "22. Aug",
+                month: 8,
+                price: "Ab 250 CHF",
+                description: "Der härteste Triathlon Europas: Schwimmen im Thunersee, Radfahren über den Grosse Scheidegg, Laufen aufs Schilthorn.",
+                highlights: ["Härtester Triathlon", "Thunersee → Schilthorn", "Extrem"],
+                website: "https://www.inferno.ch",
+                image: "https://images.unsplash.com/photo-1530549387789-4c1017266635?w=800&q=80"
+            },
+            {
+                id: 54,
+                name: "Engadin Skimarathon",
+                category: "sport",
+                location: "Maloja → S-chanf",
+                region: "GR",
+                lat: 46.5588,
+                lng: 9.8661,
+                date: "8. März",
+                month: 3,
+                price: "Ab 130 CHF",
+                description: "42 km Langlauf durch das verschneite Engadin – der legendärste Volkslanglauf der Schweiz.",
+                highlights: ["42 km Langlauf", "Engadin", "14'000 Teilnehmer"],
+                website: "https://www.engadin-skimarathon.ch",
+                image: "https://images.unsplash.com/photo-1551524559-8af4e6624178?w=800&q=80"
+            },
+            {
+                id: 55,
+                name: "Weltcup Adelboden Riesenslalom",
+                category: "sport",
+                location: "Adelboden",
+                region: "BE",
+                lat: 46.4942,
+                lng: 7.5600,
+                date: "10.–11. Jan",
+                month: 1,
+                price: "Ab 45 CHF",
+                description: "Der legendäre Riesenslalom am Chuenisbärgli – die steilste Party-Atmosphäre des Ski-Weltcups.",
+                highlights: ["Chuenisbärgli", "Party-Stimmung", "Ski-Weltcup"],
+                website: "https://www.weltcup-adelboden.ch",
+                image: "https://images.unsplash.com/photo-1565992441121-4367c2967103?w=800&q=80"
+            },
+            {
+                id: 56,
+                name: "Swiss Wrestling & Alpine Festival (ESAF)",
+                category: "sport",
+                location: "Wechselnd (alle 3 Jahre)",
+                region: "CH",
+                lat: 47.0502,
+                lng: 8.3093,
+                date: "Aug (nächstes: 2028)",
+                month: 0,
+                price: "Ab 80 CHF",
+                description: "Das grösste wiederkehrende Sportereignis der Schweiz – Eidg. Schwing- und Älplerfest mit 400'000 Zuschauern.",
+                highlights: ["400'000 Zuschauer", "Schwingen", "Alle 3 Jahre"],
+                website: "https://www.esv.ch",
+                image: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=800&q=80"
+            },
+            {
+                id: 57,
+                name: "Glacier 3000 Peak Walk",
+                category: "sport",
+                location: "Les Diablerets",
+                region: "VD",
+                lat: 46.3305,
+                lng: 7.2052,
+                date: "Mai–Okt",
+                month: 0,
+                price: "Ab 89 CHF",
+                description: "Die weltweit einzige Hängebrücke zwischen zwei Berggipfeln auf 3'000 m Höhe – mit 360°-Alpen-Panorama.",
+                highlights: ["3'000 m Höhe", "Hängebrücke", "360° Panorama"],
+                website: "https://www.glacier3000.ch",
+                image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80"
+            },
+            {
+                id: 58,
+                name: "Aletsch Arena Wanderung",
+                category: "sport",
+                location: "Aletschgletscher",
+                region: "VS",
+                lat: 46.4000,
+                lng: 8.0660,
+                date: "Juni–Okt",
+                month: 0,
+                price: "Gratis (Anreise ab 35 CHF)",
+                description: "Wanderung entlang des grössten Gletschers der Alpen – UNESCO-Welterbe mit atemberaubendem Panorama.",
+                highlights: ["UNESCO-Welterbe", "Grösster Alpengletscher", "23 km lang"],
+                website: "https://www.aletscharena.ch",
+                image: "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 59,
+                name: "Via Ferrata Murren",
+                category: "sport",
+                location: "Mürren",
+                region: "BE",
+                lat: 46.5592,
+                lng: 7.8925,
+                date: "Juni–Okt",
+                month: 0,
+                price: "Ab 45 CHF (Ausrüstung)",
+                description: "Spektakulärer Klettersteig mit Blick auf Eiger, Mönch und Jungfrau – für Anfänger und Fortgeschrittene.",
+                highlights: ["Eiger-Blick", "Klettersteig", "Mürren"],
+                website: "https://www.muerren.swiss",
+                image: "https://images.unsplash.com/photo-1522163182402-834f871fd851?w=800&q=80"
+            },
+            {
+                id: 60,
+                name: "Zürich Marathon",
+                category: "sport",
+                location: "Zürich",
+                region: "ZH",
+                lat: 47.3769,
+                lng: 8.5417,
+                date: "19. April",
+                month: 4,
+                price: "Ab 90 CHF",
+                description: "42 km durch Zürich – am See entlang, durch die Altstadt und über die Quaibrücke.",
+                highlights: ["42 km", "Zürichsee", "Citymarathon"],
+                website: "https://www.zuerichmarathon.ch",
+                image: "https://images.unsplash.com/photo-1530549387789-4c1017266635?w=800&q=80"
+            },
+
+            // ═══════════════════════════════════════════
+            // 👨‍👩‍👧 FAMILIE & KINDER (18)
+            // ═══════════════════════════════════════════
+            {
+                id: 61,
+                name: "Conny-Land",
+                category: "familie",
+                location: "Lipperswil",
+                region: "TG",
+                lat: 47.6058,
+                lng: 9.1044,
+                date: "April–Okt",
+                month: 0,
+                price: "Ab 43 CHF",
+                description: "Grösster Freizeitpark der Ostschweiz mit Achterbahnen, Delfin-Show und Wasserpark.",
+                highlights: ["Achterbahnen", "Wasserpark", "Kinder-Paradies"],
+                website: "https://www.connyland.ch",
+                image: "https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?w=800&q=80"
+            },
+            {
+                id: 62,
+                name: "Swiss Vapeur Parc",
+                category: "familie",
+                location: "Le Bouveret",
+                region: "VS",
+                lat: 46.3930,
+                lng: 6.8570,
+                date: "April–Okt",
+                month: 0,
+                price: "Ab 21 CHF",
+                description: "Miniatur-Dampfeisenbahnpark am Genfersee – echte Dampfloks zum Mitfahren für die ganze Familie.",
+                highlights: ["Dampfeisenbahnen", "Genfersee", "Kinder ab 2"],
+                website: "https://www.swissvapeur.ch",
+                image: "https://images.unsplash.com/photo-1527155781772-b97cd89ecab0?w=800&q=80"
+            },
+            {
+                id: 63,
+                name: "Technorama",
+                category: "familie",
+                location: "Winterthur",
+                region: "ZH",
+                lat: 47.5063,
+                lng: 8.7200,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 29 CHF",
+                description: "Das grösste Science Center der Schweiz – über 500 interaktive Experimentierstationen zum Anfassen.",
+                highlights: ["500+ Experimente", "Interaktiv", "Für alle Altersgruppen"],
+                website: "https://www.technorama.ch",
+                image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 64,
+                name: "Verkehrshaus Luzern",
+                category: "familie",
+                location: "Luzern",
+                region: "LU",
+                lat: 47.0537,
+                lng: 8.3377,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 36 CHF",
+                description: "Meistbesuchtes Museum der Schweiz – Flugzeuge, Züge, Autos, Planetarium und Swiss Chocolate Adventure.",
+                highlights: ["Meistbesuchtes Museum CH", "Planetarium", "Swiss Chocolate Adventure"],
+                website: "https://www.verkehrshaus.ch",
+                image: "https://images.unsplash.com/photo-1555861496-0666c8981751?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 65,
+                name: "Zoo Zürich",
+                category: "familie",
+                location: "Zürich",
+                region: "ZH",
+                lat: 47.3853,
+                lng: 8.5750,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 29 CHF",
+                description: "Mehrfach preisgekrönter Zoo mit Masoala-Regenwaldhalle, Elefantenpark und Pantanal-Anlage.",
+                highlights: ["Masoala-Halle", "Elefantenpark", "Pantanal"],
+                website: "https://www.zoo.ch",
+                image: "https://images.unsplash.com/photo-1534567153574-2b12153a87f0?w=800&q=80"
+            },
+            {
+                id: 66,
+                name: "Bärenpark Bern",
+                category: "familie",
+                location: "Bern",
+                region: "BE",
+                lat: 46.9481,
+                lng: 7.4594,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Die Berner Bären in ihrer weitläufigen Anlage direkt an der Aare – Wahrzeichen der Bundesstadt.",
+                highlights: ["Gratis", "Aare-Ufer", "Berner Wappentier"],
+                website: "https://www.bern.com/barenpark",
+                image: "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?w=800&q=80"
+            },
+            {
+                id: 67,
+                name: "Alpamare Pfäffikon",
+                category: "familie",
+                location: "Pfäffikon SZ",
+                region: "SZ",
+                lat: 47.2043,
+                lng: 8.7826,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 49 CHF",
+                description: "Grosses Erlebnisbad mit Europas längster Wasserrutsche, Wellenbad und Saunalandschaft.",
+                highlights: ["Längste Rutsche Europas", "Wellenbad", "Sauna"],
+                website: "https://www.alpamare.ch",
+                image: "https://images.unsplash.com/photo-1519315901367-f34ff9154487?w=800&q=80"
+            },
+            {
+                id: 68,
+                name: "Seilpark Balmberg",
+                category: "familie",
+                location: "Balmberg (Solothurn)",
+                region: "SO",
+                lat: 47.2664,
+                lng: 7.5190,
+                date: "April–Okt",
+                month: 0,
+                price: "Ab 35 CHF",
+                description: "Grosser Hochseilpark im Jura mit 13 Parcours verschiedener Schwierigkeitsgrade – ab 4 Jahren.",
+                highlights: ["13 Parcours", "Ab 4 Jahren", "Jura-Wald"],
+                website: "https://www.seilpark-balmberg.ch",
+                image: "https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=800&q=80"
+            },
+            {
+                id: 69,
+                name: "Knies Kinderzoo",
+                category: "familie",
+                location: "Rapperswil-Jona",
+                region: "SG",
+                lat: 47.2262,
+                lng: 8.8174,
+                date: "März–Okt",
+                month: 0,
+                price: "Ab 18 CHF",
+                description: "Familiärer Tierpark am Zürichsee – Elefanten, Giraffen und Streichelzoo für die Kleinsten.",
+                highlights: ["Streichelzoo", "Elefanten", "Zürichsee"],
+                website: "https://www.kfrr.ch",
+                image: "https://images.unsplash.com/photo-1474511320723-9a56873571b7?w=800&q=80"
+            },
+            {
+                id: 70,
+                name: "Ballenberg Freilichtmuseum",
+                category: "familie",
+                location: "Hofstetten bei Brienz",
+                region: "BE",
+                lat: 46.7604,
+                lng: 8.0700,
+                date: "April–Okt",
+                month: 0,
+                price: "Ab 32 CHF",
+                description: "100 originale Häuser aus allen Landesteilen – lebendige Schweizer Tradition mit Handwerk und Tieren.",
+                highlights: ["100 Originalhäuser", "Handwerk live", "Bauernhoftiere"],
+                website: "https://www.ballenberg.ch",
+                image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80"
+            },
+            {
+                id: 71,
+                name: "Maison Cailler",
+                category: "familie",
+                location: "Broc",
+                region: "FR",
+                lat: 46.6069,
+                lng: 7.1004,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 15 CHF",
+                description: "Interaktive Schokoladenwelt von Cailler – die Geschichte der Schweizer Schokolade mit Degustation.",
+                highlights: ["Schokoladen-Degustation", "Interaktiv", "Cailler seit 1819"],
+                website: "https://www.cailler.ch/maison-cailler",
+                image: "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=800&q=80"
+            },
+            {
+                id: 72,
+                name: "Papiliorama",
+                category: "familie",
+                location: "Kerzers",
+                region: "FR",
+                lat: 46.9719,
+                lng: 7.1331,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 19 CHF",
+                description: "Tropisches Schmetterlingshaus und Nocturama – über 60 exotische Schmetterlingsarten hautnah.",
+                highlights: ["Schmetterlinge", "Tropisch", "Nocturama"],
+                website: "https://www.papiliorama.ch",
+                image: "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?w=800&q=80"
+            },
+            {
+                id: 73,
+                name: "Aquaparc Le Bouveret",
+                category: "familie",
+                location: "Le Bouveret",
+                region: "VS",
+                lat: 46.3932,
+                lng: 6.8552,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 39 CHF",
+                description: "Grosser Wasserpark am Genfersee mit Indoor- und Outdoor-Rutschen, Wellenbad und Lazy River.",
+                highlights: ["Wasserrutschen", "Genfersee", "Indoor & Outdoor"],
+                website: "https://www.aquaparc.ch",
+                image: "https://images.unsplash.com/photo-1502086223501-7ea6ecd65d99?w=800&q=80"
+            },
+            {
+                id: 74,
+                name: "Tierpark Goldau",
+                category: "familie",
+                location: "Goldau",
+                region: "SZ",
+                lat: 47.0500,
+                lng: 8.5500,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 22 CHF",
+                description: "Natur- und Tierpark in einem Bergsturz-Gebiet – Bären, Wölfe und freilaufende Hirsche.",
+                highlights: ["Bären & Wölfe", "Freilaufende Hirsche", "Bergsturz-Landschaft"],
+                website: "https://www.tierpark.ch",
+                image: "https://images.unsplash.com/photo-1474511320723-9a56873571b7?w=800&q=80"
+            },
+            {
+                id: 75,
+                name: "Swissminiatur",
+                category: "familie",
+                location: "Melide",
+                region: "TI",
+                lat: 45.9557,
+                lng: 8.9467,
+                date: "März–Okt",
+                month: 0,
+                price: "Ab 19 CHF",
+                description: "Die ganze Schweiz im Miniaturformat – 130 Modelle von Gebäuden und Monumenten am Luganersee.",
+                highlights: ["130 Miniatur-Modelle", "Luganersee", "Ganze Schweiz"],
+                website: "https://www.swissminiatur.ch",
+                image: "https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=800&q=80"
+            },
+            {
+                id: 76,
+                name: "Augusta Raurica",
+                category: "familie",
+                location: "Augst bei Basel",
+                region: "BL",
+                lat: 47.5349,
+                lng: 7.7218,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 8 CHF",
+                description: "Besterhaltene Römerstadt nördlich der Alpen – Amphitheater, Museum und Römer-Erlebnispfad für Kinder.",
+                highlights: ["Römerstadt", "Amphitheater", "Kinder-Erlebnis"],
+                website: "https://www.augusta-raurica.ch",
+                image: "https://images.unsplash.com/photo-1555993539-1732b0258235?w=800&q=80"
+            },
+            {
+                id: 77,
+                name: "Tropenhaus Frutigen",
+                category: "familie",
+                location: "Frutigen",
+                region: "BE",
+                lat: 46.5933,
+                lng: 7.6480,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 20 CHF",
+                description: "Tropische Früchte und Störe mitten in den Alpen – beheizt mit warmem Bergwasser vom Lötschberg-Tunnel.",
+                highlights: ["Tropisch in den Alpen", "Kaviar-Produktion", "Lötschberg-Wärme"],
+                website: "https://www.tropenhaus-frutigen.ch",
+                image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&q=80"
+            },
+
+            // ═══════════════════════════════════════════
+            // 🏛️ SEHENSWÜRDIGKEITEN (20)
+            // ═══════════════════════════════════════════
+            {
+                id: 78,
+                name: "Matterhorn",
+                category: "sehenswuerdigkeit",
+                location: "Zermatt",
+                region: "VS",
+                lat: 45.9763,
+                lng: 7.6586,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gornergrat-Bahn ab 99 CHF",
+                description: "Das ikonischste Bergmotiv der Welt – 4'478 m hoch, am besten vom Gornergrat oder Rothorn aus sichtbar.",
+                highlights: ["4'478 m", "Ikonisch", "Gornergrat-Bahn"],
+                website: "https://www.zermatt.ch",
+                image: "https://images.unsplash.com/photo-1529973565457-a60a2ccf750d?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 79,
+                name: "Jungfraujoch – Top of Europe",
+                category: "sehenswuerdigkeit",
+                location: "Jungfraujoch",
+                region: "BE",
+                lat: 46.5474,
+                lng: 7.9853,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 230 CHF (retour)",
+                description: "Höchster Bahnhof Europas auf 3'454 m – Eispalast, Sphinx-Aussichtsterrasse und Aletschgletscher.",
+                highlights: ["3'454 m", "Höchster Bahnhof", "Sphinx-Terrasse"],
+                website: "https://www.jungfrau.ch",
+                image: "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 80,
+                name: "Rheinfall Schaffhausen",
+                category: "sehenswuerdigkeit",
+                location: "Neuhausen / Schaffhausen",
+                region: "SH",
+                lat: 47.6778,
+                lng: 8.6155,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis (Boot ab 7 CHF)",
+                description: "Der grösste Wasserfall Europas – 150 m breit, 23 m hoch. Bootsfahrt zum Mittelfelsen möglich.",
+                highlights: ["Grösster Wasserfall Europas", "Bootsfahrt", "150 m breit"],
+                website: "https://www.rheinfall.ch",
+                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 81,
+                name: "Kapellbrücke Luzern",
+                category: "sehenswuerdigkeit",
+                location: "Luzern",
+                region: "LU",
+                lat: 47.0517,
+                lng: 8.3073,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Die älteste Holzbrücke Europas (1333) mit dem Wasserturm – das Wahrzeichen von Luzern.",
+                highlights: ["Seit 1333", "Älteste Holzbrücke", "Wasserturm"],
+                website: "https://www.luzern.com",
+                image: "https://images.unsplash.com/photo-1527668752968-14dc70a27c95?w=800&q=80"
+            },
+            {
+                id: 82,
+                name: "Altstadt Bern (UNESCO)",
+                category: "sehenswuerdigkeit",
+                location: "Bern",
+                region: "BE",
+                lat: 46.9480,
+                lng: 7.4474,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "UNESCO-Welterbe-Altstadt mit 6 km Lauben, Zytglogge, Münster und Bundeshaus.",
+                highlights: ["UNESCO-Welterbe", "Zytglogge", "6 km Lauben"],
+                website: "https://www.bern.com",
+                image: "https://images.unsplash.com/photo-1587974928442-77dc3e0748b1?w=800&q=80"
+            },
+            {
+                id: 83,
+                name: "Château de Chillon",
+                category: "sehenswuerdigkeit",
+                location: "Veytaux (Montreux)",
+                region: "VD",
+                lat: 46.4142,
+                lng: 6.9274,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 13.50 CHF",
+                description: "Die meistbesuchte Burg der Schweiz auf einer Felseninsel im Genfersee – 1'000 Jahre Geschichte.",
+                highlights: ["Meistbesuchte Burg CH", "Genfersee-Insel", "1'000 Jahre"],
+                website: "https://www.chillon.ch",
+                image: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=800&q=80"
+            },
+            {
+                id: 84,
+                name: "Lavaux Weinberg-Terrassen (UNESCO)",
+                category: "sehenswuerdigkeit",
+                location: "Lavaux",
+                region: "VD",
+                lat: 46.4950,
+                lng: 6.7400,
+                date: "Ganzjährig (Herbst am schönsten)",
+                month: 0,
+                price: "Gratis",
+                description: "830 Hektar UNESCO-Weinberg-Terrassen am Genfersee – seit dem 12. Jahrhundert bewirtschaftet.",
+                highlights: ["UNESCO-Welterbe", "Weinwanderung", "Seit 12. Jh."],
+                website: "https://www.lavaux-unesco.ch",
+                image: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=800&q=80"
+            },
+            {
+                id: 85,
+                name: "Drei Burgen von Bellinzona (UNESCO)",
+                category: "sehenswuerdigkeit",
+                location: "Bellinzona",
+                region: "TI",
+                lat: 46.1952,
+                lng: 9.0237,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 5 CHF",
+                description: "UNESCO-Welterbe – Castelgrande, Montebello und Sasso Corbaro bilden das beeindruckendste Burgensemble der Alpen.",
+                highlights: ["UNESCO-Welterbe", "3 Burgen", "Alpen-Festung"],
+                website: "https://www.bellinzonese-altoticino.ch",
+                image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80"
+            },
+            {
+                id: 86,
+                name: "Stiftsbezirk St. Gallen (UNESCO)",
+                category: "sehenswuerdigkeit",
+                location: "St. Gallen",
+                region: "SG",
+                lat: 47.4234,
+                lng: 9.3770,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 18 CHF (Bibliothek)",
+                description: "UNESCO-Welterbe mit der berühmten Stiftsbibliothek – einer der schönsten Bibliothekssäle der Welt.",
+                highlights: ["UNESCO-Welterbe", "Stiftsbibliothek", "Barock-Kathedrale"],
+                website: "https://www.stiftsbezirk.ch",
+                image: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=800&q=80"
+            },
+            {
+                id: 87,
+                name: "Glacier Express",
+                category: "sehenswuerdigkeit",
+                location: "Zermatt → St. Moritz",
+                region: "GR",
+                lat: 46.4908,
+                lng: 9.8355,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 153 CHF",
+                description: "Der langsamste Schnellzug der Welt – 291 Brücken, 91 Tunnel und das Landwasserviadukt in 8 Stunden.",
+                highlights: ["291 Brücken", "91 Tunnel", "Langsamster Schnellzug"],
+                website: "https://www.glacierexpress.ch",
+                image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 88,
+                name: "Bernina Express",
+                category: "sehenswuerdigkeit",
+                location: "Chur → Tirano",
+                region: "GR",
+                lat: 46.4063,
+                lng: 10.0226,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 65 CHF",
+                description: "UNESCO-Welterbe Rhätische Bahn – über den Berninapass mit dem Kreisviadukt von Brusio.",
+                highlights: ["UNESCO-Welterbe", "Berninapass", "Kreisviadukt Brusio"],
+                website: "https://www.berninaexpress.ch",
+                image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=80"
+            },
+            {
+                id: 89,
+                name: "Jet d'Eau Genf",
+                category: "sehenswuerdigkeit",
+                location: "Genf",
+                region: "GE",
+                lat: 46.2073,
+                lng: 6.1554,
+                date: "März–Okt (täglich), Winter eingeschränkt",
+                month: 0,
+                price: "Gratis",
+                description: "Genfs Wahrzeichen – die 140 m hohe Wasserfontäne im Genfersee, sichtbar aus der ganzen Stadt.",
+                highlights: ["140 m hoch", "Wahrzeichen Genf", "Gratis"],
+                website: "https://www.geneve.com",
+                image: "https://images.unsplash.com/photo-1573108037329-37aa135a142e?w=800&q=80"
+            },
+            {
+                id: 90,
+                name: "Säntis & Schwägalp",
+                category: "sehenswuerdigkeit",
+                location: "Schwägalp → Säntis",
+                region: "AI",
+                lat: 47.2494,
+                lng: 9.3432,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 46 CHF",
+                description: "Panorama auf 6 Länder vom 2'502 m hohen Säntis – Alpstein-Gebirge mit Seealpsee und Äscher.",
+                highlights: ["6-Länder-Blick", "2'502 m", "Alpstein"],
+                website: "https://www.saentisbahn.ch",
+                image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+            },
+            {
+                id: 91,
+                name: "Pilatus",
+                category: "sehenswuerdigkeit",
+                location: "Kriens bei Luzern",
+                region: "LU",
+                lat: 46.9789,
+                lng: 8.2540,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 72 CHF (Goldene Rundfahrt)",
+                description: "Luzerns Hausberg – mit der steilsten Zahnradbahn der Welt (48% Steigung) und Goldener Rundfahrt.",
+                highlights: ["Steilste Zahnradbahn", "48% Steigung", "Goldene Rundfahrt"],
+                website: "https://www.pilatus.ch",
+                image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80"
+            },
+            {
+                id: 92,
+                name: "Creux du Van",
+                category: "sehenswuerdigkeit",
+                location: "Neuenburg / Val de Travers",
+                region: "NE",
+                lat: 46.9310,
+                lng: 6.7280,
+                date: "Mai–Okt",
+                month: 0,
+                price: "Gratis",
+                description: "Natürlicher Felsenkessel mit 160 m hohen Steilwänden – der Grand Canyon der Schweiz mit Steinböcken.",
+                highlights: ["160 m Steilwände", "Steinböcke", "Grand Canyon CH"],
+                website: "https://www.neuchateltourisme.ch",
+                image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+            },
+            {
+                id: 93,
+                name: "Oeschinensee (UNESCO)",
+                category: "sehenswuerdigkeit",
+                location: "Kandersteg",
+                region: "BE",
+                lat: 46.4972,
+                lng: 7.7337,
+                date: "Juni–Okt",
+                month: 0,
+                price: "Gondel ab 15 CHF",
+                description: "Smaragdgrüner Bergsee im UNESCO-Welterbe Gebiet – umrahmt von 3'000er-Gipfeln und Wasserfällen.",
+                highlights: ["UNESCO-Welterbe", "Smaragdgrün", "3'000er-Gipfel"],
+                website: "https://www.oeschinensee.ch",
+                image: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=800&q=80"
+            },
+            {
+                id: 94,
+                name: "Aare-Schlucht Meiringen",
+                category: "sehenswuerdigkeit",
+                location: "Meiringen",
+                region: "BE",
+                lat: 46.7278,
+                lng: 8.1835,
+                date: "April–Nov",
+                month: 0,
+                price: "Ab 10 CHF",
+                description: "200 m tiefe Schlucht mit 1 m breiten Engstellen – spektakuläre Stege durch die Felsspalte.",
+                highlights: ["200 m tief", "1 m eng", "Steg-Wanderung"],
+                website: "https://www.aareschlucht.ch",
+                image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800&q=80"
+            },
+
+            // ═══════════════════════════════════════════
+            // 🎄 WEIHNACHTSMÄRKTE (14)
+            // ═══════════════════════════════════════════
+            {
+                id: 95,
+                name: "Berner Weihnachtsmarkt",
+                category: "weihnachten",
+                location: "Bern (Waisenhausplatz & Münsterplatz)",
+                region: "BE",
+                lat: 46.9480,
+                lng: 7.4474,
+                date: "29. Nov – 24. Dez",
+                month: 12,
+                price: "Gratis",
+                description: "Zwei stimmungsvolle Märkte in der UNESCO-Altstadt – Handwerk auf dem Münsterplatz und Gastronomie am Waisenhausplatz.",
+                highlights: ["UNESCO-Altstadt", "2 Märkte", "Handwerk & Glühwein"],
+                website: "https://www.bern.com/weihnachtsmarkt",
+                image: "https://images.unsplash.com/photo-1512389142860-9c449e58a814?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 96,
+                name: "Christkindlimarkt Zürich (Hauptbahnhof)",
+                category: "weihnachten",
+                location: "Zürich HB",
+                region: "ZH",
+                lat: 47.3769,
+                lng: 8.5417,
+                date: "20. Nov – 24. Dez",
+                month: 12,
+                price: "Gratis",
+                description: "Grösster überdachter Weihnachtsmarkt Europas in der Halle des Zürcher Hauptbahnhofs mit Swarovski-Baum.",
+                highlights: ["Grösster überdachter Markt", "Swarovski-Baum", "HB Zürich"],
+                website: "https://www.christkindlimarkt.ch",
+                image: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 97,
+                name: "Basler Weihnachtsmarkt",
+                category: "weihnachten",
+                location: "Basel (Barfüsserplatz & Münsterplatz)",
+                region: "BS",
+                lat: 47.5547,
+                lng: 7.5906,
+                date: "28. Nov – 23. Dez",
+                month: 12,
+                price: "Gratis",
+                description: "Einer der schönsten und grössten Weihnachtsmärkte der Schweiz – 180 Stände vor dem Rathaus.",
+                highlights: ["180 Stände", "Münsterplatz", "Basler Läckerli"],
+                website: "https://www.basel.com/weihnachten",
+                image: "https://images.unsplash.com/photo-1544551763-92ab472cad1f?w=800&q=80"
+            },
+            {
+                id: 98,
+                name: "Montreux Noël",
+                category: "weihnachten",
+                location: "Montreux",
+                region: "VD",
+                lat: 46.4312,
+                lng: 6.9107,
+                date: "22. Nov – 24. Dez",
+                month: 12,
+                price: "Gratis / Grotte 12 CHF",
+                description: "Magischer Weihnachtsmarkt am Genfersee mit Weihnachtsgrotte und Mittelaltermarkt im Schloss Chillon.",
+                highlights: ["Genfersee", "Weihnachtsgrotte", "Schloss Chillon"],
+                website: "https://www.montreuxnoel.com",
+                image: "https://images.unsplash.com/photo-1576919228236-a097c32a5cd4?w=800&q=80"
+            },
+            {
+                id: 99,
+                name: "St. Galler Sternenstadt",
+                category: "weihnachten",
+                location: "St. Gallen",
+                region: "SG",
+                lat: 47.4245,
+                lng: 9.3767,
+                date: "27. Nov – 24. Dez",
+                month: 12,
+                price: "Gratis",
+                description: "700 Sterne leuchten über der Altstadt – eine der stimmungsvollsten Weihnachtsbeleuchtungen der Schweiz.",
+                highlights: ["700 Sterne", "Altstadt-Zauber", "Sternenstadt"],
+                website: "https://www.sternenstadt.ch",
+                image: "https://images.unsplash.com/photo-1512389142860-9c449e58a814?w=800&q=80"
+            },
+            {
+                id: 100,
+                name: "Luzerner Weihnachtsmarkt",
+                category: "weihnachten",
+                location: "Luzern (Franziskanerplatz)",
+                region: "LU",
+                lat: 47.0502,
+                lng: 8.3073,
+                date: "4.–22. Dez",
+                month: 12,
+                price: "Gratis",
+                description: "Stimmungsvoller Markt beim Franziskanerplatz in der Altstadt – Kunsthandwerk und Luzerner Spezialitäten.",
+                highlights: ["Altstadt", "Kunsthandwerk", "Stimmungsvoll"],
+                website: "https://www.luzern.com",
+                image: "https://images.unsplash.com/photo-1544551763-92ab472cad1f?w=800&q=80"
+            },
+            {
+                id: 101,
+                name: "Wienachtsdorf am Bellevue (Zürich)",
+                category: "weihnachten",
+                location: "Zürich (Sechseläutenplatz)",
+                region: "ZH",
+                lat: 47.3657,
+                lng: 8.5460,
+                date: "20. Nov – 24. Dez",
+                month: 12,
+                price: "Gratis",
+                description: "Winterdorf auf dem Sechseläutenplatz mit Fondue-Stube, Glühwein und Eislaufbahn am See.",
+                highlights: ["Eislaufbahn", "Fondue-Stube", "Am See"],
+                website: "https://www.wienachtsdorf.ch",
+                image: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=800&q=80"
+            },
+            {
+                id: 102,
+                name: "Bains des Pâquis Fondue Genf",
+                category: "weihnachten",
+                location: "Genf",
+                region: "GE",
+                lat: 46.2099,
+                lng: 6.1524,
+                date: "Nov–März",
+                month: 12,
+                price: "Fondue ab 25 CHF",
+                description: "Kultiges Winterfondue direkt am Genfersee auf dem Steg der Bains des Pâquis – Genfer Geheimtipp.",
+                highlights: ["Fondue am See", "Geheimtipp", "Genfer Kult"],
+                website: "https://www.bfrp.ch",
+                image: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=800&q=80"
+            },
+            {
+                id: 103,
+                name: "Weihnachtsmarkt Einsiedeln",
+                category: "weihnachten",
+                location: "Einsiedeln",
+                region: "SZ",
+                lat: 47.1267,
+                lng: 8.7474,
+                date: "5.–8. Dez",
+                month: 12,
+                price: "Gratis",
+                description: "Stimmungsvoller Weihnachtsmarkt vor der barocken Klosterkirche – einer der schönsten Plätze der Schweiz.",
+                highlights: ["Kloster-Kulisse", "Barock", "Innerschweiz"],
+                website: "https://www.einsiedeln-tourismus.ch",
+                image: "https://images.unsplash.com/photo-1576919228236-a097c32a5cd4?w=800&q=80"
+            },
+            {
+                id: 104,
+                name: "Weihnachten in Gruyères",
+                category: "weihnachten",
+                location: "Gruyères",
+                region: "FR",
+                lat: 46.5828,
+                lng: 7.0816,
+                date: "Dez",
+                month: 12,
+                price: "Gratis",
+                description: "Märchenhaftes Weihnachten im mittelalterlichen Städtchen Gruyères – mit Fondue, Schloss und Lichterzauber.",
+                highlights: ["Mittelalter-Kulisse", "Schloss Gruyères", "Fondue"],
+                website: "https://www.la-gruyere.ch",
+                image: "https://images.unsplash.com/photo-1512389142860-9c449e58a814?w=800&q=80"
+            },
+            {
+                id: 105,
+                name: "Natale in Piazza Lugano",
+                category: "weihnachten",
+                location: "Lugano",
+                region: "TI",
+                lat: 46.0037,
+                lng: 8.9511,
+                date: "22. Nov – 6. Jan",
+                month: 12,
+                price: "Gratis",
+                description: "Tessiner Weihnachtszauber an der Piazza della Riforma – mit italienischem Flair und Panettone.",
+                highlights: ["Tessiner Flair", "Panettone", "Piazza-Zauber"],
+                website: "https://www.luganoregion.com",
+                image: "https://images.unsplash.com/photo-1544551763-92ab472cad1f?w=800&q=80"
+            },
+            {
+                id: 106,
+                name: "Thuner Weihnachtsmarkt",
+                category: "weihnachten",
+                location: "Thun",
+                region: "BE",
+                lat: 46.7580,
+                lng: 7.6280,
+                date: "29. Nov – 24. Dez",
+                month: 12,
+                price: "Gratis",
+                description: "Charmanter Weihnachtsmarkt in der Oberen Hauptgasse – mit Schloss-Kulisse und Blick auf die Alpen.",
+                highlights: ["Schloss Thun", "Obere Hauptgasse", "Alpen-Blick"],
+                website: "https://www.thun.ch",
+                image: "https://images.unsplash.com/photo-1576919228236-a097c32a5cd4?w=800&q=80"
+            },
+            {
+                id: 107,
+                name: "Davos Klosters Advent",
+                category: "weihnachten",
+                location: "Davos",
+                region: "GR",
+                lat: 46.8027,
+                lng: 9.8361,
+                date: "Dez",
+                month: 12,
+                price: "Gratis",
+                description: "Advent im höchstgelegenen Kurort Europas – Weihnachtsmarkt, Eisbahn und verschneite Bergkulisse.",
+                highlights: ["Höchster Kurort", "Bergkulisse", "Winterzauber"],
+                website: "https://www.davos.ch",
+                image: "https://images.unsplash.com/photo-1512389142860-9c449e58a814?w=800&q=80"
+            },
+            {
+                id: 108,
+                name: "Samichlaus-Einzug Küssnacht",
+                category: "weihnachten",
+                location: "Küssnacht am Rigi",
+                region: "SZ",
+                lat: 47.0858,
+                lng: 8.4413,
+                date: "5. Dez",
+                month: 12,
+                price: "Gratis",
+                description: "Spektakulärster Samichlaus-Einzug der Schweiz – mit 200 Iffelen (Bischofsmützen) und Geisselchlöpfern.",
+                highlights: ["200 Iffelen", "Geisselchlöpfer", "Tradition"],
+                website: "https://www.kuessnacht-tourismus.ch",
+                image: "https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?w=800&q=80"
+            }
+        ];
+        ];
+        
+        // ============================================
+        // APP-LOGIK
+        // ============================================
+        let map;
+        let markers = {};
+        let activeFilter = 'all';
+        let activeMonth = 'all';
+        let searchTerm = '';
+        let selectedPOIs = [];
+        
+        const categoryColors = {
+            festival: '#9b59b6',
+            volksfest: '#f39c12',
+            kultur: '#e94560',
+            sport: '#4ecca3',
+            familie: '#3498db',
+            sehenswuerdigkeit: '#f1c40f',
+            weihnachten: '#e94560'
+        };
+        
+        const categoryIcons = {
+            festival: '🎵',
+            volksfest: '🎪',
+            kultur: '🎭',
+            sport: '⚽',
+            familie: '👨‍👩‍👧',
+            sehenswuerdigkeit: '🏛️',
+            weihnachten: '🎄'
+        };
+        
+        function initMap() {
+            map = L.map('map', {
+                zoomControl: true,
+                scrollWheelZoom: true
+            }).setView([47.2, 9.2], 8);
+            
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '© OpenStreetMap &amp; CartoDB',
+                maxZoom: 19
+            }).addTo(map);
+            
+            addMarkers(allPOIs);
+            updateCounts();
+            renderPOIList(allPOIs);
+            
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+            }, 500);
+        }
+        
+        function createMarkerIcon(category, isHighlight) {
+            const color = categoryColors[category] || '#3b82f6';
+            const icon = categoryIcons[category] || '📍';
+            const size = isHighlight ? 40 : 32;
+            
+            return L.divIcon({
+                className: 'custom-marker-wrapper',
+                html: `<div class="custom-marker" style="background:${color};width:${size}px;height:${size}px;${isHighlight ? 'box-shadow: 0 0 20px ' + color + '60;' : ''}">${icon}</div>`,
+                iconSize: [size, size],
+                iconAnchor: [size/2, size/2]
+            });
+        }
+        
+        function addMarkers(pois) {
+            // Clear existing markers
+            Object.values(markers).forEach(m => map.removeLayer(m));
+            markers = {};
+            
+            pois.forEach(poi => {
+                const marker = L.marker([poi.lat, poi.lng], {
+                    icon: createMarkerIcon(poi.category, poi.isHighlight)
+                }).addTo(map);
+                
+                const popupContent = createPopupContent(poi);
+                marker.bindPopup(popupContent, {
+                    maxWidth: 320,
+                    className: 'custom-popup'
+                });
+                
+                marker.on('click', () => {
+                    highlightPOICard(poi.id);
+                });
+                
+                markers[poi.id] = marker;
+            });
+        }
+        
+        function createPopupContent(poi) {
+            const highlightsHTML = poi.highlights ? 
+                poi.highlights.map(h => `<span style="background:rgba(255,255,255,0.1);padding:3px 8px;border-radius:4px;font-size:0.7rem;margin-right:4px;">${h}</span>`).join('') : '';
+            
+            return `
+                <div class="popup-content">
+                    <img src="${poi.image}" alt="${poi.name}" class="popup-image" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80'">
+                    <div class="popup-body">
+                        <div class="popup-category">${categoryIcons[poi.category]} ${poi.category}</div>
+                        <h3 class="popup-title">${poi.name}</h3>
+                        <div class="popup-location">📍 ${poi.location} (${poi.region})</div>
+                        <p class="popup-description">${poi.description}</p>
+                        <div style="margin-bottom:12px;">${highlightsHTML}</div>
+                        <div class="popup-details">
+                            <div class="popup-detail">
+                                <div class="popup-detail-label">Datum</div>
+                                <div class="popup-detail-value">${poi.date}</div>
+                            </div>
+                            <div class="popup-detail">
+                                <div class="popup-detail-label">Preis</div>
+                                <div class="popup-detail-value">${poi.price}</div>
+                            </div>
+                        </div>
+                        <div class="popup-actions">
+                            <a href="https://www.google.com/maps/search/?api=1&query=${poi.lat},${poi.lng}" target="_blank" class="popup-btn primary">
+                                📍 Route planen
+                            </a>
+                            ${poi.website ? `<a href="${poi.website}" target="_blank" class="popup-btn secondary">🔗 Website</a>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderPOIList(pois) {
+            const container = document.getElementById('poi-list');
+            
+            if (pois.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <div class="no-results-icon">🔍</div>
+                        <p>Keine Ergebnisse gefunden</p>
+                        <p style="font-size: 0.8rem; margin-top: 8px;">Versuche andere Filter</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Group by category
+            const categories = {};
+            pois.forEach(poi => {
+                if (!categories[poi.category]) {
+                    categories[poi.category] = [];
+                }
+                categories[poi.category].push(poi);
+            });
+            
+            let html = '';
+            
+            Object.entries(categories).forEach(([category, items]) => {
+                html += `
+                    <div class="category-section">
+                        <div class="category-header">
+                            <span>${categoryIcons[category] || '📍'}</span>
+                            <span>${category.charAt(0).toUpperCase() + category.slice(1)}</span>
+                            <span style="margin-left:auto;color:var(--text-muted);">(${items.length})</span>
+                        </div>
+                `;
+                
+                items.forEach(poi => {
+                    html += `
+                        <div class="poi-card" data-id="${poi.id}" style="--cat-color: ${categoryColors[poi.category]}">
+                            <div class="poi-header">
+                                <img src="${poi.image}" alt="${poi.name}" class="poi-image" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80'">
+                                <div class="poi-info">
+                                    <div class="poi-title">${poi.name}</div>
+                                    <div class="poi-location">📍 ${poi.location}</div>
+                                    <div class="poi-meta">
+                                        <span class="poi-tag date">📅 ${poi.date}</span>
+                                        <span class="poi-tag price">💰 ${poi.price}</span>
+                                        ${poi.isHighlight ? '<span class="poi-tag highlight">⭐ Highlight</span>' : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+            });
+            
+            container.innerHTML = html;
+            
+            // Add click listeners
+            container.querySelectorAll('.poi-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const id = parseInt(card.dataset.id);
+                    const poi = allPOIs.find(p => p.id === id);
+                    if (poi && markers[id]) {
+                        map.setView([poi.lat, poi.lng], 12);
+                        markers[id].openPopup();
+                        highlightPOICard(id);
+                    }
+                });
+            });
+        }
+        
+        function highlightPOICard(id) {
+            document.querySelectorAll('.poi-card').forEach(c => c.classList.remove('active'));
+            const card = document.querySelector(`.poi-card[data-id="${id}"]`);
+            if (card) {
+                card.classList.add('active');
+                card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+        
+        function filterPOIs() {
+            let filtered = allPOIs;
+            
+            // Category filter
+            if (activeFilter !== 'all') {
+                filtered = filtered.filter(p => p.category === activeFilter);
+            }
+            
+            // Month filter
+            if (activeMonth !== 'all') {
+                const month = parseInt(activeMonth);
+                filtered = filtered.filter(p => p.month === month || p.month === 0);
+            }
+            
+            // Search filter
+            if (searchTerm) {
+                const term = searchTerm.toLowerCase();
+                filtered = filtered.filter(p => 
+                    p.name.toLowerCase().includes(term) ||
+                    p.location.toLowerCase().includes(term) ||
+                    p.description.toLowerCase().includes(term) ||
+                    (p.highlights && p.highlights.some(h => h.toLowerCase().includes(term)))
+                );
+            }
+            
+            addMarkers(filtered);
+            renderPOIList(filtered);
+            
+            // Fit map to filtered results
+            if (filtered.length > 0) {
+                const bounds = L.latLngBounds(filtered.map(p => [p.lat, p.lng]));
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
+        }
+        
+        function updateCounts() {
+            document.getElementById('total-pois').textContent = allPOIs.length;
+            document.getElementById('total-events').textContent = allPOIs.filter(p => p.month > 0).length;
+            document.getElementById('count-all').textContent = allPOIs.length;
+            
+            const categories = ['festival', 'volksfest', 'kultur', 'sport', 'familie', 'sehenswuerdigkeit', 'weihnachten'];
+            categories.forEach(cat => {
+                const el = document.getElementById(`count-${cat}`);
+                if (el) {
+                    el.textContent = allPOIs.filter(p => p.category === cat).length;
+                }
+            });
+        }
+        
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            initMap();
+            
+            // Search
+            document.getElementById('search-input').addEventListener('input', (e) => {
+                searchTerm = e.target.value;
+                filterPOIs();
+            });
+            
+            // Category filters
+            document.querySelectorAll('.filter-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    activeFilter = btn.dataset.category;
+                    filterPOIs();
+                });
+            });
+            
+            // Month filters
+            document.querySelectorAll('.month-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.month-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    activeMonth = btn.dataset.month;
+                    filterPOIs();
+                });
+            });
+        });
+    </script>
+</body>
+</html>
