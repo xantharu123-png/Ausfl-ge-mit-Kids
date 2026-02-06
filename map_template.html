@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jahresguide 2026 | Bodensee • Ostschweiz • Tessin • Graubünden</title>
+    <title>Familienguide 2026 | Schweiz & Deutschland</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
@@ -861,12 +861,82 @@
         .visited-stats.visible {
             display: block;
         }
+        
+        /* Country Selector */
+        .country-selector {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+        }
+        .country-btn {
+            flex: 1;
+            padding: 10px 12px;
+            border: 2px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .country-btn:hover {
+            background: var(--hover);
+            border-color: var(--text-muted);
+        }
+        .country-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .country-btn span:first-child {
+            font-size: 1.1rem;
+        }
+        
+        /* Region Filter (dynamic based on country) */
+        .region-filter {
+            display: none;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 10px 16px;
+            background: var(--sidebar-bg);
+            border-bottom: 1px solid var(--border);
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        .region-filter.visible {
+            display: flex;
+        }
+        .region-btn {
+            padding: 5px 10px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+        }
+        .region-btn:hover {
+            background: var(--hover);
+        }
+        .region-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
     </style>
 </head>
 <body>
     <div class="loading-overlay" id="loading">
         <div class="loading-spinner"></div>
-        <p style="color: var(--text-secondary);">Lade Jahresguide 2026...</p>
+        <p style="color: var(--text-secondary);">Lade Familienguide 2026...</p>
     </div>
 
     <div class="app-container">
@@ -875,10 +945,24 @@
                 <div class="logo">
                     <div class="logo-icon">🗺️</div>
                     <div class="logo-text">
-                        <h1>Jahresguide 2026</h1>
-                        <p>Bodensee • Ostschweiz • Tessin • Graubünden</p>
+                        <h1>Familienguide 2026</h1>
+                        <p id="region-subtitle">Schweiz & Deutschland</p>
                     </div>
                 </div>
+                
+                <!-- Country Selector -->
+                <div class="country-selector">
+                    <button class="country-btn active" data-country="all">
+                        <span>🌍</span> Alle
+                    </button>
+                    <button class="country-btn" data-country="CH">
+                        <span>🇨🇭</span> Schweiz
+                    </button>
+                    <button class="country-btn" data-country="DE">
+                        <span>🇩🇪</span> Deutschland
+                    </button>
+                </div>
+                
                 <div class="stats-bar">
                     <div class="stat-item">
                         <span>📍</span>
@@ -951,6 +1035,11 @@
                 <button class="month-btn" data-month="12">Dez</button>
             </div>
             
+            <!-- Region Filter (dynamic) -->
+            <div class="region-filter" id="region-filter">
+                <!-- Will be populated dynamically based on country selection -->
+            </div>
+            
             <!-- Visited Filter -->
             <div class="visited-filter">
                 <button class="visited-filter-btn active" data-filter="all">Alle</button>
@@ -1002,7 +1091,7 @@
                 name: "OpenAir St. Gallen",
                 category: "festival",
                 location: "St. Gallen",
-                region: "SG",
+                country: "CH", region: "SG",
                 lat: 47.4245,
                 lng: 9.3767,
                 date: "25.-28. Juni",
@@ -1019,7 +1108,7 @@
                 name: "FL1.LIFE Festival",
                 category: "festival",
                 location: "Schaan",
-                region: "LI",
+                country: "CH", region: "LI",
                 lat: 47.1650,
                 lng: 9.5094,
                 date: "3.-4. Juli",
@@ -1035,7 +1124,7 @@
                 name: "OpenAir Frauenfeld",
                 category: "festival",
                 location: "Frauenfeld",
-                region: "TG",
+                country: "CH", region: "TG",
                 lat: 47.5570,
                 lng: 8.8987,
                 date: "9.-11. Juli",
@@ -1052,7 +1141,7 @@
                 name: "Moon & Stars Locarno",
                 category: "festival",
                 location: "Locarno",
-                region: "TI",
+                country: "CH", region: "TI",
                 lat: 46.1670,
                 lng: 8.7940,
                 date: "9.-19. Juli",
@@ -1069,7 +1158,7 @@
                 name: "VaduzSOUNDZ",
                 category: "festival",
                 location: "Vaduz",
-                region: "LI",
+                country: "CH", region: "LI",
                 lat: 47.1410,
                 lng: 9.5215,
                 date: "22.-25. Juli",
@@ -1086,7 +1175,7 @@
                 name: "Bregenzer Festspiele",
                 category: "festival",
                 location: "Bregenz",
-                region: "AT",
+                country: "CH", region: "AT",
                 lat: 47.5027,
                 lng: 9.7472,
                 date: "22. Juli - 23. August",
@@ -1103,7 +1192,7 @@
                 name: "Street Parade Zürich",
                 category: "festival",
                 location: "Zürich",
-                region: "ZH",
+                country: "CH", region: "ZH",
                 lat: 47.3669,
                 lng: 8.5417,
                 date: "8. August",
@@ -1120,7 +1209,7 @@
                 name: "Campus Festival Konstanz",
                 category: "festival",
                 location: "Konstanz",
-                region: "DE",
+                country: "CH", region: "DE",
                 lat: 47.6603,
                 lng: 9.1753,
                 date: "29.-30. Mai",
@@ -1136,7 +1225,7 @@
                 name: "Heiden Festival",
                 category: "festival",
                 location: "Heiden",
-                region: "AR",
+                country: "CH", region: "AR",
                 lat: 47.4432,
                 lng: 9.5322,
                 date: "23.-25. Mai",
@@ -1152,7 +1241,7 @@
                 name: "Clanx Festival",
                 category: "festival",
                 location: "Appenzell",
-                region: "AI",
+                country: "CH", region: "AI",
                 lat: 47.3308,
                 lng: 9.4089,
                 date: "28.-30. August",
@@ -1168,7 +1257,7 @@
                 name: "Estival Jazz Lugano",
                 category: "festival",
                 location: "Lugano",
-                region: "TI",
+                country: "CH", region: "TI",
                 lat: 46.0037,
                 lng: 8.9511,
                 date: "15.-24. Juli",
@@ -1184,7 +1273,7 @@
                 name: "Bodenseefestival",
                 category: "festival",
                 location: "Bodensee Region",
-                region: "Ganze Region",
+                country: "CH", region: "Ganze Region",
                 lat: 47.6000,
                 lng: 9.3500,
                 date: "1.-24. Mai",
@@ -1200,7 +1289,7 @@
                 name: "classicAscona",
                 category: "festival",
                 location: "Ascona",
-                region: "TI",
+                country: "CH", region: "TI",
                 lat: 46.1542,
                 lng: 8.7726,
                 date: "18. Sept - 10. Okt",
@@ -1218,7 +1307,7 @@
                 name: "Churer Fasnacht",
                 category: "volksfest",
                 location: "Chur",
-                region: "GR",
+                country: "CH", region: "GR",
                 lat: 46.8499,
                 lng: 9.5329,
                 date: "12.-17. Februar",
@@ -1234,7 +1323,7 @@
                 name: "Rabadan Bellinzona",
                 category: "volksfest",
                 location: "Bellinzona",
-                region: "TI",
+                country: "CH", region: "TI",
                 lat: 46.1952,
                 lng: 9.0241,
                 date: "19.-21. Februar",
@@ -1250,7 +1339,7 @@
                 name: "Basler Fasnacht",
                 category: "volksfest",
                 location: "Basel",
-                region: "BS",
+                country: "CH", region: "BS",
                 lat: 47.5596,
                 lng: 7.5886,
                 date: "23.-25. Februar",
@@ -1267,7 +1356,7 @@
                 name: "Sechseläuten",
                 category: "volksfest",
                 location: "Zürich",
-                region: "ZH",
+                country: "CH", region: "ZH",
                 lat: 47.3669,
                 lng: 8.5417,
                 date: "17.-20. April",
@@ -1284,7 +1373,7 @@
                 name: "76. Seehasenfest",
                 category: "volksfest",
                 location: "Friedrichshafen",
-                region: "DE",
+                country: "CH", region: "DE",
                 lat: 47.6541,
                 lng: 9.4795,
                 date: "16.-20. Juli",
@@ -1300,7 +1389,7 @@
                 name: "Seenachtfest Konstanz",
                 category: "volksfest",
                 location: "Konstanz",
-                region: "DE",
+                country: "CH", region: "DE",
                 lat: 47.6603,
                 lng: 9.1753,
                 date: "8. August",
@@ -1317,7 +1406,7 @@
                 name: "Fantastical Kreuzlingen",
                 category: "volksfest",
                 location: "Kreuzlingen",
-                region: "TG",
+                country: "CH", region: "TG",
                 lat: 47.6467,
                 lng: 9.1781,
                 date: "7.-9. August",
@@ -1333,7 +1422,7 @@
                 name: "Churer Fest",
                 category: "volksfest",
                 location: "Chur",
-                region: "GR",
+                country: "CH", region: "GR",
                 lat: 46.8499,
                 lng: 9.5329,
                 date: "14.-16. August",
@@ -1349,7 +1438,7 @@
                 name: "Lake and Sound Festival",
                 category: "volksfest",
                 location: "Rapperswil-Jona",
-                region: "SG",
+                country: "CH", region: "SG",
                 lat: 47.2269,
                 lng: 8.8180,
                 date: "19.-21. Juni",
@@ -1367,7 +1456,7 @@
                 name: "Zürich Marathon",
                 category: "sport",
                 location: "Zürich",
-                region: "ZH",
+                country: "CH", region: "ZH",
                 lat: 47.3769,
                 lng: 8.5417,
                 date: "12. April",
@@ -1383,7 +1472,7 @@
                 name: "IRONMAN 70.3 Rapperswil",
                 category: "sport",
                 location: "Rapperswil-Jona",
-                region: "SG",
+                country: "CH", region: "SG",
                 lat: 47.2269,
                 lng: 8.8180,
                 date: "7. Juni",
@@ -1399,7 +1488,7 @@
                 name: "75. RUND UM Regatta",
                 category: "sport",
                 location: "Lindau",
-                region: "DE",
+                country: "CH", region: "DE",
                 lat: 47.5460,
                 lng: 9.6842,
                 date: "4.-6. Juni",
@@ -1416,7 +1505,7 @@
                 name: "Eidg. Schützenfest Chur",
                 category: "sport",
                 location: "Chur",
-                region: "GR",
+                country: "CH", region: "GR",
                 lat: 46.8499,
                 lng: 9.5329,
                 date: "27. Juni - 25. Juli",
@@ -1433,7 +1522,7 @@
                 name: "Weltklasse Zürich",
                 category: "sport",
                 location: "Zürich",
-                region: "ZH",
+                country: "CH", region: "ZH",
                 lat: 47.3831,
                 lng: 8.5036,
                 date: "26.-27. August",
@@ -1449,7 +1538,7 @@
                 name: "3-Länder-Marathon",
                 category: "sport",
                 location: "Bodensee",
-                region: "CH-AT-DE",
+                country: "CH", region: "CH-AT-DE",
                 lat: 47.5000,
                 lng: 9.5000,
                 date: "11. Oktober",
@@ -1465,7 +1554,7 @@
                 name: "LGT Alpin Marathon",
                 category: "sport",
                 location: "Liechtenstein",
-                region: "LI",
+                country: "CH", region: "LI",
                 lat: 47.1410,
                 lng: 9.5215,
                 date: "13. Juni",
@@ -1481,7 +1570,7 @@
                 name: "UCI MTB World Cup",
                 category: "sport",
                 location: "Lenzerheide",
-                region: "GR",
+                country: "CH", region: "GR",
                 lat: 46.7333,
                 lng: 9.5500,
                 date: "19.-21. Juni",
@@ -1497,7 +1586,7 @@
                 name: "Giro d'Italia Etappe",
                 category: "sport",
                 location: "Bellinzona",
-                region: "TI",
+                country: "CH", region: "TI",
                 lat: 46.1952,
                 lng: 9.0241,
                 date: "26. Mai",
@@ -1514,7 +1603,7 @@
                 name: "Transalpine Run",
                 category: "sport",
                 location: "Lenzerheide - Locarno",
-                region: "GR-TI",
+                country: "CH", region: "GR-TI",
                 lat: 46.5000,
                 lng: 9.3000,
                 date: "28. Aug - 3. Sept",
@@ -1532,7 +1621,7 @@
                 name: "79. Locarno Film Festival",
                 category: "kultur",
                 location: "Locarno",
-                region: "TI",
+                country: "CH", region: "TI",
                 lat: 46.1670,
                 lng: 8.7940,
                 date: "5.-15. August",
@@ -1549,7 +1638,7 @@
                 name: "Zurich Film Festival",
                 category: "kultur",
                 location: "Zürich",
-                region: "ZH",
+                country: "CH", region: "ZH",
                 lat: 47.3769,
                 lng: 8.5417,
                 date: "24. Sept - 4. Okt",
@@ -1565,7 +1654,7 @@
                 name: "150 Jahre Rätisches Museum",
                 category: "kultur",
                 location: "Chur",
-                region: "GR",
+                country: "CH", region: "GR",
                 lat: 46.8499,
                 lng: 9.5329,
                 date: "Ganzjährig",
@@ -1581,7 +1670,7 @@
                 name: "Open House Chur",
                 category: "kultur",
                 location: "Chur",
-                region: "GR",
+                country: "CH", region: "GR",
                 lat: 46.8499,
                 lng: 9.5329,
                 date: "25.-26. April",
@@ -1597,7 +1686,7 @@
                 name: "20. Museumsnacht St. Gallen",
                 category: "kultur",
                 location: "St. Gallen",
-                region: "SG",
+                country: "CH", region: "SG",
                 lat: 47.4245,
                 lng: 9.3767,
                 date: "12. September",
@@ -1613,7 +1702,7 @@
                 name: "Asisi-Panorama Konstanz",
                 category: "kultur",
                 location: "Konstanz",
-                region: "DE",
+                country: "CH", region: "DE",
                 lat: 47.6603,
                 lng: 9.1753,
                 date: "Ab März 2026",
@@ -1632,7 +1721,7 @@
                 name: "Zoo Zürich",
                 category: "familie",
                 location: "Zürich",
-                region: "ZH",
+                country: "CH", region: "ZH",
                 lat: 47.3846,
                 lng: 8.5749,
                 date: "Ganzjährig",
@@ -1648,7 +1737,7 @@
                 name: "Wildnispark Langenberg",
                 category: "familie",
                 location: "Zürich",
-                region: "ZH",
+                country: "CH", region: "ZH",
                 lat: 47.2852,
                 lng: 8.5445,
                 date: "Ganzjährig",
@@ -1665,7 +1754,7 @@
                 name: "Connyland",
                 category: "familie",
                 location: "Lipperswil",
-                region: "TG",
+                country: "CH", region: "TG",
                 lat: 47.6342,
                 lng: 9.0103,
                 date: "April - Oktober",
@@ -1681,7 +1770,7 @@
                 name: "Technorama Winterthur",
                 category: "familie",
                 location: "Winterthur",
-                region: "ZH",
+                country: "CH", region: "ZH",
                 lat: 47.4993,
                 lng: 8.7268,
                 date: "Ganzjährig",
@@ -1698,7 +1787,7 @@
                 name: "Sea Life Konstanz",
                 category: "familie",
                 location: "Konstanz",
-                region: "DE",
+                country: "CH", region: "DE",
                 lat: 47.6603,
                 lng: 9.1753,
                 date: "Ganzjährig",
@@ -1714,7 +1803,7 @@
                 name: "Ravensburger Spieleland",
                 category: "familie",
                 location: "Meckenbeuren",
-                region: "DE",
+                country: "CH", region: "DE",
                 lat: 47.7022,
                 lng: 9.5736,
                 date: "April - Oktober",
@@ -1730,7 +1819,7 @@
                 name: "100 Jahre Pfahlbaumuseum",
                 category: "familie",
                 location: "Unteruhldingen",
-                region: "DE",
+                country: "CH", region: "DE",
                 lat: 47.7260,
                 lng: 9.2236,
                 date: "Ganzjährig (Jubiläum 2026)",
@@ -1747,7 +1836,7 @@
                 name: "Swissminiatur",
                 category: "familie",
                 location: "Melide",
-                region: "TI",
+                country: "CH", region: "TI",
                 lat: 45.9536,
                 lng: 8.9500,
                 date: "März - November",
@@ -1763,7 +1852,7 @@
                 name: "Knies Kinderzoo",
                 category: "familie",
                 location: "Rapperswil",
-                region: "SG",
+                country: "CH", region: "SG",
                 lat: 47.2269,
                 lng: 8.8180,
                 date: "März - November",
@@ -1779,7 +1868,7 @@
                 name: "Säntis (2'502m)",
                 category: "familie",
                 location: "Schwägalp",
-                region: "AR",
+                country: "CH", region: "AR",
                 lat: 47.2492,
                 lng: 9.3439,
                 date: "Ganzjährig",
@@ -1795,7 +1884,7 @@
                 name: "Schaukelpfad Malbun",
                 category: "familie",
                 location: "Malbun",
-                region: "LI",
+                country: "CH", region: "LI",
                 lat: 47.1023,
                 lng: 9.6089,
                 date: "Mai - Oktober",
@@ -1812,7 +1901,7 @@
                 name: "Rheinfall",
                 category: "familie",
                 location: "Schaffhausen",
-                region: "SH",
+                country: "CH", region: "SH",
                 lat: 47.6778,
                 lng: 8.6156,
                 date: "Ganzjährig",
@@ -1829,7 +1918,7 @@
                 name: "Insel Mainau",
                 category: "familie",
                 location: "Konstanz",
-                region: "DE",
+                country: "CH", region: "DE",
                 lat: 47.7051,
                 lng: 9.1919,
                 date: "Ganzjährig",
@@ -1845,7 +1934,7 @@
                 name: "Monte Tamaro",
                 category: "familie",
                 location: "Rivera",
-                region: "TI",
+                country: "CH", region: "TI",
                 lat: 46.1167,
                 lng: 8.8667,
                 date: "April - November",
@@ -1861,7 +1950,7 @@
                 name: "Marienschlucht",
                 category: "familie",
                 location: "Bodanrück",
-                region: "DE",
+                country: "CH", region: "DE",
                 lat: 47.7500,
                 lng: 9.0500,
                 date: "Ab 28. März 2026",
@@ -1880,7 +1969,7 @@
                 name: "Stiftsbibliothek St. Gallen",
                 category: "sehenswuerdigkeit",
                 location: "St. Gallen",
-                region: "SG",
+                country: "CH", region: "SG",
                 lat: 47.4232,
                 lng: 9.3772,
                 date: "Ganzjährig",
@@ -1897,7 +1986,7 @@
                 name: "Schloss Vaduz",
                 category: "sehenswuerdigkeit",
                 location: "Vaduz",
-                region: "LI",
+                country: "CH", region: "LI",
                 lat: 47.1420,
                 lng: 9.5230,
                 date: "Nur von aussen",
@@ -1913,7 +2002,7 @@
                 name: "UNESCO Burgen Bellinzona",
                 category: "sehenswuerdigkeit",
                 location: "Bellinzona",
-                region: "TI",
+                country: "CH", region: "TI",
                 lat: 46.1952,
                 lng: 9.0241,
                 date: "Ganzjährig",
@@ -1930,7 +2019,7 @@
                 name: "Burg Meersburg",
                 category: "sehenswuerdigkeit",
                 location: "Meersburg",
-                region: "DE",
+                country: "CH", region: "DE",
                 lat: 47.6957,
                 lng: 9.2711,
                 date: "Ganzjährig",
@@ -1946,7 +2035,7 @@
                 name: "Insel Reichenau",
                 category: "sehenswuerdigkeit",
                 location: "Reichenau",
-                region: "DE",
+                country: "CH", region: "DE",
                 lat: 47.6919,
                 lng: 9.0553,
                 date: "Ganzjährig",
@@ -1962,7 +2051,7 @@
                 name: "Altstadt Chur",
                 category: "sehenswuerdigkeit",
                 location: "Chur",
-                region: "GR",
+                country: "CH", region: "GR",
                 lat: 46.8499,
                 lng: 9.5329,
                 date: "Ganzjährig",
@@ -1978,7 +2067,7 @@
                 name: "1200 Jahre Radolfzell",
                 category: "sehenswuerdigkeit",
                 location: "Radolfzell",
-                region: "DE",
+                country: "CH", region: "DE",
                 lat: 47.7381,
                 lng: 8.9706,
                 date: "Ganzjähriges Jubiläum",
@@ -1995,7 +2084,7 @@
                 name: "100 Jahre Flugplatz Altenrhein",
                 category: "sehenswuerdigkeit",
                 location: "Altenrhein",
-                region: "SG",
+                country: "CH", region: "SG",
                 lat: 47.4850,
                 lng: 9.5600,
                 date: "28.-30. August",
@@ -2012,7 +2101,7 @@
                 name: "Piazza Grande Locarno",
                 category: "sehenswuerdigkeit",
                 location: "Locarno",
-                region: "TI",
+                country: "CH", region: "TI",
                 lat: 46.1670,
                 lng: 8.7940,
                 date: "Ganzjährig",
@@ -2028,7 +2117,7 @@
                 name: "Lindau Insel",
                 category: "sehenswuerdigkeit",
                 location: "Lindau",
-                region: "DE",
+                country: "CH", region: "DE",
                 lat: 47.5460,
                 lng: 9.6842,
                 date: "Ganzjährig",
@@ -2044,7 +2133,7 @@
                 name: "Schloss Rapperswil",
                 category: "sehenswuerdigkeit",
                 location: "Rapperswil",
-                region: "SG",
+                country: "CH", region: "SG",
                 lat: 47.2260,
                 lng: 8.8200,
                 date: "Ganzjährig",
@@ -2062,7 +2151,7 @@
                 name: "Sternenstadt St. Gallen",
                 category: "weihnachten",
                 location: "St. Gallen",
-                region: "SG",
+                country: "CH", region: "SG",
                 lat: 47.4245,
                 lng: 9.3767,
                 date: "27. Nov - 24. Dez",
@@ -2078,7 +2167,7 @@
                 name: "Weihnachtsmarkt Konstanz",
                 category: "weihnachten",
                 location: "Konstanz",
-                region: "DE",
+                country: "CH", region: "DE",
                 lat: 47.6603,
                 lng: 9.1753,
                 date: "26. Nov - 23. Dez",
@@ -2094,7 +2183,7 @@
                 name: "Vaduz on Ice",
                 category: "weihnachten",
                 location: "Vaduz",
-                region: "LI",
+                country: "CH", region: "LI",
                 lat: 47.1410,
                 lng: 9.5215,
                 date: "7. Nov - 6. Jan",
@@ -2110,7 +2199,7 @@
                 name: "Winterland Locarno",
                 category: "weihnachten",
                 location: "Locarno",
-                region: "TI",
+                country: "CH", region: "TI",
                 lat: 46.1670,
                 lng: 8.7940,
                 date: "20. Nov - 6. Jan",
@@ -2126,7 +2215,7 @@
                 name: "Lindauer Hafenweihnacht",
                 category: "weihnachten",
                 location: "Lindau",
-                region: "DE",
+                country: "CH", region: "DE",
                 lat: 47.5460,
                 lng: 9.6842,
                 date: "27. Nov - 21. Dez",
@@ -2142,7 +2231,7 @@
                 name: "Christkindlmarkt Zürich HB",
                 category: "weihnachten",
                 location: "Zürich",
-                region: "ZH",
+                country: "CH", region: "ZH",
                 lat: 47.3778,
                 lng: 8.5403,
                 date: "20. Nov - 23. Dez",
@@ -2160,7 +2249,7 @@
                 name: "OLMA St. Gallen",
                 category: "volksfest",
                 location: "St. Gallen",
-                region: "SG",
+                country: "CH", region: "SG",
                 lat: 47.4245,
                 lng: 9.3767,
                 date: "8.-18. Oktober",
@@ -2176,7 +2265,7 @@
                 name: "OFFA St. Gallen",
                 category: "volksfest",
                 location: "St. Gallen",
-                region: "SG",
+                country: "CH", region: "SG",
                 lat: 47.4245,
                 lng: 9.3767,
                 date: "15.-19. April",
@@ -2192,7 +2281,7 @@
                 name: "Arbon Classics",
                 category: "volksfest",
                 location: "Arbon",
-                region: "TG",
+                country: "CH", region: "TG",
                 lat: 47.5168,
                 lng: 9.4321,
                 date: "30.-31. Mai",
@@ -2208,7 +2297,7 @@
                 name: "Genussfestival Vaduz",
                 category: "volksfest",
                 location: "Vaduz",
-                region: "LI",
+                country: "CH", region: "LI",
                 lat: 47.1410,
                 lng: 9.5215,
                 date: "5.-13. September",
@@ -2227,7 +2316,7 @@
                 name: "Thermalbad Zürich",
                 category: "familie",
                 location: "Zürich (Hürlimann-Areal)",
-                region: "ZH",
+                country: "CH", region: "ZH",
                 lat: 47.3668,
                 lng: 8.5265,
                 date: "Ganzjährig",
@@ -2244,7 +2333,7 @@
                 name: "Leukerbad Therme",
                 category: "familie",
                 location: "Leukerbad",
-                region: "VS",
+                country: "CH", region: "VS",
                 lat: 46.3790,
                 lng: 7.6280,
                 date: "Ganzjährig",
@@ -2261,7 +2350,7 @@
                 name: "Tamina Therme Bad Ragaz",
                 category: "familie",
                 location: "Bad Ragaz",
-                region: "SG",
+                country: "CH", region: "SG",
                 lat: 47.0070,
                 lng: 9.5000,
                 date: "Ganzjährig",
@@ -2277,7 +2366,7 @@
                 name: "Aquabasilea",
                 category: "familie",
                 location: "Pratteln",
-                region: "BL",
+                country: "CH", region: "BL",
                 lat: 47.5170,
                 lng: 7.6880,
                 date: "Ganzjährig",
@@ -2294,7 +2383,7 @@
                 name: "Mineralbad Rigi Kaltbad",
                 category: "familie",
                 location: "Rigi Kaltbad",
-                region: "LU",
+                country: "CH", region: "LU",
                 lat: 47.0430,
                 lng: 8.4860,
                 date: "Ganzjährig",
@@ -2310,7 +2399,7 @@
                 name: "Bogn Engiadina Scuol",
                 category: "familie",
                 location: "Scuol",
-                region: "GR",
+                country: "CH", region: "GR",
                 lat: 46.7960,
                 lng: 10.3050,
                 date: "Ganzjährig",
@@ -2326,7 +2415,7 @@
                 name: "Bains de Lavey",
                 category: "familie",
                 location: "Lavey-les-Bains",
-                region: "VD",
+                country: "CH", region: "VD",
                 lat: 46.2070,
                 lng: 7.0290,
                 date: "Ganzjährig",
@@ -2342,7 +2431,7 @@
                 name: "Fortyseven Therme Baden",
                 category: "familie",
                 location: "Baden",
-                region: "AG",
+                country: "CH", region: "AG",
                 lat: 47.4765,
                 lng: 8.3047,
                 date: "Ganzjährig",
@@ -2358,7 +2447,7 @@
                 name: "Bernaqua Bern",
                 category: "familie",
                 location: "Bern (Westside)",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.9220,
                 lng: 7.3890,
                 date: "Ganzjährig",
@@ -2374,7 +2463,7 @@
                 name: "Aquaparc Le Bouveret",
                 category: "familie",
                 location: "Le Bouveret",
-                region: "VS",
+                country: "CH", region: "VS",
                 lat: 46.3932,
                 lng: 6.8552,
                 date: "Ganzjährig",
@@ -2393,7 +2482,7 @@
                 name: "Rodelbahn Pradaschier",
                 category: "familie",
                 location: "Churwalden",
-                region: "GR",
+                country: "CH", region: "GR",
                 lat: 46.7810,
                 lng: 9.5390,
                 date: "Mai–Okt",
@@ -2410,7 +2499,7 @@
                 name: "Rodelbahn Pilatus",
                 category: "familie",
                 location: "Kriens / Pilatus",
-                region: "LU",
+                country: "CH", region: "LU",
                 lat: 47.0100,
                 lng: 8.2700,
                 date: "April–Nov",
@@ -2426,7 +2515,7 @@
                 name: "Rodelbahn Kronberg",
                 category: "familie",
                 location: "Jakobsbad (Appenzell)",
-                region: "AI",
+                country: "CH", region: "AI",
                 lat: 47.3100,
                 lng: 9.4000,
                 date: "April–Okt",
@@ -2442,7 +2531,7 @@
                 name: "Alpine Coaster Glacier 3000",
                 category: "familie",
                 location: "Les Diablerets",
-                region: "VD",
+                country: "CH", region: "VD",
                 lat: 46.3305,
                 lng: 7.2052,
                 date: "Mai–Okt",
@@ -2458,7 +2547,7 @@
                 name: "Rodelbahn Monte Tamaro",
                 category: "familie",
                 location: "Rivera",
-                region: "TI",
+                country: "CH", region: "TI",
                 lat: 46.1150,
                 lng: 8.9350,
                 date: "März–Nov",
@@ -2474,7 +2563,7 @@
                 name: "Rodelbahn Sattel-Hochstuckli",
                 category: "familie",
                 location: "Sattel",
-                region: "SZ",
+                country: "CH", region: "SZ",
                 lat: 47.0800,
                 lng: 8.6350,
                 date: "April–Nov",
@@ -2490,7 +2579,7 @@
                 name: "Coastiland Lenzerheide",
                 category: "familie",
                 location: "Lenzerheide",
-                region: "GR",
+                country: "CH", region: "GR",
                 lat: 46.7258,
                 lng: 9.5503,
                 date: "Mai–Okt",
@@ -2506,7 +2595,7 @@
                 name: "Rodelbahn Oeschinensee",
                 category: "familie",
                 location: "Kandersteg",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.4972,
                 lng: 7.7337,
                 date: "Mai–Okt",
@@ -2525,7 +2614,7 @@
                 name: "Plättli Zoo",
                 category: "familie",
                 location: "Frauenfeld",
-                region: "TG",
+                country: "CH", region: "TG",
                 lat: 47.5550,
                 lng: 8.8780,
                 date: "Ganzjährig",
@@ -2541,7 +2630,7 @@
                 name: "Zoo Basel (Zolli)",
                 category: "familie",
                 location: "Basel",
-                region: "BS",
+                country: "CH", region: "BS",
                 lat: 47.5475,
                 lng: 7.5785,
                 date: "Ganzjährig",
@@ -2558,7 +2647,7 @@
                 name: "Walter Zoo",
                 category: "familie",
                 location: "Gossau SG",
-                region: "SG",
+                country: "CH", region: "SG",
                 lat: 47.4130,
                 lng: 9.2580,
                 date: "Ganzjährig",
@@ -2574,7 +2663,7 @@
                 name: "Wildnispark Zürich Langenberg",
                 category: "familie",
                 location: "Langnau am Albis",
-                region: "ZH",
+                country: "CH", region: "ZH",
                 lat: 47.2880,
                 lng: 8.5430,
                 date: "Ganzjährig",
@@ -2590,7 +2679,7 @@
                 name: "Wildpark Peter und Paul",
                 category: "familie",
                 location: "St. Gallen",
-                region: "SG",
+                country: "CH", region: "SG",
                 lat: 47.4450,
                 lng: 9.3950,
                 date: "Ganzjährig",
@@ -2606,7 +2695,7 @@
                 name: "Aquatis Lausanne",
                 category: "familie",
                 location: "Lausanne",
-                region: "VD",
+                country: "CH", region: "VD",
                 lat: 46.5293,
                 lng: 6.5850,
                 date: "Ganzjährig",
@@ -2622,7 +2711,7 @@
                 name: "Juraparc Vallorbe",
                 category: "familie",
                 location: "Vallorbe",
-                region: "VD",
+                country: "CH", region: "VD",
                 lat: 46.7240,
                 lng: 6.3990,
                 date: "April–Nov",
@@ -2638,7 +2727,7 @@
                 name: "Wildpark Bruderhaus",
                 category: "familie",
                 location: "Winterthur",
-                region: "ZH",
+                country: "CH", region: "ZH",
                 lat: 47.4850,
                 lng: 8.7750,
                 date: "Ganzjährig",
@@ -2657,7 +2746,7 @@
                 name: "Titlis",
                 category: "sehenswuerdigkeit",
                 location: "Engelberg",
-                region: "OW",
+                country: "CH", region: "OW",
                 lat: 46.7715,
                 lng: 8.4260,
                 date: "Ganzjährig",
@@ -2673,7 +2762,7 @@
                 name: "Rigi – Königin der Berge",
                 category: "sehenswuerdigkeit",
                 location: "Vitznau / Weggis",
-                region: "LU",
+                country: "CH", region: "LU",
                 lat: 47.0567,
                 lng: 8.4850,
                 date: "Ganzjährig",
@@ -2689,7 +2778,7 @@
                 name: "Schilthorn – Piz Gloria",
                 category: "sehenswuerdigkeit",
                 location: "Mürren",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.5567,
                 lng: 7.8358,
                 date: "Ganzjährig",
@@ -2705,7 +2794,7 @@
                 name: "Verzasca-Tal & Römerbrücke",
                 category: "sehenswuerdigkeit",
                 location: "Verzasca-Tal",
-                region: "TI",
+                country: "CH", region: "TI",
                 lat: 46.2630,
                 lng: 8.8430,
                 date: "Ganzjährig",
@@ -2721,7 +2810,7 @@
                 name: "Trümmelbachfälle",
                 category: "sehenswuerdigkeit",
                 location: "Lauterbrunnen",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.5670,
                 lng: 7.9080,
                 date: "April–Nov",
@@ -2737,7 +2826,7 @@
                 name: "Staubbachfall",
                 category: "sehenswuerdigkeit",
                 location: "Lauterbrunnen",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.5900,
                 lng: 7.9100,
                 date: "Ganzjährig",
@@ -2753,7 +2842,7 @@
                 name: "Blausee",
                 category: "sehenswuerdigkeit",
                 location: "Blausee bei Kandersteg",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.5340,
                 lng: 7.6660,
                 date: "Ganzjährig",
@@ -2769,7 +2858,7 @@
                 name: "Caumasee",
                 category: "sehenswuerdigkeit",
                 location: "Flims",
-                region: "GR",
+                country: "CH", region: "GR",
                 lat: 46.8270,
                 lng: 9.2870,
                 date: "Mai–Okt",
@@ -2785,7 +2874,7 @@
                 name: "Rheinschlucht (Ruinaulta)",
                 category: "sehenswuerdigkeit",
                 location: "Flims – Reichenau",
-                region: "GR",
+                country: "CH", region: "GR",
                 lat: 46.8200,
                 lng: 9.2700,
                 date: "Ganzjährig",
@@ -2801,7 +2890,7 @@
                 name: "Hölloch-Höhle",
                 category: "sehenswuerdigkeit",
                 location: "Muotathal",
-                region: "SZ",
+                country: "CH", region: "SZ",
                 lat: 46.9720,
                 lng: 8.8020,
                 date: "Ganzjährig (Führungen)",
@@ -2817,7 +2906,7 @@
                 name: "St. Beatus-Höhlen",
                 category: "sehenswuerdigkeit",
                 location: "Beatenberg (Thunersee)",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.6930,
                 lng: 7.8040,
                 date: "April–Nov",
@@ -2833,7 +2922,7 @@
                 name: "Grottes de Vallorbe",
                 category: "sehenswuerdigkeit",
                 location: "Vallorbe",
-                region: "VD",
+                country: "CH", region: "VD",
                 lat: 46.7140,
                 lng: 6.3850,
                 date: "April–Nov",
@@ -2849,7 +2938,7 @@
                 name: "Monte San Salvatore",
                 category: "sehenswuerdigkeit",
                 location: "Lugano",
-                region: "TI",
+                country: "CH", region: "TI",
                 lat: 45.9680,
                 lng: 8.9500,
                 date: "März–Nov",
@@ -2865,7 +2954,7 @@
                 name: "Cardada Cimetta",
                 category: "sehenswuerdigkeit",
                 location: "Locarno",
-                region: "TI",
+                country: "CH", region: "TI",
                 lat: 46.1870,
                 lng: 8.7870,
                 date: "Ganzjährig",
@@ -2881,7 +2970,7 @@
                 name: "Schloss Thun",
                 category: "sehenswuerdigkeit",
                 location: "Thun",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.7580,
                 lng: 7.6280,
                 date: "Ganzjährig",
@@ -2897,7 +2986,7 @@
                 name: "Schloss Gruyères",
                 category: "sehenswuerdigkeit",
                 location: "Gruyères",
-                region: "FR",
+                country: "CH", region: "FR",
                 lat: 46.5828,
                 lng: 7.0816,
                 date: "Ganzjährig",
@@ -2913,7 +3002,7 @@
                 name: "Seealpsee & Äscher",
                 category: "sehenswuerdigkeit",
                 location: "Wasserauen (Alpstein)",
-                region: "AI",
+                country: "CH", region: "AI",
                 lat: 47.2640,
                 lng: 9.4160,
                 date: "Mai–Okt",
@@ -2929,7 +3018,7 @@
                 name: "Gelmerbahn",
                 category: "sehenswuerdigkeit",
                 location: "Handegg (Grimsel)",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.6050,
                 lng: 8.3200,
                 date: "Juni–Okt",
@@ -2945,7 +3034,7 @@
                 name: "Harder Kulm",
                 category: "sehenswuerdigkeit",
                 location: "Interlaken",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.6960,
                 lng: 7.8680,
                 date: "April–Nov",
@@ -2961,7 +3050,7 @@
                 name: "Stanserhorn CabriO",
                 category: "sehenswuerdigkeit",
                 location: "Stans",
-                region: "NW",
+                country: "CH", region: "NW",
                 lat: 46.9280,
                 lng: 8.3420,
                 date: "April–Nov",
@@ -2977,7 +3066,7 @@
                 name: "Niesen",
                 category: "sehenswuerdigkeit",
                 location: "Mülenen bei Spiez",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.6460,
                 lng: 7.6510,
                 date: "Mai–Nov",
@@ -2993,7 +3082,7 @@
                 name: "Brienzer Rothorn Dampfbahn",
                 category: "sehenswuerdigkeit",
                 location: "Brienz",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.7820,
                 lng: 8.0580,
                 date: "Juni–Okt",
@@ -3009,7 +3098,7 @@
                 name: "First Cliff Walk Grindelwald",
                 category: "sehenswuerdigkeit",
                 location: "Grindelwald First",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.6570,
                 lng: 8.0580,
                 date: "Mai–Okt",
@@ -3025,7 +3114,7 @@
                 name: "Swiss Knife Valley",
                 category: "sehenswuerdigkeit",
                 location: "Brunnen",
-                region: "SZ",
+                country: "CH", region: "SZ",
                 lat: 46.9944,
                 lng: 8.6097,
                 date: "Ganzjährig",
@@ -3041,7 +3130,7 @@
                 name: "Creux du Van",
                 category: "sehenswuerdigkeit",
                 location: "Val de Travers",
-                region: "NE",
+                country: "CH", region: "NE",
                 lat: 46.9310,
                 lng: 6.7280,
                 date: "Mai–Okt",
@@ -3060,7 +3149,7 @@
                 name: "Muggestutz Zwergweg",
                 category: "familie",
                 location: "Hasliberg",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.7500,
                 lng: 8.2000,
                 date: "Juni–Okt",
@@ -3076,7 +3165,7 @@
                 name: "Globi-Wanderweg",
                 category: "familie",
                 location: "Lenzerheide",
-                region: "GR",
+                country: "CH", region: "GR",
                 lat: 46.7258,
                 lng: 9.5503,
                 date: "Juni–Okt",
@@ -3092,7 +3181,7 @@
                 name: "Foxtrail Schnitzeljagd",
                 category: "familie",
                 location: "Diverse Städte (ZH, BE, LU, BS)",
-                region: "ZH",
+                country: "CH", region: "ZH",
                 lat: 47.3769,
                 lng: 8.5417,
                 date: "Ganzjährig",
@@ -3108,7 +3197,7 @@
                 name: "Gwunderwelt Gurten",
                 category: "familie",
                 location: "Gurten (Bern)",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.9210,
                 lng: 7.4260,
                 date: "Ganzjährig",
@@ -3124,7 +3213,7 @@
                 name: "Klangweg Toggenburg",
                 category: "familie",
                 location: "Alt St. Johann",
-                region: "SG",
+                country: "CH", region: "SG",
                 lat: 47.2000,
                 lng: 9.2800,
                 date: "Mai–Okt",
@@ -3140,7 +3229,7 @@
                 name: "Seilpark Interlaken",
                 category: "familie",
                 location: "Interlaken",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.6863,
                 lng: 7.8530,
                 date: "April–Okt",
@@ -3156,7 +3245,7 @@
                 name: "Detektiv-Trail",
                 category: "familie",
                 location: "Diverse Orte schweizweit",
-                region: "CH",
+                country: "CH", region: "CH",
                 lat: 47.0502,
                 lng: 8.3093,
                 date: "Ganzjährig",
@@ -3172,7 +3261,7 @@
                 name: "Alpamare Pfäffikon",
                 category: "familie",
                 location: "Pfäffikon SZ",
-                region: "SZ",
+                country: "CH", region: "SZ",
                 lat: 47.2043,
                 lng: 8.7826,
                 date: "Ganzjährig",
@@ -3191,7 +3280,7 @@
                 name: "Weihnachtsmarkt Winterthur",
                 category: "weihnachten",
                 location: "Winterthur",
-                region: "ZH",
+                country: "CH", region: "ZH",
                 lat: 47.4984,
                 lng: 8.7268,
                 date: "21. Nov – 23. Dez",
@@ -3207,7 +3296,7 @@
                 name: "Lichterschwimmen Aarau",
                 category: "weihnachten",
                 location: "Aarau",
-                region: "AG",
+                country: "CH", region: "AG",
                 lat: 47.3900,
                 lng: 8.0450,
                 date: "8. Dez",
@@ -3223,7 +3312,7 @@
                 name: "Weihnachtsmarkt Rapperswil",
                 category: "weihnachten",
                 location: "Rapperswil-Jona",
-                region: "SG",
+                country: "CH", region: "SG",
                 lat: 47.2262,
                 lng: 8.8174,
                 date: "5.–8. Dez / 12.–15. Dez",
@@ -3239,7 +3328,7 @@
                 name: "Weihnachtsmarkt Thun",
                 category: "weihnachten",
                 location: "Thun",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.7580,
                 lng: 7.6280,
                 date: "29. Nov – 24. Dez",
@@ -3255,7 +3344,7 @@
                 name: "Davos Klosters Advent",
                 category: "weihnachten",
                 location: "Davos",
-                region: "GR",
+                country: "CH", region: "GR",
                 lat: 46.8027,
                 lng: 9.8361,
                 date: "Dez",
@@ -3271,7 +3360,7 @@
                 name: "Weihnachtsmarkt Baden",
                 category: "weihnachten",
                 location: "Baden",
-                region: "AG",
+                country: "CH", region: "AG",
                 lat: 47.4734,
                 lng: 8.3064,
                 date: "28. Nov – 23. Dez",
@@ -3287,7 +3376,7 @@
                 name: "Weihnachtsmarkt Solothurn",
                 category: "weihnachten",
                 location: "Solothurn",
-                region: "SO",
+                country: "CH", region: "SO",
                 lat: 47.2088,
                 lng: 7.5323,
                 date: "5.–8. Dez",
@@ -3303,7 +3392,7 @@
                 name: "Weihnachtsmarkt Stein am Rhein",
                 category: "weihnachten",
                 location: "Stein am Rhein",
-                region: "SH",
+                country: "CH", region: "SH",
                 lat: 47.6592,
                 lng: 8.8600,
                 date: "1.–22. Dez",
@@ -3322,7 +3411,7 @@
                 name: "Atzmännig",
                 category: "familie",
                 location: "Goldingen",
-                region: "SG",
+                country: "CH", region: "SG",
                 lat: 47.2370,
                 lng: 8.9670,
                 date: "Ganzjährig",
@@ -3338,7 +3427,7 @@
                 name: "Munot",
                 category: "sehenswuerdigkeit",
                 location: "Schaffhausen",
-                region: "SH",
+                country: "CH", region: "SH",
                 lat: 47.6958,
                 lng: 8.6350,
                 date: "Ganzjährig",
@@ -3355,7 +3444,7 @@
                 name: "Giessbachfälle",
                 category: "sehenswuerdigkeit",
                 location: "Brienz",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.7290,
                 lng: 8.0520,
                 date: "April–Okt",
@@ -3372,7 +3461,7 @@
                 name: "Smilestones Miniaturwelt",
                 category: "familie",
                 location: "Neuhausen am Rheinfall",
-                region: "SH",
+                country: "CH", region: "SH",
                 lat: 47.6780,
                 lng: 8.6150,
                 date: "Ganzjährig",
@@ -3388,7 +3477,7 @@
                 name: "Kartause Ittingen",
                 category: "kultur",
                 location: "Warth",
-                region: "TG",
+                country: "CH", region: "TG",
                 lat: 47.5880,
                 lng: 8.8510,
                 date: "Ganzjährig",
@@ -3404,7 +3493,7 @@
                 name: "Burg Hohenklingen",
                 category: "sehenswuerdigkeit",
                 location: "Stein am Rhein",
-                region: "SH",
+                country: "CH", region: "SH",
                 lat: 47.6640,
                 lng: 8.8550,
                 date: "Ganzjährig",
@@ -3420,7 +3509,7 @@
                 name: "Schloss Kyburg",
                 category: "sehenswuerdigkeit",
                 location: "Kyburg",
-                region: "ZH",
+                country: "CH", region: "ZH",
                 lat: 47.4570,
                 lng: 8.7440,
                 date: "Ganzjährig",
@@ -3436,7 +3525,7 @@
                 name: "Baumwipfelpfad Neckertal",
                 category: "familie",
                 location: "Mogelsberg",
-                region: "SG",
+                country: "CH", region: "SG",
                 lat: 47.3580,
                 lng: 9.1350,
                 date: "Ganzjährig",
@@ -3452,7 +3541,7 @@
                 name: "Taminaschlucht",
                 category: "sehenswuerdigkeit",
                 location: "Bad Ragaz",
-                region: "SG",
+                country: "CH", region: "SG",
                 lat: 46.9930,
                 lng: 9.5080,
                 date: "Mai–Okt",
@@ -3468,7 +3557,7 @@
                 name: "Klöntalersee",
                 category: "sehenswuerdigkeit",
                 location: "Glarus",
-                region: "GL",
+                country: "CH", region: "GL",
                 lat: 47.0270,
                 lng: 8.9680,
                 date: "Ganzjährig",
@@ -3484,7 +3573,7 @@
                 name: "Triftbrücke",
                 category: "sehenswuerdigkeit",
                 location: "Gadmen",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.7100,
                 lng: 8.3450,
                 date: "Juni–Okt",
@@ -3501,7 +3590,7 @@
                 name: "Charles Kuonen Hängebrücke",
                 category: "sehenswuerdigkeit",
                 location: "Randa",
-                region: "VS",
+                country: "CH", region: "VS",
                 lat: 46.0980,
                 lng: 7.7840,
                 date: "Juni–Okt",
@@ -3518,7 +3607,7 @@
                 name: "Stoosbahn",
                 category: "sehenswuerdigkeit",
                 location: "Schwyz",
-                region: "SZ",
+                country: "CH", region: "SZ",
                 lat: 46.9780,
                 lng: 8.6630,
                 date: "Ganzjährig",
@@ -3534,7 +3623,7 @@
                 name: "Ponte Tibetano Carasc",
                 category: "sehenswuerdigkeit",
                 location: "Sementina",
-                region: "TI",
+                country: "CH", region: "TI",
                 lat: 46.1870,
                 lng: 9.0150,
                 date: "Ganzjährig",
@@ -3550,7 +3639,7 @@
                 name: "Viamala-Schlucht",
                 category: "sehenswuerdigkeit",
                 location: "Thusis",
-                region: "GR",
+                country: "CH", region: "GR",
                 lat: 46.6570,
                 lng: 9.4380,
                 date: "April–Nov",
@@ -3566,7 +3655,7 @@
                 name: "Fronalpstock",
                 category: "sehenswuerdigkeit",
                 location: "Stoos",
-                region: "SZ",
+                country: "CH", region: "SZ",
                 lat: 46.9730,
                 lng: 8.6570,
                 date: "Ganzjährig",
@@ -3582,7 +3671,7 @@
                 name: "Gornerschlucht",
                 category: "sehenswuerdigkeit",
                 location: "Zermatt",
-                region: "VS",
+                country: "CH", region: "VS",
                 lat: 46.0180,
                 lng: 7.7520,
                 date: "Juni–Okt",
@@ -3598,7 +3687,7 @@
                 name: "Gletscherschlucht Rosenlaui",
                 category: "sehenswuerdigkeit",
                 location: "Meiringen",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.7430,
                 lng: 8.1580,
                 date: "Mai–Okt",
@@ -3614,7 +3703,7 @@
                 name: "Crestasee",
                 category: "sehenswuerdigkeit",
                 location: "Flims",
-                region: "GR",
+                country: "CH", region: "GR",
                 lat: 46.8350,
                 lng: 9.2620,
                 date: "Mai–Okt",
@@ -3630,7 +3719,7 @@
                 name: "Silsersee",
                 category: "sehenswuerdigkeit",
                 location: "Sils Maria",
-                region: "GR",
+                country: "CH", region: "GR",
                 lat: 46.4280,
                 lng: 9.7470,
                 date: "Ganzjährig",
@@ -3646,7 +3735,7 @@
                 name: "Engstligenfälle",
                 category: "sehenswuerdigkeit",
                 location: "Adelboden",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.4580,
                 lng: 7.5700,
                 date: "Mai–Okt",
@@ -3662,7 +3751,7 @@
                 name: "Heididorf",
                 category: "familie",
                 location: "Maienfeld",
-                region: "GR",
+                country: "CH", region: "GR",
                 lat: 47.0080,
                 lng: 9.5270,
                 date: "März–Nov",
@@ -3678,7 +3767,7 @@
                 name: "Rochers de Naye",
                 category: "sehenswuerdigkeit",
                 location: "Montreux",
-                region: "VD",
+                country: "CH", region: "VD",
                 lat: 46.4320,
                 lng: 6.9780,
                 date: "Ganzjährig",
@@ -3694,7 +3783,7 @@
                 name: "Grande Dixence Staumauer",
                 category: "sehenswuerdigkeit",
                 location: "Hérémence",
-                region: "VS",
+                country: "CH", region: "VS",
                 lat: 46.0810,
                 lng: 7.4050,
                 date: "Juni–Sept",
@@ -3711,7 +3800,7 @@
                 name: "Lac Souterrain St-Léonard",
                 category: "sehenswuerdigkeit",
                 location: "St-Léonard",
-                region: "VS",
+                country: "CH", region: "VS",
                 lat: 46.2530,
                 lng: 7.4180,
                 date: "März–Nov",
@@ -3727,7 +3816,7 @@
                 name: "Salzbergwerk Bex",
                 category: "familie",
                 location: "Bex",
-                region: "VD",
+                country: "CH", region: "VD",
                 lat: 46.2630,
                 lng: 7.0150,
                 date: "Ganzjährig",
@@ -3743,7 +3832,7 @@
                 name: "Schloss Hallwyl",
                 category: "sehenswuerdigkeit",
                 location: "Seengen",
-                region: "AG",
+                country: "CH", region: "AG",
                 lat: 47.2760,
                 lng: 8.1970,
                 date: "April–Okt",
@@ -3759,7 +3848,7 @@
                 name: "Reichenbachfall",
                 category: "sehenswuerdigkeit",
                 location: "Meiringen",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.7180,
                 lng: 8.1820,
                 date: "Mai–Okt",
@@ -3775,7 +3864,7 @@
                 name: "Riffelsee",
                 category: "sehenswuerdigkeit",
                 location: "Zermatt",
-                region: "VS",
+                country: "CH", region: "VS",
                 lat: 45.9870,
                 lng: 7.7530,
                 date: "Juni–Okt",
@@ -3792,7 +3881,7 @@
                 name: "Bachalpsee",
                 category: "sehenswuerdigkeit",
                 location: "Grindelwald First",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.6690,
                 lng: 8.0250,
                 date: "Juni–Okt",
@@ -3808,7 +3897,7 @@
                 name: "MoMö Mosterei-Museum",
                 category: "kultur",
                 location: "Arbon",
-                region: "TG",
+                country: "CH", region: "TG",
                 lat: 47.5170,
                 lng: 9.4280,
                 date: "Ganzjährig",
@@ -3824,7 +3913,7 @@
                 name: "Hundertwasser Markthalle",
                 category: "kultur",
                 location: "Altenrhein",
-                region: "SG",
+                country: "CH", region: "SG",
                 lat: 47.4870,
                 lng: 9.5570,
                 date: "Ganzjährig",
@@ -3840,7 +3929,7 @@
                 name: "Musée Olympique",
                 category: "kultur",
                 location: "Lausanne",
-                region: "VD",
+                country: "CH", region: "VD",
                 lat: 46.5080,
                 lng: 6.6340,
                 date: "Ganzjährig",
@@ -3857,7 +3946,7 @@
                 name: "Arenenberg Napoleonmuseum",
                 category: "kultur",
                 location: "Salenstein",
-                region: "TG",
+                country: "CH", region: "TG",
                 lat: 47.6710,
                 lng: 9.0560,
                 date: "Ganzjährig",
@@ -3873,7 +3962,7 @@
                 name: "Autobau Erlebniswelt",
                 category: "kultur",
                 location: "Romanshorn",
-                region: "TG",
+                country: "CH", region: "TG",
                 lat: 47.5640,
                 lng: 9.3730,
                 date: "Ganzjährig",
@@ -3889,7 +3978,7 @@
                 name: "Schloss Frauenfeld",
                 category: "sehenswuerdigkeit",
                 location: "Frauenfeld",
-                region: "TG",
+                country: "CH", region: "TG",
                 lat: 47.5580,
                 lng: 8.8980,
                 date: "Ganzjährig",
@@ -3905,7 +3994,7 @@
                 name: "RAMSEIER Erlebniswelt",
                 category: "familie",
                 location: "Sursee",
-                region: "LU",
+                country: "CH", region: "LU",
                 lat: 47.1740,
                 lng: 8.1130,
                 date: "Ganzjährig",
@@ -3921,7 +4010,7 @@
                 name: "Höllgrotten Baar",
                 category: "sehenswuerdigkeit",
                 location: "Baar",
-                region: "ZG",
+                country: "CH", region: "ZG",
                 lat: 47.1890,
                 lng: 8.5150,
                 date: "April–Nov",
@@ -3937,7 +4026,7 @@
                 name: "Säntispark",
                 category: "familie",
                 location: "Abtwil",
-                region: "SG",
+                country: "CH", region: "SG",
                 lat: 47.4210,
                 lng: 9.3170,
                 date: "Ganzjährig",
@@ -3953,7 +4042,7 @@
                 name: "Gorges de l'Areuse",
                 category: "sehenswuerdigkeit",
                 location: "Noiraigue",
-                region: "NE",
+                country: "CH", region: "NE",
                 lat: 46.9510,
                 lng: 6.7280,
                 date: "Ganzjährig",
@@ -3969,7 +4058,7 @@
                 name: "Grosser Mythen",
                 category: "sehenswuerdigkeit",
                 location: "Schwyz",
-                region: "SZ",
+                country: "CH", region: "SZ",
                 lat: 47.0340,
                 lng: 8.6220,
                 date: "Mai–Okt",
@@ -3985,7 +4074,7 @@
                 name: "Paxmal",
                 category: "sehenswuerdigkeit",
                 location: "Walenstadtberg",
-                region: "SG",
+                country: "CH", region: "SG",
                 lat: 47.1160,
                 lng: 9.2580,
                 date: "Ganzjährig",
@@ -4001,7 +4090,7 @@
                 name: "Schweizer Kindermuseum",
                 category: "familie",
                 location: "Baden",
-                region: "AG",
+                country: "CH", region: "AG",
                 lat: 47.4720,
                 lng: 8.3020,
                 date: "Ganzjährig",
@@ -4017,7 +4106,7 @@
                 name: "Zoo des Marécottes",
                 category: "familie",
                 location: "Les Marécottes",
-                region: "VS",
+                country: "CH", region: "VS",
                 lat: 46.1080,
                 lng: 7.0060,
                 date: "Ganzjährig",
@@ -4033,7 +4122,7 @@
                 name: "Zoo Hasel",
                 category: "familie",
                 location: "Rüfenach",
-                region: "AG",
+                country: "CH", region: "AG",
                 lat: 47.5150,
                 lng: 8.2010,
                 date: "Ganzjährig",
@@ -4049,7 +4138,7 @@
                 name: "Fly-Line Pfingstegg",
                 category: "familie",
                 location: "Grindelwald",
-                region: "BE",
+                country: "CH", region: "BE",
                 lat: 46.6100,
                 lng: 8.0550,
                 date: "Mai–Okt",
@@ -4065,7 +4154,7 @@
                 name: "Preda-Bergün Schlittelbahn",
                 category: "familie",
                 location: "Bergün",
-                region: "GR",
+                country: "CH", region: "GR",
                 lat: 46.6300,
                 lng: 9.7450,
                 date: "Dez–März",
@@ -4081,7 +4170,7 @@
                 name: "Splash & Spa Tamaro",
                 category: "familie",
                 location: "Rivera",
-                region: "TI",
+                country: "CH", region: "TI",
                 lat: 46.1150,
                 lng: 8.9300,
                 date: "Ganzjährig",
@@ -4097,7 +4186,7 @@
                 name: "Tropiquarium Servion",
                 category: "familie",
                 location: "Servion",
-                region: "VD",
+                country: "CH", region: "VD",
                 lat: 46.5560,
                 lng: 6.7830,
                 date: "Ganzjährig",
@@ -4113,7 +4202,7 @@
                 name: "Juckerhof",
                 category: "familie",
                 location: "Seegräben",
-                region: "ZH",
+                country: "CH", region: "ZH",
                 lat: 47.3420,
                 lng: 8.7610,
                 date: "Ganzjährig",
@@ -4129,7 +4218,7 @@
                 name: "Appenzeller Schaukäserei",
                 category: "kultur",
                 location: "Stein AR",
-                region: "AR",
+                country: "CH", region: "AR",
                 lat: 47.3740,
                 lng: 9.3520,
                 date: "Ganzjährig",
@@ -4145,7 +4234,7 @@
                 name: "House of Läderach",
                 category: "kultur",
                 location: "Bilten",
-                region: "GL",
+                country: "CH", region: "GL",
                 lat: 47.1480,
                 lng: 9.0340,
                 date: "Ganzjährig",
@@ -4161,7 +4250,7 @@
                 name: "Nationalpark Schweiz",
                 category: "sehenswuerdigkeit",
                 location: "Zernez",
-                region: "GR",
+                country: "CH", region: "GR",
                 lat: 46.6600,
                 lng: 10.2270,
                 date: "Juni–Okt",
@@ -4178,7 +4267,7 @@
                 name: "Barryland St. Bernhard",
                 category: "familie",
                 location: "Martigny",
-                region: "VS",
+                country: "CH", region: "VS",
                 lat: 46.0970,
                 lng: 7.0680,
                 date: "Ganzjährig",
@@ -4188,6 +4277,969 @@
                 highlights: ["Bernhardiner", "Museum"],
                 website: "https://www.fondation-barry.ch",
                 image: "https://images.unsplash.com/photo-1534361960057-19889db9621e?w=800&q=80"
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // 🇩🇪 DEUTSCHLAND - POIs
+            // ═══════════════════════════════════════════════════════════════
+            
+            // ═══════════════════════════════════════════════════════════════
+            // 🎢 FREIZEITPARKS DEUTSCHLAND
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 300,
+                name: "Europa-Park",
+                category: "familie",
+                location: "Rust",
+                country: "DE",
+                region: "BW",
+                lat: 48.2660,
+                lng: 7.7220,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 62.50 €",
+                description: "Grösster Freizeitpark Deutschlands mit 18 Themenbereichen.",
+                highlights: ["Grösster Park DE", "100+ Attraktionen"],
+                website: "https://www.europapark.de",
+                image: "https://images.unsplash.com/photo-1536768139911-e290a59011e4?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 301,
+                name: "Phantasialand",
+                category: "familie",
+                location: "Brühl",
+                country: "DE",
+                region: "NW",
+                lat: 50.7999,
+                lng: 6.8792,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 57 €",
+                description: "Spektakulärer Themenpark mit preisgekrönten Achterbahnen.",
+                highlights: ["Taron", "F.L.Y."],
+                website: "https://www.phantasialand.de",
+                image: "https://images.unsplash.com/photo-1536768139911-e290a59011e4?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 302,
+                name: "Legoland Deutschland",
+                category: "familie",
+                location: "Günzburg",
+                country: "DE",
+                region: "BY",
+                lat: 48.4263,
+                lng: 10.2970,
+                date: "März–Nov",
+                month: 0,
+                price: "Ab 51.50 €",
+                description: "Freizeitpark für Familien mit über 55 Millionen Legosteinen.",
+                highlights: ["55 Mio. Legosteine", "Miniland"],
+                website: "https://www.legoland.de",
+                image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
+            },
+            {
+                id: 303,
+                name: "Movie Park Germany",
+                category: "familie",
+                location: "Bottrop",
+                country: "DE",
+                region: "NW",
+                lat: 51.6178,
+                lng: 6.9731,
+                date: "März–Nov",
+                month: 0,
+                price: "Ab 49.90 €",
+                description: "Film- und Entertainmentpark mit Hollywood-Flair.",
+                highlights: ["Hollywood", "Star Trek"],
+                website: "https://www.movieparkgermany.de",
+                image: "https://images.unsplash.com/photo-1536768139911-e290a59011e4?w=800&q=80"
+            },
+            {
+                id: 304,
+                name: "Heide Park Resort",
+                category: "familie",
+                location: "Soltau",
+                country: "DE",
+                region: "NI",
+                lat: 53.0244,
+                lng: 9.8786,
+                date: "März–Nov",
+                month: 0,
+                price: "Ab 52 €",
+                description: "Norddeutschlands grösster Freizeitpark.",
+                highlights: ["Colossos", "Krake"],
+                website: "https://www.heide-park.de",
+                image: "https://images.unsplash.com/photo-1536768139911-e290a59011e4?w=800&q=80"
+            },
+            {
+                id: 305,
+                name: "Hansa-Park",
+                category: "familie",
+                location: "Sierksdorf",
+                country: "DE",
+                region: "SH",
+                lat: 54.0747,
+                lng: 10.7778,
+                date: "März–Okt",
+                month: 0,
+                price: "Ab 49 €",
+                description: "Einziger Freizeitpark Deutschlands am Meer.",
+                highlights: ["Ostsee", "Fluch von Novgorod"],
+                website: "https://www.hansapark.de",
+                image: "https://images.unsplash.com/photo-1536768139911-e290a59011e4?w=800&q=80"
+            },
+            {
+                id: 306,
+                name: "Tripsdrill",
+                category: "familie",
+                location: "Cleebronn",
+                country: "DE",
+                region: "BW",
+                lat: 49.0319,
+                lng: 9.0575,
+                date: "März–Nov",
+                month: 0,
+                price: "Ab 43 €",
+                description: "Erlebnispark mit schwäbischem Charme und Wildparadies.",
+                highlights: ["Wildparadies", "Karacho"],
+                website: "https://www.tripsdrill.de",
+                image: "https://images.unsplash.com/photo-1536768139911-e290a59011e4?w=800&q=80"
+            },
+            {
+                id: 307,
+                name: "Tropical Islands",
+                category: "familie",
+                location: "Krausnick",
+                country: "DE",
+                region: "BB",
+                lat: 52.0388,
+                lng: 13.7522,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 47 €",
+                description: "Grösste tropische Urlaubswelt Europas in ehemaliger Luftschiffhalle.",
+                highlights: ["Grösste Halle", "Tropisch"],
+                website: "https://www.tropical-islands.de",
+                image: "https://images.unsplash.com/photo-1519315901367-f34ff9154487?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 308,
+                name: "Ravensburger Spieleland",
+                category: "familie",
+                location: "Meckenbeuren",
+                country: "DE",
+                region: "BW",
+                lat: 47.7097,
+                lng: 9.5619,
+                date: "April–Okt",
+                month: 0,
+                price: "Ab 42.50 €",
+                description: "Freizeitpark mit Ravensburger-Spieleklassikern.",
+                highlights: ["Memory", "Käpt'n Blaubär"],
+                website: "https://www.spieleland.de",
+                image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // 🦁 ZOOS & TIERPARKS DEUTSCHLAND
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 310,
+                name: "Zoo Berlin",
+                category: "familie",
+                location: "Berlin",
+                country: "DE",
+                region: "BE",
+                lat: 52.5077,
+                lng: 13.3378,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 22 €",
+                description: "Artenreichster Zoo der Welt mit Panda-Garten.",
+                highlights: ["Artenreichster der Welt", "Pandas"],
+                website: "https://www.zoo-berlin.de",
+                image: "https://images.unsplash.com/photo-1534567153574-2b12153a87f0?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 311,
+                name: "Tierpark Hagenbeck",
+                category: "familie",
+                location: "Hamburg",
+                country: "DE",
+                region: "HH",
+                lat: 53.5964,
+                lng: 9.9378,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 26 €",
+                description: "Legendärer Tierpark mit gitterlosen Gehegen seit 1907.",
+                highlights: ["Gitterlos", "Tropen-Aquarium"],
+                website: "https://www.hagenbeck.de",
+                image: "https://images.unsplash.com/photo-1534567153574-2b12153a87f0?w=800&q=80"
+            },
+            {
+                id: 312,
+                name: "Wilhelma Stuttgart",
+                category: "familie",
+                location: "Stuttgart",
+                country: "DE",
+                region: "BW",
+                lat: 48.8047,
+                lng: 9.2067,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 20 €",
+                description: "Einziger Zoo Deutschlands mit grossem Botanischem Garten.",
+                highlights: ["Zoo + Botanik", "Menschenaffen"],
+                website: "https://www.wilhelma.de",
+                image: "https://images.unsplash.com/photo-1534567153574-2b12153a87f0?w=800&q=80"
+            },
+            {
+                id: 313,
+                name: "Zoo Leipzig",
+                category: "familie",
+                location: "Leipzig",
+                country: "DE",
+                region: "SN",
+                lat: 51.3500,
+                lng: 12.3700,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 23 €",
+                description: "Zoo der Zukunft mit Gondwanaland-Tropenhalle.",
+                highlights: ["Gondwanaland", "Tropenhalle"],
+                website: "https://www.zoo-leipzig.de",
+                image: "https://images.unsplash.com/photo-1534567153574-2b12153a87f0?w=800&q=80"
+            },
+            {
+                id: 314,
+                name: "Erlebnis-Zoo Hannover",
+                category: "familie",
+                location: "Hannover",
+                country: "DE",
+                region: "NI",
+                lat: 52.3803,
+                lng: 9.7019,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 29.50 €",
+                description: "Spektakulärer Erlebniszoo mit Themenwelten.",
+                highlights: ["Yukon Bay", "Sambesi"],
+                website: "https://www.zoo-hannover.de",
+                image: "https://images.unsplash.com/photo-1534567153574-2b12153a87f0?w=800&q=80"
+            },
+            {
+                id: 315,
+                name: "Kölner Zoo",
+                category: "familie",
+                location: "Köln",
+                country: "DE",
+                region: "NW",
+                lat: 50.9581,
+                lng: 6.9739,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 24 €",
+                description: "Drittältester Zoo Deutschlands mit Elefantenpark.",
+                highlights: ["Elefantenpark", "Hippodom"],
+                website: "https://www.koelnerzoo.de",
+                image: "https://images.unsplash.com/photo-1534567153574-2b12153a87f0?w=800&q=80"
+            },
+            {
+                id: 316,
+                name: "SeaLife & Legoland Discovery München",
+                category: "familie",
+                location: "München",
+                country: "DE",
+                region: "BY",
+                lat: 48.1306,
+                lng: 11.6019,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 21 €",
+                description: "Aquarium und Indoor-Lego-Erlebniswelt im Olympiapark.",
+                highlights: ["Aquarium", "Lego"],
+                website: "https://www.visitsealife.com",
+                image: "https://images.unsplash.com/photo-1534043464124-3be32fe000c9?w=800&q=80"
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // 🏛️ SEHENSWÜRDIGKEITEN DEUTSCHLAND
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 320,
+                name: "Schloss Neuschwanstein",
+                category: "sehenswuerdigkeit",
+                location: "Schwangau",
+                country: "DE",
+                region: "BY",
+                lat: 47.5576,
+                lng: 10.7498,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 15 €",
+                description: "Das Märchenschloss von König Ludwig II.",
+                highlights: ["Märchenschloss", "Ludwig II"],
+                website: "https://www.neuschwanstein.de",
+                image: "https://images.unsplash.com/photo-1534313314376-a72289b6181e?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 321,
+                name: "Brandenburger Tor",
+                category: "sehenswuerdigkeit",
+                location: "Berlin",
+                country: "DE",
+                region: "BE",
+                lat: 52.5163,
+                lng: 13.3777,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Wahrzeichen Berlins und Symbol der deutschen Einheit.",
+                highlights: ["Wahrzeichen", "Deutsche Einheit"],
+                website: "https://www.visitberlin.de",
+                image: "https://images.unsplash.com/photo-1560969184-10fe8719e047?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 322,
+                name: "Kölner Dom",
+                category: "sehenswuerdigkeit",
+                location: "Köln",
+                country: "DE",
+                region: "NW",
+                lat: 50.9413,
+                lng: 6.9583,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis (Turm 6 €)",
+                description: "Gotisches Meisterwerk und UNESCO-Welterbe.",
+                highlights: ["UNESCO", "Gotik"],
+                website: "https://www.koelner-dom.de",
+                image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 323,
+                name: "Miniatur Wunderland",
+                category: "familie",
+                location: "Hamburg",
+                country: "DE",
+                region: "HH",
+                lat: 53.5439,
+                lng: 9.9886,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 20 €",
+                description: "Grösste Modelleisenbahnanlage der Welt.",
+                highlights: ["Grösste der Welt", "Modellbahn"],
+                website: "https://www.miniatur-wunderland.de",
+                image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 324,
+                name: "Zugspitze",
+                category: "sehenswuerdigkeit",
+                location: "Garmisch-Partenkirchen",
+                country: "DE",
+                region: "BY",
+                lat: 47.4211,
+                lng: 10.9853,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 63 €",
+                description: "Höchster Berg Deutschlands (2.962 m).",
+                highlights: ["Höchster Berg DE", "Gletscherskigebiet"],
+                website: "https://www.zugspitze.de",
+                image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 325,
+                name: "Heidelberger Schloss",
+                category: "sehenswuerdigkeit",
+                location: "Heidelberg",
+                country: "DE",
+                region: "BW",
+                lat: 49.4106,
+                lng: 8.7153,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 9 €",
+                description: "Romantische Schlossruine über der Altstadt.",
+                highlights: ["Schlossruine", "Romantik"],
+                website: "https://www.schloss-heidelberg.de",
+                image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80"
+            },
+            {
+                id: 326,
+                name: "Rothenburg ob der Tauber",
+                category: "sehenswuerdigkeit",
+                location: "Rothenburg ob der Tauber",
+                country: "DE",
+                region: "BY",
+                lat: 49.3780,
+                lng: 10.1780,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Besterhaltene mittelalterliche Altstadt Deutschlands.",
+                highlights: ["Mittelalter", "Altstadt"],
+                website: "https://www.rothenburg-tourismus.de",
+                image: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=800&q=80"
+            },
+            {
+                id: 327,
+                name: "Schwarzwald",
+                category: "sehenswuerdigkeit",
+                location: "Schwarzwald",
+                country: "DE",
+                region: "BW",
+                lat: 48.1500,
+                lng: 8.1500,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Deutschlands grösstes Mittelgebirge mit Kuckucksuhren.",
+                highlights: ["Wandern", "Kuckucksuhren"],
+                website: "https://www.schwarzwald-tourismus.info",
+                image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80"
+            },
+            {
+                id: 328,
+                name: "Königssee",
+                category: "sehenswuerdigkeit",
+                location: "Berchtesgaden",
+                country: "DE",
+                region: "BY",
+                lat: 47.5530,
+                lng: 12.9875,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 19.50 € (Schiff)",
+                description: "Smaragdgrüner Alpensee mit St. Bartholomä.",
+                highlights: ["St. Bartholomä", "Elektroboote"],
+                website: "https://www.seenschifffahrt.de",
+                image: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 329,
+                name: "Loreley",
+                category: "sehenswuerdigkeit",
+                location: "St. Goarshausen",
+                country: "DE",
+                region: "RP",
+                lat: 50.1414,
+                lng: 7.7328,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Legendärer Felsen am Rhein mit UNESCO-Kulturerbe.",
+                highlights: ["UNESCO", "Rhein"],
+                website: "https://www.loreley-touristik.de",
+                image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+            },
+            {
+                id: 330,
+                name: "Elbphilharmonie",
+                category: "kultur",
+                location: "Hamburg",
+                country: "DE",
+                region: "HH",
+                lat: 53.5413,
+                lng: 9.9842,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 2 € (Plaza)",
+                description: "Spektakuläres Konzerthaus mit Aussichtsplattform.",
+                highlights: ["Architektur", "Konzerte"],
+                website: "https://www.elbphilharmonie.de",
+                image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
+            },
+            {
+                id: 331,
+                name: "Frauenkirche Dresden",
+                category: "sehenswuerdigkeit",
+                location: "Dresden",
+                country: "DE",
+                region: "SN",
+                lat: 51.0519,
+                lng: 13.7416,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis (Kuppel 8 €)",
+                description: "Wiederaufgebautes Barockjuwel als Symbol der Versöhnung.",
+                highlights: ["Barock", "Wiederaufbau"],
+                website: "https://www.frauenkirche-dresden.de",
+                image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80"
+            },
+            {
+                id: 332,
+                name: "Bodensee",
+                category: "sehenswuerdigkeit",
+                location: "Konstanz / Lindau",
+                country: "DE",
+                region: "BW",
+                lat: 47.6633,
+                lng: 9.1750,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Drittgrösster See Mitteleuropas mit Alpenpanorama.",
+                highlights: ["Alpenpanorama", "Insel Mainau"],
+                website: "https://www.bodensee.eu",
+                image: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=800&q=80"
+            },
+            {
+                id: 333,
+                name: "Insel Mainau",
+                category: "sehenswuerdigkeit",
+                location: "Konstanz",
+                country: "DE",
+                region: "BW",
+                lat: 47.7050,
+                lng: 9.1919,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 26 €",
+                description: "Blumeninsel im Bodensee mit tropischem Schmetterlingshaus.",
+                highlights: ["Blumeninsel", "Schmetterlinge"],
+                website: "https://www.mainau.de",
+                image: "https://images.unsplash.com/photo-1502086223501-7ea6ecd65d99?w=800&q=80"
+            },
+            {
+                id: 334,
+                name: "Basteibrücke",
+                category: "sehenswuerdigkeit",
+                location: "Lohmen (Sächsische Schweiz)",
+                country: "DE",
+                region: "SN",
+                lat: 50.9617,
+                lng: 14.0722,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Spektakuläre Felsbrücke in der Sächsischen Schweiz.",
+                highlights: ["Felsbrücke", "Sächsische Schweiz"],
+                website: "https://www.saechsische-schweiz.de",
+                image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 335,
+                name: "Schloss Sanssouci",
+                category: "sehenswuerdigkeit",
+                location: "Potsdam",
+                country: "DE",
+                region: "BB",
+                lat: 52.4042,
+                lng: 13.0386,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 14 €",
+                description: "Preussisches Versailles und UNESCO-Welterbe.",
+                highlights: ["UNESCO", "Friedrich der Grosse"],
+                website: "https://www.spsg.de",
+                image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80"
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // 🎵 FESTIVALS DEUTSCHLAND
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 340,
+                name: "Rock am Ring",
+                category: "festival",
+                location: "Nürburg",
+                country: "DE",
+                region: "RP",
+                lat: 50.3340,
+                lng: 6.9433,
+                date: "6.–8. Juni 2026",
+                month: 6,
+                price: "Ab 229 €",
+                description: "Legendäres Rock-Festival am Nürburgring.",
+                highlights: ["Nürburgring", "Rock"],
+                website: "https://www.rock-am-ring.com",
+                image: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 341,
+                name: "Wacken Open Air",
+                category: "festival",
+                location: "Wacken",
+                country: "DE",
+                region: "SH",
+                lat: 54.0250,
+                lng: 9.3714,
+                date: "30. Juli – 1. Aug 2026",
+                month: 7,
+                price: "Ab 299 €",
+                description: "Grösstes Metal-Festival der Welt.",
+                highlights: ["Grösstes Metal-Festival", "Heavy Metal"],
+                website: "https://www.wacken.com",
+                image: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 342,
+                name: "Hurricane Festival",
+                category: "festival",
+                location: "Scheeßel",
+                country: "DE",
+                region: "NI",
+                lat: 53.1667,
+                lng: 9.4833,
+                date: "19.–21. Juni 2026",
+                month: 6,
+                price: "Ab 199 €",
+                description: "Grosses Indie- und Alternative-Festival.",
+                highlights: ["Indie", "Alternative"],
+                website: "https://www.hurricane.de",
+                image: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80"
+            },
+            {
+                id: 343,
+                name: "Southside Festival",
+                category: "festival",
+                location: "Neuhausen ob Eck",
+                country: "DE",
+                region: "BW",
+                lat: 47.9667,
+                lng: 8.9500,
+                date: "19.–21. Juni 2026",
+                month: 6,
+                price: "Ab 199 €",
+                description: "Süddeutsches Pendant zum Hurricane.",
+                highlights: ["Alternative", "Rock"],
+                website: "https://www.southside.de",
+                image: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80"
+            },
+            {
+                id: 344,
+                name: "Parookaville",
+                category: "festival",
+                location: "Weeze",
+                country: "DE",
+                region: "NW",
+                lat: 51.6244,
+                lng: 6.1994,
+                date: "17.–19. Juli 2026",
+                month: 7,
+                price: "Ab 169 €",
+                description: "Spektakuläres EDM-Festival mit eigener Stadt.",
+                highlights: ["EDM", "Madness City"],
+                website: "https://www.parookaville.com",
+                image: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&q=80"
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // 🎪 VOLKSFESTE DEUTSCHLAND
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 350,
+                name: "Oktoberfest München",
+                category: "volksfest",
+                location: "München",
+                country: "DE",
+                region: "BY",
+                lat: 48.1317,
+                lng: 11.5497,
+                date: "19. Sept – 4. Okt 2026",
+                month: 9,
+                price: "Eintritt frei",
+                description: "Grösstes Volksfest der Welt mit 6 Millionen Besuchern.",
+                highlights: ["Grösstes der Welt", "6 Mio. Besucher"],
+                website: "https://www.oktoberfest.de",
+                image: "https://images.unsplash.com/photo-1505489435671-80b5c9c4e8b1?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 351,
+                name: "Cannstatter Wasen",
+                category: "volksfest",
+                location: "Stuttgart",
+                country: "DE",
+                region: "BW",
+                lat: 48.7919,
+                lng: 9.2247,
+                date: "25. Sept – 11. Okt 2026",
+                month: 9,
+                price: "Eintritt frei",
+                description: "Zweitgrösstes Volksfest Deutschlands.",
+                highlights: ["Zweitgrösstes", "Stuttgart"],
+                website: "https://www.cannstatter-volksfest.de",
+                image: "https://images.unsplash.com/photo-1505489435671-80b5c9c4e8b1?w=800&q=80"
+            },
+            {
+                id: 352,
+                name: "Hamburger Dom",
+                category: "volksfest",
+                location: "Hamburg",
+                country: "DE",
+                region: "HH",
+                lat: 53.5544,
+                lng: 9.9689,
+                date: "März, Juli, Nov",
+                month: 0,
+                price: "Eintritt frei",
+                description: "Norddeutschlands grösstes Volksfest – dreimal jährlich.",
+                highlights: ["3x jährlich", "Hamburg"],
+                website: "https://www.hamburger-dom.de",
+                image: "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&q=80"
+            },
+            {
+                id: 353,
+                name: "Rhein in Flammen",
+                category: "volksfest",
+                location: "Koblenz",
+                country: "DE",
+                region: "RP",
+                lat: 50.3569,
+                lng: 7.5889,
+                date: "8. Aug 2026",
+                month: 8,
+                price: "Variiert",
+                description: "Spektakuläres Feuerwerk entlang des Rheins.",
+                highlights: ["Feuerwerk", "Rhein"],
+                website: "https://www.rhein-in-flammen.com",
+                image: "https://images.unsplash.com/photo-1498931299351-aff385757dea?w=800&q=80"
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // 🎄 WEIHNACHTSMÄRKTE DEUTSCHLAND
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 360,
+                name: "Nürnberger Christkindlesmarkt",
+                category: "weihnachten",
+                location: "Nürnberg",
+                country: "DE",
+                region: "BY",
+                lat: 49.4539,
+                lng: 11.0775,
+                date: "27. Nov – 24. Dez",
+                month: 12,
+                price: "Gratis",
+                description: "Berühmtester Weihnachtsmarkt Deutschlands.",
+                highlights: ["Berühmtester", "Lebkuchen"],
+                website: "https://www.christkindlesmarkt.de",
+                image: "https://images.unsplash.com/photo-1512389142860-9c449e58a814?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 361,
+                name: "Dresdner Striezelmarkt",
+                category: "weihnachten",
+                location: "Dresden",
+                country: "DE",
+                region: "SN",
+                lat: 51.0504,
+                lng: 13.7373,
+                date: "26. Nov – 24. Dez",
+                month: 12,
+                price: "Gratis",
+                description: "Ältester Weihnachtsmarkt Deutschlands (seit 1434).",
+                highlights: ["Ältester seit 1434", "Stollen"],
+                website: "https://www.striezelmarkt.dresden.de",
+                image: "https://images.unsplash.com/photo-1544551763-92ab472cad1f?w=800&q=80"
+            },
+            {
+                id: 362,
+                name: "Kölner Weihnachtsmarkt am Dom",
+                category: "weihnachten",
+                location: "Köln",
+                country: "DE",
+                region: "NW",
+                lat: 50.9413,
+                lng: 6.9583,
+                date: "25. Nov – 23. Dez",
+                month: 12,
+                price: "Gratis",
+                description: "Weihnachtsmarkt direkt vor dem Kölner Dom.",
+                highlights: ["Dom-Kulisse", "7 Märkte"],
+                website: "https://www.koelnerweihnachtsmarkt.com",
+                image: "https://images.unsplash.com/photo-1576919228236-a097c32a5cd4?w=800&q=80"
+            },
+            {
+                id: 363,
+                name: "Stuttgarter Weihnachtsmarkt",
+                category: "weihnachten",
+                location: "Stuttgart",
+                country: "DE",
+                region: "BW",
+                lat: 48.7758,
+                lng: 9.1829,
+                date: "26. Nov – 23. Dez",
+                month: 12,
+                price: "Gratis",
+                description: "Einer der ältesten und schönsten Weihnachtsmärkte.",
+                highlights: ["300+ Stände", "Altstadt"],
+                website: "https://www.stuttgarter-weihnachtsmarkt.de",
+                image: "https://images.unsplash.com/photo-1512389142860-9c449e58a814?w=800&q=80"
+            },
+            {
+                id: 364,
+                name: "Münchner Christkindlmarkt",
+                category: "weihnachten",
+                location: "München",
+                country: "DE",
+                region: "BY",
+                lat: 48.1375,
+                lng: 11.5755,
+                date: "27. Nov – 24. Dez",
+                month: 12,
+                price: "Gratis",
+                description: "Traditioneller Christkindlmarkt auf dem Marienplatz.",
+                highlights: ["Marienplatz", "Krippe"],
+                website: "https://www.muenchen.de",
+                image: "https://images.unsplash.com/photo-1544551763-92ab472cad1f?w=800&q=80"
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // 🎭 KULTUR & MUSEEN DEUTSCHLAND
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 370,
+                name: "Deutsches Museum München",
+                category: "kultur",
+                location: "München",
+                country: "DE",
+                region: "BY",
+                lat: 48.1298,
+                lng: 11.5833,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 15 €",
+                description: "Grösstes Technikmuseum der Welt.",
+                highlights: ["Grösstes Technikmuseum", "Interaktiv"],
+                website: "https://www.deutsches-museum.de",
+                image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 371,
+                name: "Museumsinsel Berlin",
+                category: "kultur",
+                location: "Berlin",
+                country: "DE",
+                region: "BE",
+                lat: 52.5169,
+                lng: 13.4019,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 19 €",
+                description: "UNESCO-Welterbe mit 5 weltberühmten Museen.",
+                highlights: ["UNESCO", "5 Museen"],
+                website: "https://www.smb.museum",
+                image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
+            },
+            {
+                id: 372,
+                name: "Mercedes-Benz Museum",
+                category: "kultur",
+                location: "Stuttgart",
+                country: "DE",
+                region: "BW",
+                lat: 48.7882,
+                lng: 9.2339,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 12 €",
+                description: "Automobilgeschichte vom ersten Auto bis heute.",
+                highlights: ["Automobilgeschichte", "160 Fahrzeuge"],
+                website: "https://www.mercedes-benz.com/museum",
+                image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80"
+            },
+            {
+                id: 373,
+                name: "BMW Welt & Museum",
+                category: "kultur",
+                location: "München",
+                country: "DE",
+                region: "BY",
+                lat: 48.1769,
+                lng: 11.5567,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 10 €",
+                description: "Erlebniswelt und Museum rund um BMW.",
+                highlights: ["Architektur", "BMW"],
+                website: "https://www.bmw-welt.com",
+                image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80"
+            },
+            {
+                id: 374,
+                name: "Porsche Museum",
+                category: "kultur",
+                location: "Stuttgart",
+                country: "DE",
+                region: "BW",
+                lat: 48.8344,
+                lng: 9.1531,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 10 €",
+                description: "Die Geschichte des Sportwagenherstellers.",
+                highlights: ["Sportwagen", "80+ Fahrzeuge"],
+                website: "https://www.porsche.com/museum",
+                image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80"
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // 🛁 THERMEN DEUTSCHLAND
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 380,
+                name: "Therme Erding",
+                category: "familie",
+                location: "Erding",
+                country: "DE",
+                region: "BY",
+                lat: 48.2892,
+                lng: 11.9153,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 35 €",
+                description: "Grösste Therme der Welt mit 27 Rutschen.",
+                highlights: ["Grösste der Welt", "27 Rutschen"],
+                website: "https://www.therme-erding.de",
+                image: "https://images.unsplash.com/photo-1519315901367-f34ff9154487?w=800&q=80",
+                isHighlight: true
+            },
+            {
+                id: 381,
+                name: "Badeparadies Schwarzwald",
+                category: "familie",
+                location: "Titisee-Neustadt",
+                country: "DE",
+                region: "BW",
+                lat: 47.9081,
+                lng: 8.1533,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 33 €",
+                description: "Tropisches Badeparadies mit Palmen.",
+                highlights: ["Palmenparadies", "Rutschen"],
+                website: "https://www.badeparadies-schwarzwald.de",
+                image: "https://images.unsplash.com/photo-1519315901367-f34ff9154487?w=800&q=80"
+            },
+            {
+                id: 382,
+                name: "Caracalla Therme Baden-Baden",
+                category: "familie",
+                location: "Baden-Baden",
+                country: "DE",
+                region: "BW",
+                lat: 48.7606,
+                lng: 8.2442,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 23 €",
+                description: "Elegante Therme mit 2000 Jahre alter Badetradition.",
+                highlights: ["Römische Tradition", "Wellness"],
+                website: "https://www.carasana.de",
+                image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&q=80"
             }
         ];
         
@@ -4198,6 +5250,8 @@
         let markers = {};
         let activeFilter = 'all';
         let activeMonth = 'all';
+        let activeCountry = 'all';
+        let activeRegion = 'all';
         let searchTerm = '';
         let selectedPOIs = [];
         let areaFilterActive = false;
@@ -4206,6 +5260,41 @@
         
         // Load visited POIs from localStorage
         let visitedPOIs = JSON.parse(localStorage.getItem('visitedPOIs') || '[]');
+        
+        // Region configurations per country
+        const regionConfig = {
+            CH: {
+                name: "Schweiz",
+                flag: "🇨🇭",
+                center: [46.8182, 8.2275],
+                zoom: 8,
+                regions: {
+                    "all": "Alle Kantone",
+                    "ZH": "Zürich", "BE": "Bern", "LU": "Luzern", "UR": "Uri",
+                    "SZ": "Schwyz", "OW": "Obwalden", "NW": "Nidwalden", "GL": "Glarus",
+                    "ZG": "Zug", "FR": "Freiburg", "SO": "Solothurn", "BS": "Basel-Stadt",
+                    "BL": "Basel-Land", "SH": "Schaffhausen", "AR": "Appenzell AR",
+                    "AI": "Appenzell AI", "SG": "St. Gallen", "GR": "Graubünden",
+                    "AG": "Aargau", "TG": "Thurgau", "TI": "Tessin", "VD": "Waadt",
+                    "VS": "Wallis", "NE": "Neuenburg", "GE": "Genf", "JU": "Jura"
+                }
+            },
+            DE: {
+                name: "Deutschland",
+                flag: "🇩🇪",
+                center: [51.1657, 10.4515],
+                zoom: 6,
+                regions: {
+                    "all": "Alle Bundesländer",
+                    "BW": "Baden-Württemberg", "BY": "Bayern", "BE": "Berlin",
+                    "BB": "Brandenburg", "HB": "Bremen", "HH": "Hamburg",
+                    "HE": "Hessen", "MV": "Mecklenburg-Vorp.", "NI": "Niedersachsen",
+                    "NW": "Nordrhein-Westfalen", "RP": "Rheinland-Pfalz", "SL": "Saarland",
+                    "SN": "Sachsen", "ST": "Sachsen-Anhalt", "SH": "Schleswig-Holstein",
+                    "TH": "Thüringen"
+                }
+            }
+        };
         
         const categoryColors = {
             festival: '#9b59b6',
@@ -4410,6 +5499,16 @@
         function filterPOIs(fitBounds = true) {
             let filtered = allPOIs;
             
+            // Country filter
+            if (activeCountry !== 'all') {
+                filtered = filtered.filter(p => p.country === activeCountry);
+            }
+            
+            // Region filter
+            if (activeRegion !== 'all') {
+                filtered = filtered.filter(p => p.region === activeRegion);
+            }
+            
             // Category filter
             if (activeFilter !== 'all') {
                 filtered = filtered.filter(p => p.category === activeFilter);
@@ -4447,6 +5546,7 @@
             addMarkers(filtered);
             renderPOIList(filtered);
             updateVisitedStats();
+            updateCounts();
             
             // Fit map to filtered results (only if requested)
             if (fitBounds && filtered.length > 0 && !areaFilterActive) {
@@ -4456,17 +5556,71 @@
         }
         
         function updateCounts() {
-            document.getElementById('total-pois').textContent = allPOIs.length;
-            document.getElementById('total-events').textContent = allPOIs.filter(p => p.month > 0).length;
-            document.getElementById('count-all').textContent = allPOIs.length;
+            // Get base filtered POIs (by country and region)
+            let basePOIs = allPOIs;
+            if (activeCountry !== 'all') {
+                basePOIs = basePOIs.filter(p => p.country === activeCountry);
+            }
+            if (activeRegion !== 'all') {
+                basePOIs = basePOIs.filter(p => p.region === activeRegion);
+            }
+            
+            document.getElementById('total-pois').textContent = basePOIs.length;
+            document.getElementById('total-events').textContent = basePOIs.filter(p => p.month > 0).length;
+            document.getElementById('count-all').textContent = basePOIs.length;
             
             const categories = ['festival', 'volksfest', 'kultur', 'sport', 'familie', 'sehenswuerdigkeit', 'weihnachten'];
             categories.forEach(cat => {
                 const el = document.getElementById(`count-${cat}`);
                 if (el) {
-                    el.textContent = allPOIs.filter(p => p.category === cat).length;
+                    el.textContent = basePOIs.filter(p => p.category === cat).length;
                 }
             });
+        }
+        
+        // Update region filter based on selected country
+        function updateRegionFilter() {
+            const container = document.getElementById('region-filter');
+            
+            if (activeCountry === 'all') {
+                container.classList.remove('visible');
+                container.innerHTML = '';
+                return;
+            }
+            
+            const config = regionConfig[activeCountry];
+            if (!config) return;
+            
+            // Get POIs for this country to show counts
+            const countryPOIs = allPOIs.filter(p => p.country === activeCountry);
+            
+            let html = '';
+            Object.entries(config.regions).forEach(([code, name]) => {
+                const count = code === 'all' 
+                    ? countryPOIs.length 
+                    : countryPOIs.filter(p => p.region === code).length;
+                
+                if (count > 0 || code === 'all') {
+                    const isActive = activeRegion === code ? 'active' : '';
+                    html += `<button class="region-btn ${isActive}" data-region="${code}">${name} (${count})</button>`;
+                }
+            });
+            
+            container.innerHTML = html;
+            container.classList.add('visible');
+            
+            // Add event listeners to new buttons
+            container.querySelectorAll('.region-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    container.querySelectorAll('.region-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    activeRegion = btn.dataset.region;
+                    filterPOIs();
+                });
+            });
+            
+            // Update subtitle
+            document.getElementById('region-subtitle').textContent = config.name;
         }
         
         // Toggle visited status
@@ -4555,11 +5709,31 @@
         document.addEventListener('DOMContentLoaded', () => {
             initMap();
             updateVisitedStats();
+            updateCounts();
             
             // Search
             document.getElementById('search-input').addEventListener('input', (e) => {
                 searchTerm = e.target.value;
                 filterPOIs();
+            });
+            
+            // Country filters
+            document.querySelectorAll('.country-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.country-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    activeCountry = btn.dataset.country;
+                    activeRegion = 'all'; // Reset region when country changes
+                    
+                    // Update map view based on country
+                    if (activeCountry !== 'all' && regionConfig[activeCountry]) {
+                        const config = regionConfig[activeCountry];
+                        map.setView(config.center, config.zoom);
+                    }
+                    
+                    updateRegionFilter();
+                    filterPOIs(activeCountry === 'all');
+                });
             });
             
             // Category filters
