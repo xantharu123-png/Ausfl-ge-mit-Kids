@@ -279,31 +279,29 @@
         /* Country Switch */
         .country-switch {
             display: flex;
-            flex-wrap: wrap;
-            padding: 10px 16px;
-            gap: 8px;
+            padding: 12px 16px;
+            gap: 4px;
             border-bottom: 1px solid var(--border);
-            align-items: center;
         }
         .country-link {
-            padding: 8px 12px;
-            text-align: center;
-            border-radius: 8px;
+            padding: 6px 8px;
             text-decoration: none;
-            font-size: 1.3rem;
+            
+            border-radius: 6px;
             transition: all 0.2s;
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.2);
+            opacity: 0.5;
         }
         .country-link.active {
-            background: #6366f1;
-            border-color: #6366f1;
-            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+            opacity: 1;
+            background: rgba(99, 102, 241, 0.2);
+        }
+        .country-link img {
+            width: 32px;
+            height: auto;
+            border-radius: 4px;
         }
         .country-link:not(.active):hover {
-            background: rgba(255,255,255,0.25);
-            border-color: rgba(255,255,255,0.4);
-            transform: translateY(-2px);
+            opacity: 1;
         }
         
         /* POI List */
@@ -999,13 +997,13 @@
                 
                 <!-- Country Switch -->
                 <div class="country-switch">
-                    <a href="map_deutschland.html" class="country-link" title="Deutschland">🇩🇪</a>
-                    <a href="index.html" class="country-link active" title="Schweiz">🇨🇭</a>
-                    <a href="map_italien.html" class="country-link" title="Italien">🇮🇹</a>
-                    <a href="map_frankreich.html" class="country-link" title="Frankreich">🇫🇷</a>
-                    <a href="map_spanien.html" class="country-link" title="Spanien">🇪🇸</a>
-                    <a href="map_portugal.html" class="country-link" title="Portugal">🇵🇹</a>
-                    <a href="map_kroatien.html" class="country-link" title="Kroatien">🇭🇷</a>
+                    <a href="map_deutschland.html" class="country-link" title="Deutschland"><img src="https://flagcdn.com/w40/de.png" alt="DE"></a>
+                    <a href="index.html" class="country-link active" title="Schweiz"><img src="https://flagcdn.com/w40/ch.png" alt="CH"></a>
+                    <a href="map_italien.html" class="country-link" title="Italien"><img src="https://flagcdn.com/w40/it.png" alt="IT"></a>
+                    <a href="map_frankreich.html" class="country-link" title="Frankreich"><img src="https://flagcdn.com/w40/fr.png" alt="FR"></a>
+                    <a href="map_spanien.html" class="country-link" title="Spanien"><img src="https://flagcdn.com/w40/es.png" alt="ES"></a>
+                    <a href="map_portugal.html" class="country-link" title="Portugal"><img src="https://flagcdn.com/w40/pt.png" alt="PT"></a>
+                    <a href="map_kroatien.html" class="country-link" title="Kroatien"><img src="https://flagcdn.com/w40/hr.png" alt="HR"></a>
                 </div>
                 
                 <div class="stats-bar">
@@ -4358,6 +4356,1202 @@
                 highlights: ["Bernhardiner", "Museum"],
                 website: "https://www.fondation-barry.ch",
                 image: "https://images.unsplash.com/photo-1534361960057-19889db9621e?w=800&q=80"
+            }
+            
+            // ═══════════════════════════════════════════════════════════════
+            // 🏔️ GENF (GE) - Komplett neu
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 2001,
+                name: "Jet d'Eau",
+                category: "sehenswuerdigkeit",
+                location: "Genf",
+                country: "CH", region: "GE",
+                lat: 46.2073,
+                lng: 6.1558,
+                date: "März - Oktober",
+                month: 3,
+                price: "Gratis",
+                description: "Ikonische 140m hohe Wasserfontäne im Genfersee.",
+                highlights: ["140m hoch", "Wahrzeichen Genf", "Abends beleuchtet"],
+                isHighlight: true
+            },
+            {
+                id: 2002,
+                name: "CERN",
+                category: "kultur",
+                location: "Meyrin",
+                country: "CH", region: "GE",
+                lat: 46.2330,
+                lng: 6.0557,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Grösstes Teilchenphysik-Labor der Welt mit Besucherzentrum.",
+                highlights: ["Urknall-Forschung", "Science Gateway", "Interaktive Ausstellung"],
+                isHighlight: true
+            },
+            {
+                id: 2003,
+                name: "Altstadt Genf",
+                category: "sehenswuerdigkeit",
+                location: "Genf",
+                country: "CH", region: "GE",
+                lat: 46.2012,
+                lng: 6.1480,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Historische Altstadt mit Kathedrale St-Pierre und engen Gassen.",
+                highlights: ["Kathedrale St-Pierre", "Place du Bourg-de-Four", "Panoramablick"],
+                isHighlight: true
+            },
+            {
+                id: 2004,
+                name: "UNO-Palast (Palais des Nations)",
+                category: "kultur",
+                location: "Genf",
+                country: "CH", region: "GE",
+                lat: 46.2265,
+                lng: 6.1408,
+                date: "Ganzjährig",
+                month: 0,
+                price: "15 CHF",
+                description: "Europasitz der Vereinten Nationen mit Führungen.",
+                highlights: ["UNO Hauptquartier Europa", "Broken Chair", "Ariana Park"],
+                isHighlight: true
+            },
+            {
+                id: 2005,
+                name: "Naturhistorisches Museum Genf",
+                category: "kultur",
+                location: "Genf",
+                country: "CH", region: "GE",
+                lat: 46.1988,
+                lng: 6.1720,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Eines der grössten Naturkundemuseen der Schweiz.",
+                highlights: ["Dinosaurier", "Tierpräparate", "Gratis Eintritt"],
+                isHighlight: false
+            },
+            {
+                id: 2006,
+                name: "Bains des Pâquis",
+                category: "familie",
+                location: "Genf",
+                country: "CH", region: "GE",
+                lat: 46.2103,
+                lng: 6.1530,
+                date: "Ganzjährig",
+                month: 0,
+                price: "2 CHF",
+                description: "Legendäres Seebad mit Strand, Sauna und Restaurant.",
+                highlights: ["Baden im See", "Fondue im Winter", "Lokaler Treffpunkt"],
+                isHighlight: false
+            },
+            {
+                id: 2007,
+                name: "Parc La Grange",
+                category: "familie",
+                location: "Genf",
+                country: "CH", region: "GE",
+                lat: 46.2024,
+                lng: 6.1652,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Grösster Park Genfs mit Rosengarten und Spielplätzen.",
+                highlights: ["200 Rosensorten", "Spielplätze", "Seeufer"],
+                isHighlight: false
+            },
+            {
+                id: 2008,
+                name: "Carouge Altstadt",
+                category: "sehenswuerdigkeit",
+                location: "Carouge",
+                country: "CH", region: "GE",
+                lat: 46.1833,
+                lng: 6.1392,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Sardinisches Flair mit Boutiquen und Cafés.",
+                highlights: ["Künstlerviertel", "Samstagsmarkt", "Italienischer Charme"],
+                isHighlight: false
+            },
+            {
+                id: 2009,
+                name: "Genfer Weihnachtsmarkt",
+                category: "weihnachten",
+                location: "Genf",
+                country: "CH", region: "GE",
+                lat: 46.2044,
+                lng: 6.1432,
+                date: "November - Dezember",
+                month: 11,
+                price: "Gratis",
+                description: "Stimmungsvoller Weihnachtsmarkt in der Altstadt.",
+                highlights: ["Handwerk", "Glühwein", "Weihnachtsstimmung"],
+                isHighlight: false
+            },
+            {
+                id: 2010,
+                name: "Musée d'Art et d'Histoire",
+                category: "kultur",
+                location: "Genf",
+                country: "CH", region: "GE",
+                lat: 46.1997,
+                lng: 6.1538,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis (Dauerausstellung)",
+                description: "Grösstes Kunstmuseum Genfs mit Werken von Hodler bis Warhol.",
+                highlights: ["Hodler", "Antike Sammlung", "Gratis"],
+                isHighlight: false
+            },
+            
+            // ═══════════════════════════════════════════════════════════════
+            // 🏔️ WALLIS (VS) - Erweitert
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 2020,
+                name: "Matterhorn",
+                category: "sehenswuerdigkeit",
+                location: "Zermatt",
+                country: "CH", region: "VS",
+                lat: 45.9766,
+                lng: 7.6586,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gornergrat Bahn ab 48 CHF",
+                description: "Das ikonischste Bergmassiv der Schweiz (4478m).",
+                highlights: ["Ikonischster Berg", "Gornergrat Bahn", "Gletscherpanorama"],
+                isHighlight: true
+            },
+            {
+                id: 2021,
+                name: "Aletschgletscher",
+                category: "sehenswuerdigkeit",
+                location: "Riederalp",
+                country: "CH", region: "VS",
+                lat: 46.4000,
+                lng: 8.0667,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Seilbahn ab 35 CHF",
+                description: "Grösster Gletscher der Alpen - UNESCO Welterbe.",
+                highlights: ["UNESCO Welterbe", "23 km lang", "Eggishorn Aussicht"],
+                isHighlight: true
+            },
+            {
+                id: 2022,
+                name: "Thermalbad Leukerbad",
+                category: "familie",
+                location: "Leukerbad",
+                country: "CH", region: "VS",
+                lat: 46.3792,
+                lng: 7.6269,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 28 CHF",
+                description: "Grösste Alpen-Therme Europas mit Bergpanorama.",
+                highlights: ["Grösste Alpen-Therme", "51°C heisses Wasser", "10 Becken"],
+                isHighlight: true
+            },
+            {
+                id: 2023,
+                name: "Saas-Fee",
+                category: "sehenswuerdigkeit",
+                location: "Saas-Fee",
+                country: "CH", region: "VS",
+                lat: 46.1086,
+                lng: 7.9286,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Metro Alpin ab 45 CHF",
+                description: "Autofreies Gletscherdorf - Perle der Alpen.",
+                highlights: ["Autofrei", "Metro Alpin", "Eispavillon"],
+                isHighlight: true
+            },
+            {
+                id: 2024,
+                name: "Sion Altstadt & Schlösser",
+                category: "sehenswuerdigkeit",
+                location: "Sion",
+                country: "CH", region: "VS",
+                lat: 46.2333,
+                lng: 7.3667,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis / Schlösser ab 6 CHF",
+                description: "Älteste Stadt der Schweiz mit zwei Burghügeln.",
+                highlights: ["Valère", "Tourbillon", "Älteste Orgel der Welt"],
+                isHighlight: false
+            },
+            {
+                id: 2025,
+                name: "Glacier Express",
+                category: "sehenswuerdigkeit",
+                location: "Zermatt - St. Moritz",
+                country: "CH", region: "VS",
+                lat: 46.0207,
+                lng: 7.7491,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 153 CHF",
+                description: "Langsamster Schnellzug der Welt durch 91 Tunnel.",
+                highlights: ["8 Stunden Panorama", "291 Brücken", "Oberalppass"],
+                isHighlight: true
+            },
+            {
+                id: 2026,
+                name: "Verbier",
+                category: "familie",
+                location: "Verbier",
+                country: "CH", region: "VS",
+                lat: 46.0964,
+                lng: 7.2286,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Tageskarte ab 75 CHF",
+                description: "Weltberühmter Ski- und Wanderort mit Mont-Blanc-Blick.",
+                highlights: ["4 Vallées", "Mont Fort 3330m", "Freeride"],
+                isHighlight: false
+            },
+            {
+                id: 2027,
+                name: "Gorges du Trient",
+                category: "sehenswuerdigkeit",
+                location: "Vernayaz",
+                country: "CH", region: "VS",
+                lat: 46.1328,
+                lng: 7.0406,
+                date: "Mai - Oktober",
+                month: 5,
+                price: "8 CHF",
+                description: "Spektakuläre 200m tiefe Schlucht mit Wasserfällen.",
+                highlights: ["200m tief", "Wasserfall", "Holzstege"],
+                isHighlight: false
+            },
+            
+            // ═══════════════════════════════════════════════════════════════
+            // 🏔️ WAADT (VD) - Erweitert
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 2040,
+                name: "Chaplin's World",
+                category: "kultur",
+                location: "Corsier-sur-Vevey",
+                country: "CH", region: "VD",
+                lat: 46.4711,
+                lng: 6.8406,
+                date: "Ganzjährig",
+                month: 0,
+                price: "32 CHF",
+                description: "Interaktives Museum im ehemaligen Wohnhaus von Charlie Chaplin.",
+                highlights: ["Chaplins Villa", "Hollywood Studio", "Interaktiv"],
+                isHighlight: true
+            },
+            {
+                id: 2041,
+                name: "Lavaux Weinberge",
+                category: "sehenswuerdigkeit",
+                location: "Lavaux",
+                country: "CH", region: "VD",
+                lat: 46.4892,
+                lng: 6.7192,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis (Wandern)",
+                description: "UNESCO Welterbe Weinbergterrassen am Genfersee.",
+                highlights: ["UNESCO Welterbe", "Weinwanderung", "Seeblick"],
+                isHighlight: true
+            },
+            {
+                id: 2042,
+                name: "Schloss Chillon",
+                category: "sehenswuerdigkeit",
+                location: "Veytaux",
+                country: "CH", region: "VD",
+                lat: 46.4142,
+                lng: 6.9278,
+                date: "Ganzjährig",
+                month: 0,
+                price: "14 CHF",
+                description: "Meistbesuchtes Schloss der Schweiz direkt am See.",
+                highlights: ["Meistbesucht CH", "Am See", "Byron Gedicht"],
+                isHighlight: true
+            },
+            {
+                id: 2043,
+                name: "Olympisches Museum",
+                category: "kultur",
+                location: "Lausanne",
+                country: "CH", region: "VD",
+                lat: 46.5086,
+                lng: 6.6342,
+                date: "Ganzjährig",
+                month: 0,
+                price: "20 CHF",
+                description: "Grösstes Archiv der Olympischen Spiele weltweit.",
+                highlights: ["Olympia-Geschichte", "Interaktive Stationen", "Seeufer-Park"],
+                isHighlight: true
+            },
+            {
+                id: 2044,
+                name: "Aquatis Aquarium-Vivarium",
+                category: "familie",
+                location: "Lausanne",
+                country: "CH", region: "VD",
+                lat: 46.5562,
+                lng: 6.6142,
+                date: "Ganzjährig",
+                month: 0,
+                price: "29 CHF",
+                description: "Grösstes Süsswasser-Aquarium Europas.",
+                highlights: ["Grösstes Süsswasser-Aquarium", "5 Kontinente", "Interaktiv"],
+                isHighlight: true
+            },
+            {
+                id: 2045,
+                name: "Montreux Riviera",
+                category: "sehenswuerdigkeit",
+                location: "Montreux",
+                country: "CH", region: "VD",
+                lat: 46.4312,
+                lng: 6.9107,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Elegante Seepromenade mit Freddie Mercury Statue.",
+                highlights: ["Freddie Mercury Statue", "Seepromenade", "Riviera-Flair"],
+                isHighlight: false
+            },
+            {
+                id: 2046,
+                name: "Montreux Jazz Festival",
+                category: "festival",
+                location: "Montreux",
+                country: "CH", region: "VD",
+                lat: 46.4353,
+                lng: 6.9106,
+                date: "Juli",
+                month: 7,
+                price: "Ab 69 CHF",
+                description: "Legendäres Musikfestival seit 1967.",
+                highlights: ["Weltberühmt", "Lake Stage gratis", "2 Wochen"],
+                isHighlight: true
+            },
+            {
+                id: 2047,
+                name: "Alimentarium",
+                category: "kultur",
+                location: "Vevey",
+                country: "CH", region: "VD",
+                lat: 46.4606,
+                lng: 6.8428,
+                date: "Ganzjährig",
+                month: 0,
+                price: "13 CHF",
+                description: "Interaktives Ernährungsmuseum von Nestlé.",
+                highlights: ["Ernährung", "Kochen für Kinder", "Garten"],
+                isHighlight: false
+            },
+            {
+                id: 2048,
+                name: "Glacier 3000",
+                category: "familie",
+                location: "Les Diablerets",
+                country: "CH", region: "VD",
+                lat: 46.3378,
+                lng: 7.2072,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 70 CHF",
+                description: "Gletschererlebnis mit Peak Walk Hängebrücke.",
+                highlights: ["Peak Walk Hängebrücke", "Alpine Coaster", "Ganzjährig Schnee"],
+                isHighlight: true
+            },
+            
+            // ═══════════════════════════════════════════════════════════════
+            // 🏔️ TESSIN (TI) - Erweitert
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 2060,
+                name: "Swissminiatur",
+                category: "familie",
+                location: "Melide",
+                country: "CH", region: "TI",
+                lat: 45.9531,
+                lng: 8.9481,
+                date: "März - Oktober",
+                month: 3,
+                price: "19 CHF",
+                description: "Die Schweiz im Miniaturformat mit 130 Modellen.",
+                highlights: ["130 Modelle 1:25", "Eisenbahnen", "Familienfreundlich"],
+                isHighlight: true
+            },
+            {
+                id: 2061,
+                name: "Verzascatal",
+                category: "sehenswuerdigkeit",
+                location: "Lavertezzo",
+                country: "CH", region: "TI",
+                lat: 46.2597,
+                lng: 8.8458,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Spektakuläres Tal mit smaragdgrünem Wasser und Römerbrücke.",
+                highlights: ["Smaragdgrünes Wasser", "Ponte dei Salti", "Baden"],
+                isHighlight: true
+            },
+            {
+                id: 2062,
+                name: "Monte San Salvatore",
+                category: "sehenswuerdigkeit",
+                location: "Lugano",
+                country: "CH", region: "TI",
+                lat: 45.9525,
+                lng: 8.9472,
+                date: "März - November",
+                month: 3,
+                price: "30 CHF (Seilbahn)",
+                description: "Hausberg Luganos mit Rundumsicht auf Seen und Alpen.",
+                highlights: ["360° Panorama", "Restaurant", "Wanderwege"],
+                isHighlight: false
+            },
+            {
+                id: 2063,
+                name: "Burgen von Bellinzona",
+                category: "sehenswuerdigkeit",
+                location: "Bellinzona",
+                country: "CH", region: "TI",
+                lat: 46.1956,
+                lng: 9.0253,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis / Museum 15 CHF",
+                description: "Drei mittelalterliche Burgen - UNESCO Welterbe.",
+                highlights: ["UNESCO Welterbe", "3 Burgen", "Stadtmauer"],
+                isHighlight: true
+            },
+            {
+                id: 2064,
+                name: "Lido di Lugano",
+                category: "familie",
+                location: "Lugano",
+                country: "CH", region: "TI",
+                lat: 46.0017,
+                lng: 8.9564,
+                date: "Mai - September",
+                month: 5,
+                price: "12 CHF",
+                description: "Grösstes Strandbad im Tessin mit Olympia-Pool.",
+                highlights: ["Olympia-Pool", "Sandstrand", "Rutschen"],
+                isHighlight: false
+            },
+            {
+                id: 2065,
+                name: "Locarno Altstadt & Piazza",
+                category: "sehenswuerdigkeit",
+                location: "Locarno",
+                country: "CH", region: "TI",
+                lat: 46.1708,
+                lng: 8.7953,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Mediterrane Altstadt mit der Piazza Grande.",
+                highlights: ["Piazza Grande", "Filmfestival", "Seepromenade"],
+                isHighlight: false
+            },
+            {
+                id: 2066,
+                name: "Locarno Film Festival",
+                category: "festival",
+                location: "Locarno",
+                country: "CH", region: "TI",
+                lat: 46.1708,
+                lng: 8.7953,
+                date: "August",
+                month: 8,
+                price: "Ab 23 CHF",
+                description: "Eines der renommiertesten Filmfestivals weltweit.",
+                highlights: ["Open-Air Kino", "8000 Zuschauer", "Seit 1946"],
+                isHighlight: true
+            },
+            {
+                id: 2067,
+                name: "Centovalli-Bahn",
+                category: "sehenswuerdigkeit",
+                location: "Locarno - Domodossola",
+                country: "CH", region: "TI",
+                lat: 46.1708,
+                lng: 8.7953,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 36 CHF",
+                description: "Panoramabahn durch 100 Täler nach Italien.",
+                highlights: ["100 Täler", "83 Brücken", "31 Tunnel"],
+                isHighlight: false
+            },
+            
+            // ═══════════════════════════════════════════════════════════════
+            // 🏔️ JURA (JU) - Komplett neu
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 2080,
+                name: "Préhisto-Parc",
+                category: "familie",
+                location: "Réclère",
+                country: "CH", region: "JU",
+                lat: 47.3833,
+                lng: 7.0167,
+                date: "April - Oktober",
+                month: 4,
+                price: "14 CHF",
+                description: "Dinosaurierpark mit 40 lebensgrossen Modellen.",
+                highlights: ["40 Dinosaurier", "Höhlen", "Familienfreundlich"],
+                isHighlight: true
+            },
+            {
+                id: 2081,
+                name: "Grottes de Réclère",
+                category: "sehenswuerdigkeit",
+                location: "Réclère",
+                country: "CH", region: "JU",
+                lat: 47.3858,
+                lng: 7.0189,
+                date: "April - Oktober",
+                month: 4,
+                price: "14 CHF",
+                description: "Spektakuläre Tropfsteinhöhlen mit 15m hohem Dom.",
+                highlights: ["15m hoher Dom", "Stalaktiten", "Geführte Tour"],
+                isHighlight: true
+            },
+            {
+                id: 2082,
+                name: "Sainte-Ursanne",
+                category: "sehenswuerdigkeit",
+                location: "Sainte-Ursanne",
+                country: "CH", region: "JU",
+                lat: 47.3653,
+                lng: 7.1531,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Mittelalterliches Städtchen am Doubs - eines der schönsten der Schweiz.",
+                highlights: ["Mittelalterlich", "Doubs-Ufer", "Stiftskirche"],
+                isHighlight: true
+            },
+            {
+                id: 2083,
+                name: "Etang de la Gruère",
+                category: "sehenswuerdigkeit",
+                location: "Saignelégier",
+                country: "CH", region: "JU",
+                lat: 47.2417,
+                lng: 7.0500,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Mystischer Moorsee mit Rundwanderung.",
+                highlights: ["Moorsee", "Rundweg 45 Min.", "Naturschutzgebiet"],
+                isHighlight: false
+            },
+            {
+                id: 2084,
+                name: "Marché-Concours Saignelégier",
+                category: "volksfest",
+                location: "Saignelégier",
+                country: "CH", region: "JU",
+                lat: 47.2514,
+                lng: 7.0417,
+                date: "August",
+                month: 8,
+                price: "Ab 15 CHF",
+                description: "Grösster Pferdemarkt der Schweiz seit 1897.",
+                highlights: ["Freiberger Pferde", "Pferderennen", "Volksfest"],
+                isHighlight: true
+            },
+            
+            // ═══════════════════════════════════════════════════════════════
+            // 🏔️ FREIBURG (FR) - Erweitert
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 2090,
+                name: "Altstadt Freiburg",
+                category: "sehenswuerdigkeit",
+                location: "Freiburg",
+                country: "CH", region: "FR",
+                lat: 46.8065,
+                lng: 7.1620,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Mittelalterliche Altstadt mit 200 gotischen Fassaden.",
+                highlights: ["Gotische Fassaden", "Zaehringen Brücke", "Zweisprachig"],
+                isHighlight: true
+            },
+            {
+                id: 2091,
+                name: "Gruyères",
+                category: "sehenswuerdigkeit",
+                location: "Gruyères",
+                country: "CH", region: "FR",
+                lat: 46.5833,
+                lng: 7.0833,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Schloss 12 CHF",
+                description: "Mittelalterliches Bilderbuch-Städtchen mit Schloss.",
+                highlights: ["Käserei", "HR Giger Museum", "Schloss"],
+                isHighlight: true
+            },
+            {
+                id: 2092,
+                name: "La Maison du Gruyère",
+                category: "kultur",
+                location: "Pringy",
+                country: "CH", region: "FR",
+                lat: 46.5797,
+                lng: 7.0786,
+                date: "Ganzjährig",
+                month: 0,
+                price: "7 CHF",
+                description: "Schaukäserei mit Einblick in die Gruyère-Herstellung.",
+                highlights: ["Käseherstellung live", "Degustation", "Restaurant"],
+                isHighlight: false
+            },
+            {
+                id: 2093,
+                name: "HR Giger Museum",
+                category: "kultur",
+                location: "Gruyères",
+                country: "CH", region: "FR",
+                lat: 46.5833,
+                lng: 7.0833,
+                date: "Ganzjährig",
+                month: 0,
+                price: "12.50 CHF",
+                description: "Museum des Alien-Schöpfers in mittelalterlichem Schloss.",
+                highlights: ["Alien-Schöpfer", "Giger Bar", "Surrealismus"],
+                isHighlight: false
+            },
+            {
+                id: 2094,
+                name: "Schwarzsee",
+                category: "familie",
+                location: "Schwarzsee",
+                country: "CH", region: "FR",
+                lat: 46.6675,
+                lng: 7.2864,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis (Wandern)",
+                description: "Idyllischer Bergsee mit Sagen und Legenden.",
+                highlights: ["Sage vom Riesen", "Rundwanderung", "Baden im Sommer"],
+                isHighlight: false
+            },
+            {
+                id: 2095,
+                name: "Moléson",
+                category: "familie",
+                location: "Moléson-sur-Gruyères",
+                country: "CH", region: "FR",
+                lat: 46.5467,
+                lng: 7.0167,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Seilbahn 42 CHF",
+                description: "Aussichtsberg mit Alpkäserei und Sommerrodelbahn.",
+                highlights: ["360° Panorama", "Sommerrodelbahn", "Alpkäserei"],
+                isHighlight: false
+            },
+            
+            // ═══════════════════════════════════════════════════════════════
+            // 🏔️ NEUENBURG (NE) - Erweitert
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 2100,
+                name: "Creux du Van",
+                category: "sehenswuerdigkeit",
+                location: "Noiraigue",
+                country: "CH", region: "NE",
+                lat: 46.9311,
+                lng: 6.7264,
+                date: "Mai - Oktober",
+                month: 5,
+                price: "Gratis",
+                description: "Spektakulärer Felsenkessel - Grand Canyon der Schweiz.",
+                highlights: ["160m hohe Felswände", "Steinböcke", "Wanderung"],
+                isHighlight: true
+            },
+            {
+                id: 2101,
+                name: "Laténium",
+                category: "kultur",
+                location: "Hauterive",
+                country: "CH", region: "NE",
+                lat: 47.0092,
+                lng: 6.9683,
+                date: "Ganzjährig",
+                month: 0,
+                price: "9 CHF",
+                description: "Grösstes Archäologiemuseum der Schweiz am See.",
+                highlights: ["Pfahlbauten", "50'000 Jahre Geschichte", "Archäologie-Park"],
+                isHighlight: true
+            },
+            {
+                id: 2102,
+                name: "Uhrenmuseum La Chaux-de-Fonds",
+                category: "kultur",
+                location: "La Chaux-de-Fonds",
+                country: "CH", region: "NE",
+                lat: 47.1044,
+                lng: 6.8256,
+                date: "Ganzjährig",
+                month: 0,
+                price: "15 CHF",
+                description: "Grösste Uhrensammlung der Welt mit 4500 Zeitmessern.",
+                highlights: ["4500 Uhren", "UNESCO Stadt", "Schweizer Tradition"],
+                isHighlight: true
+            },
+            {
+                id: 2103,
+                name: "La Chaux-de-Fonds UNESCO",
+                category: "sehenswuerdigkeit",
+                location: "La Chaux-de-Fonds",
+                country: "CH", region: "NE",
+                lat: 47.1000,
+                lng: 6.8256,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "UNESCO-Welterbe Stadt mit einzigartigem Schachbrett-Muster.",
+                highlights: ["UNESCO Welterbe", "Uhrenindustrie", "Le Corbusier"],
+                isHighlight: false
+            },
+            {
+                id: 2104,
+                name: "Neuenburg Altstadt",
+                category: "sehenswuerdigkeit",
+                location: "Neuchâtel",
+                country: "CH", region: "NE",
+                lat: 46.9920,
+                lng: 6.9311,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Elegante Altstadt am See mit Schloss und Stiftskirche.",
+                highlights: ["Schloss", "Seepromenade", "Französisches Flair"],
+                isHighlight: false
+            },
+            
+            // ═══════════════════════════════════════════════════════════════
+            // 🏔️ URI (UR) - Komplett neu
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 2110,
+                name: "Teufelsbrücke Schöllenen",
+                category: "sehenswuerdigkeit",
+                location: "Andermatt",
+                country: "CH", region: "UR",
+                lat: 46.6453,
+                lng: 8.5922,
+                date: "Mai - Oktober",
+                month: 5,
+                price: "Gratis",
+                description: "Legendäre Brücke über die wilde Schöllenenschlucht.",
+                highlights: ["Sage vom Teufel", "Suworow-Denkmal", "Wanderweg"],
+                isHighlight: true
+            },
+            {
+                id: 2111,
+                name: "Gotthard-Pass",
+                category: "sehenswuerdigkeit",
+                location: "Andermatt",
+                country: "CH", region: "UR",
+                lat: 46.5575,
+                lng: 8.5661,
+                date: "Juni - Oktober",
+                month: 6,
+                price: "Gratis",
+                description: "Historischer Alpenübergang mit Tremola Kopfsteinpflaster.",
+                highlights: ["Tremola", "Historische Route", "Museum"],
+                isHighlight: true
+            },
+            {
+                id: 2112,
+                name: "Tell-Museum Bürglen",
+                category: "kultur",
+                location: "Bürglen",
+                country: "CH", region: "UR",
+                lat: 46.8767,
+                lng: 8.6711,
+                date: "Mai - Oktober",
+                month: 5,
+                price: "8 CHF",
+                description: "Museum über Wilhelm Tell am angeblichen Geburtsort.",
+                highlights: ["Wilhelm Tell", "Schweizer Held", "Armbrust"],
+                isHighlight: false
+            },
+            {
+                id: 2113,
+                name: "Rütli",
+                category: "sehenswuerdigkeit",
+                location: "Seelisberg",
+                country: "CH", region: "UR",
+                lat: 46.9675,
+                lng: 8.5928,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Schiff ab 12 CHF",
+                description: "Geburtsort der Schweiz - die legendäre Rütliwiese.",
+                highlights: ["Geburtsort Schweiz", "Bundesbrief 1291", "Per Schiff erreichbar"],
+                isHighlight: true
+            },
+            {
+                id: 2114,
+                name: "Oberalp Arena",
+                category: "familie",
+                location: "Andermatt",
+                country: "CH", region: "UR",
+                lat: 46.6358,
+                lng: 8.5942,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 65 CHF",
+                description: "Modernes Skigebiet mit Anschluss nach Sedrun.",
+                highlights: ["SkiArena", "Schneesicher", "Gemsstock"],
+                isHighlight: false
+            },
+            
+            // ═══════════════════════════════════════════════════════════════
+            // 🏔️ SOLOTHURN (SO) - Erweitert
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 2120,
+                name: "Altstadt Solothurn",
+                category: "sehenswuerdigkeit",
+                location: "Solothurn",
+                country: "CH", region: "SO",
+                lat: 47.2088,
+                lng: 7.5372,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Schönste Barockstadt der Schweiz mit 11 Kirchen.",
+                highlights: ["Barockstadt", "Zahl 11", "St. Ursen Kathedrale"],
+                isHighlight: true
+            },
+            {
+                id: 2121,
+                name: "Weissenstein",
+                category: "familie",
+                location: "Oberdorf",
+                country: "CH", region: "SO",
+                lat: 47.2500,
+                lng: 7.5167,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Sesselbahn 26 CHF",
+                description: "Solothurner Hausberg mit Alpenpanorama.",
+                highlights: ["Sesselbahn", "Planetenweg", "Alpenblick"],
+                isHighlight: false
+            },
+            {
+                id: 2122,
+                name: "Solothurn Filmtage",
+                category: "festival",
+                location: "Solothurn",
+                country: "CH", region: "SO",
+                lat: 47.2088,
+                lng: 7.5372,
+                date: "Januar",
+                month: 1,
+                price: "Ab 18 CHF",
+                description: "Wichtigstes Schweizer Filmfestival.",
+                highlights: ["Schweizer Film", "Seit 1966", "Premieren"],
+                isHighlight: false
+            },
+            
+            // ═══════════════════════════════════════════════════════════════
+            // 🏔️ ZUG (ZG) - Erweitert
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 2130,
+                name: "Altstadt Zug",
+                category: "sehenswuerdigkeit",
+                location: "Zug",
+                country: "CH", region: "ZG",
+                lat: 47.1724,
+                lng: 8.5150,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Malerische Altstadt am türkisblauen Zugersee.",
+                highlights: ["Zytturm", "Seepromenade", "Kirschtorte"],
+                isHighlight: true
+            },
+            {
+                id: 2131,
+                name: "Höllgrotten Baar",
+                category: "sehenswuerdigkeit",
+                location: "Baar",
+                country: "CH", region: "ZG",
+                lat: 47.2044,
+                lng: 8.5200,
+                date: "April - Oktober",
+                month: 4,
+                price: "12 CHF",
+                description: "Tropfsteinhöhlen mit unterirdischem See.",
+                highlights: ["Tropfsteine", "Unterirdischer See", "Geführte Touren"],
+                isHighlight: false
+            },
+            {
+                id: 2132,
+                name: "Zugerberg",
+                category: "familie",
+                location: "Zug",
+                country: "CH", region: "ZG",
+                lat: 47.1333,
+                lng: 8.5333,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Standseilbahn 12 CHF",
+                description: "Naherholungsgebiet mit Panorama und Spielplätzen.",
+                highlights: ["Standseilbahn", "Alpenpanorama", "Wanderwege"],
+                isHighlight: false
+            },
+            
+            // ═══════════════════════════════════════════════════════════════
+            // 🏔️ BASEL (BS/BL) - Erweitert
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 2140,
+                name: "Basler Münster",
+                category: "sehenswuerdigkeit",
+                location: "Basel",
+                country: "CH", region: "BS",
+                lat: 47.5564,
+                lng: 7.5922,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis / Turm 5 CHF",
+                description: "Wahrzeichen Basels mit Aussichtsturm.",
+                highlights: ["Rote Sandstein-Türme", "Pfalz Aussicht", "Erasmus Grab"],
+                isHighlight: true
+            },
+            {
+                id: 2141,
+                name: "Zoo Basel (Zolli)",
+                category: "familie",
+                location: "Basel",
+                country: "CH", region: "BS",
+                lat: 47.5475,
+                lng: 7.5783,
+                date: "Ganzjährig",
+                month: 0,
+                price: "23 CHF",
+                description: "Ältester Zoo der Schweiz mit Ozeanium.",
+                highlights: ["Ältester Zoo CH", "Elefanten", "Ozeanium neu"],
+                isHighlight: true
+            },
+            {
+                id: 2142,
+                name: "Basler Fasnacht",
+                category: "volksfest",
+                location: "Basel",
+                country: "CH", region: "BS",
+                lat: 47.5596,
+                lng: 7.5886,
+                date: "Februar/März",
+                month: 2,
+                price: "Gratis",
+                description: "Grösste Fasnacht der Schweiz - UNESCO Welterbe.",
+                highlights: ["UNESCO Welterbe", "Morgestraich 4 Uhr", "72 Stunden"],
+                isHighlight: true
+            },
+            {
+                id: 2143,
+                name: "Fondation Beyeler",
+                category: "kultur",
+                location: "Riehen",
+                country: "CH", region: "BS",
+                lat: 47.5908,
+                lng: 7.6575,
+                date: "Ganzjährig",
+                month: 0,
+                price: "25 CHF",
+                description: "Weltklasse Kunstmuseum mit Monet, Picasso, Warhol.",
+                highlights: ["Monet", "Picasso", "Renzo Piano Bau"],
+                isHighlight: true
+            },
+            {
+                id: 2144,
+                name: "Augusta Raurica",
+                category: "kultur",
+                location: "Augst",
+                country: "CH", region: "BL",
+                lat: 47.5350,
+                lng: 7.7181,
+                date: "Ganzjährig",
+                month: 0,
+                price: "8 CHF",
+                description: "Besterhaltene Römerstadt nördlich der Alpen.",
+                highlights: ["Römertheater", "Römerhaus", "Silberschatz"],
+                isHighlight: true
+            },
+            
+            // ═══════════════════════════════════════════════════════════════
+            // 🏔️ GLARUS (GL) - Erweitert
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 2150,
+                name: "Elm UNESCO Tektonikarena",
+                category: "sehenswuerdigkeit",
+                location: "Elm",
+                country: "CH", region: "GL",
+                lat: 46.9167,
+                lng: 9.1833,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "UNESCO Welterbe - wo Afrika auf Europa traf.",
+                highlights: ["UNESCO Welterbe", "Glarner Hauptüberschiebung", "Geologie"],
+                isHighlight: true
+            },
+            {
+                id: 2151,
+                name: "Martinsloch Elm",
+                category: "sehenswuerdigkeit",
+                location: "Elm",
+                country: "CH", region: "GL",
+                lat: 46.9189,
+                lng: 9.1744,
+                date: "März & September",
+                month: 3,
+                price: "Gratis",
+                description: "Natürliches Felsloch - zweimal jährlich scheint die Sonne durch.",
+                highlights: ["Sonnenphänomen", "13./14. März", "30. Sept./1. Okt."],
+                isHighlight: true
+            },
+            {
+                id: 2152,
+                name: "Klöntalersee",
+                category: "sehenswuerdigkeit",
+                location: "Glarus",
+                country: "CH", region: "GL",
+                lat: 47.0253,
+                lng: 8.9536,
+                date: "Mai - Oktober",
+                month: 5,
+                price: "Gratis",
+                description: "Einer der schönsten Bergseen der Schweiz.",
+                highlights: ["Türkisblau", "Wandern", "Fischen"],
+                isHighlight: false
+            },
+            
+            // ═══════════════════════════════════════════════════════════════
+            // 🏔️ OBWALDEN / NIDWALDEN (OW/NW) - Erweitert
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 2160,
+                name: "Stanserhorn CabriO",
+                category: "familie",
+                location: "Stans",
+                country: "CH", region: "NW",
+                lat: 46.9264,
+                lng: 8.3414,
+                date: "April - November",
+                month: 4,
+                price: "78 CHF",
+                description: "Weltweit erste Seilbahn mit offenem Oberdeck.",
+                highlights: ["Offenes Oberdeck", "Drehrestaurant", "Murmeli-Abenteuerweg"],
+                isHighlight: true
+            },
+            {
+                id: 2161,
+                name: "Engelberg-Titlis",
+                category: "familie",
+                location: "Engelberg",
+                country: "CH", region: "OW",
+                lat: 46.7733,
+                lng: 8.4261,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 96 CHF",
+                description: "Rotair - erste drehende Seilbahn der Welt auf 3020m.",
+                highlights: ["Rotair", "Cliff Walk", "Gletschergrotte"],
+                isHighlight: true
+            },
+            {
+                id: 2162,
+                name: "Melchsee-Frutt",
+                category: "familie",
+                location: "Kerns",
+                country: "CH", region: "OW",
+                lat: 46.7667,
+                lng: 8.2833,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Ab 44 CHF",
+                description: "Autofreies Hochplateau mit Bergsee.",
+                highlights: ["Autofrei", "Fruttli-Zug", "Trottinett"],
+                isHighlight: false
+            },
+            
+            // ═══════════════════════════════════════════════════════════════
+            // 🏔️ SCHAFFHAUSEN (SH) - Erweitert
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 2170,
+                name: "Rheinfall",
+                category: "sehenswuerdigkeit",
+                location: "Neuhausen",
+                country: "CH", region: "SH",
+                lat: 47.6778,
+                lng: 8.6150,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Felsen 5 CHF",
+                description: "Grösster Wasserfall Europas - 23m hoch, 150m breit.",
+                highlights: ["Grösster Wasserfall EU", "Bootsfahrt zum Felsen", "600'000 Liter/Sek"],
+                isHighlight: true
+            },
+            {
+                id: 2171,
+                name: "Stein am Rhein",
+                category: "sehenswuerdigkeit",
+                location: "Stein am Rhein",
+                country: "CH", region: "SH",
+                lat: 47.6594,
+                lng: 8.8600,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Bilderbuch-Städtchen mit bemalten Fassaden.",
+                highlights: ["Bemalte Fassaden", "Rathausplatz", "Kloster St. Georgen"],
+                isHighlight: true
+            },
+            {
+                id: 2172,
+                name: "Munot",
+                category: "sehenswuerdigkeit",
+                location: "Schaffhausen",
+                country: "CH", region: "SH",
+                lat: 47.6964,
+                lng: 8.6392,
+                date: "Ganzjährig",
+                month: 0,
+                price: "Gratis",
+                description: "Runde Festung - Wahrzeichen von Schaffhausen.",
+                highlights: ["Rundturm", "Weinberge", "21 Uhr Glockenläuten"],
+                isHighlight: false
             }
         ];
         // ============================================
