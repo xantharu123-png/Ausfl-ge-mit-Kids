@@ -25,9 +25,10 @@
         .header { padding:16px; border-bottom:1px solid var(--border); }
         .header h1 { font-size:1.3rem; margin-bottom:8px; }
         .header h1 span { opacity:0.6; font-weight:400; font-size:0.9rem; }
-        .nav-flags { display:flex; gap:8px; margin-bottom:12px; }
-        .nav-flag { text-decoration:none; font-size:1.4rem; opacity:0.4; transition:0.2s; }
-        .nav-flag:hover,.nav-flag.active { opacity:1; transform:scale(1.2); }
+        .nav-flags { display:flex; gap:6px; margin-bottom:12px; align-items:center; }
+        .nav-flag { display:inline-block; width:36px; height:24px; border-radius:4px; overflow:hidden; opacity:0.4; transition:0.2s; border:2px solid transparent; text-decoration:none; }
+        .nav-flag:hover,.nav-flag.active { opacity:1; transform:scale(1.15); border-color:var(--accent); }
+        .nav-flag img { width:100%; height:100%; object-fit:cover; display:block; }
         
         /* Search */
         .search { position:relative; margin-bottom:10px; }
@@ -113,7 +114,7 @@
     <div class="app">
         <div class="sidebar">
             <div class="header">
-                <div class="nav-flags"><a href="map_deutschland.html" class="nav-flag" title="🇩🇪">🇩🇪</a><a href="map_schweiz.html" class="nav-flag" title="🇨🇭">🇨🇭</a><a href="map_frankreich.html" class="nav-flag" title="🇫🇷">🇫🇷</a><a href="map_italien.html" class="nav-flag" title="🇮🇹">🇮🇹</a><a href="map_spanien.html" class="nav-flag active" title="🇪🇸">🇪🇸</a></div>
+                <div class="nav-flags"><a href="map_deutschland.html" class="nav-flag" title="Deutschland"><img src="https://flagcdn.com/w80/de.png" alt="Deutschland"></a><a href="map_schweiz.html" class="nav-flag" title="Schweiz"><img src="https://flagcdn.com/w80/ch.png" alt="Schweiz"></a><a href="map_frankreich.html" class="nav-flag" title="Frankreich"><img src="https://flagcdn.com/w80/fr.png" alt="Frankreich"></a><a href="map_italien.html" class="nav-flag" title="Italien"><img src="https://flagcdn.com/w80/it.png" alt="Italien"></a><a href="map_spanien.html" class="nav-flag active" title="Spanien"><img src="https://flagcdn.com/w80/es.png" alt="Spanien"></a></div>
                 <h1>🇪🇸 Spanien <span id="count"></span></h1>
                 <div class="search"><input type="text" id="search" placeholder="Suche..."></div>
                 <div class="stats" id="stats"></div>
