@@ -4559,20 +4559,24 @@ const allPOIs = [
                 if (campingRoute) map.removeLayer(campingRoute);
                 campingRoute = L.polyline(coords, { color: '#4ecca3', weight: 4, opacity: 0.8, dashArray: '10, 8' }).addTo(map);
                 map.fitBounds(campingRoute.getBounds(), { padding: [50, 50] });
-                const routeBounds = campingRoute.getBounds();
-                const latBuffer = (routeBounds.getNorth() - routeBounds.getSouth()) * 0.15;
-                const lngBuffer = (routeBounds.getEast() - routeBounds.getWest()) * 0.15;
-                const south = routeBounds.getSouth() - latBuffer, north = routeBounds.getNorth() + latBuffer;
-                const west = routeBounds.getWest() - lngBuffer, east = routeBounds.getEast() + lngBuffer;
-                document.getElementById('camping-results').innerHTML = '<div class="camping-loading"><div class="camping-loading-text">\u{1F3D5}\uFE0F Suche Campingplätze entlang der Route...</div><div class="camping-loading-sub">Daten werden von OpenStreetMap geladen</div><div class="camping-progress"><div class="camping-progress-bar"></div></div></div>';
-                let query = '[out:json][timeout:30];(';
-                if (campingTypes.camping) query += 'node["tourism"="camp_site"](' + south + ',' + west + ',' + north + ',' + east + ');';
-                if (campingTypes.caravan) query += 'node["tourism"="caravan_site"](' + south + ',' + west + ',' + north + ',' + east + ');';
-                if (campingTypes.parking) { query += 'node["amenity"="parking"]["camping"="yes"](' + south + ',' + west + ',' + north + ',' + east + ');'; query += 'node["tourism"="camp_pitch"](' + south + ',' + west + ',' + north + ',' + east + ');'; }
-                query += ');out body 1000;';
-                const campData = await overpassQuery(query);
+                document.getElementById('camping-results').innerHTML = '<div class="camping-loading"><div class="camping-loading-text">\u{1F3D5}\uFE0F Suche Campingpl\u00e4tze entlang der Route...</div><div class="camping-loading-sub">20km-Korridor entlang der Route</div><div class="camping-progress"><div class="camping-progress-bar"></div></div></div>';
+                // Sample route points every ~30km for Overpass "around" query (much faster than BBox)
                 const routeCoords = coords;
-                const nearRoute = (campData.elements || []).filter(site => isNearRoute(site.lat, site.lon, routeCoords, 20));
+                const samplePts = [routeCoords[0]];
+                let accDist = 0;
+                for (let si = 1; si < routeCoords.length; si++) {
+                    accDist += quickDist(routeCoords[si-1][0], routeCoords[si-1][1], routeCoords[si][0], routeCoords[si][1]);
+                    if (accDist >= 30) { samplePts.push(routeCoords[si]); accDist = 0; }
+                }
+                if (samplePts.length < 2) samplePts.push(routeCoords[routeCoords.length - 1]);
+                const aroundStr = samplePts.map(p => p[0].toFixed(4) + ',' + p[1].toFixed(4)).join(',');
+                let query = '[out:json][timeout:30];(';
+                if (campingTypes.camping) query += 'node["tourism"="camp_site"](around:20000,' + aroundStr + ');';
+                if (campingTypes.caravan) query += 'node["tourism"="caravan_site"](around:20000,' + aroundStr + ');';
+                if (campingTypes.parking) { query += 'node["amenity"="parking"]["camping"="yes"](around:20000,' + aroundStr + ');'; query += 'node["tourism"="camp_pitch"](around:20000,' + aroundStr + ');'; }
+                query += ');out body 500;';
+                const campData = await overpassQuery(query);
+                const nearRoute = (campData.elements || []);
                 nearRoute.sort((a, b) => getRouteProgress(a.lat, a.lon, routeCoords) - getRouteProgress(b.lat, b.lon, routeCoords));
                 clearCamping();
                 if (campingRoute) map.removeLayer(campingRoute);
