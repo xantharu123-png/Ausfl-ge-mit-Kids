@@ -4408,15 +4408,39 @@ const allPOIs = [
         }
         
 
-        // Safe JSON fetch with error handling
-        async function safeFetchJSON(url, opts) {
-            const resp = await fetch(url, opts);
-            const text = await resp.text();
-            try { return JSON.parse(text); }
-            catch(e) {
+        // Safe JSON fetch with error handling, timeout, and fallback
+        async function safeFetchJSON(url, opts, timeoutMs) {
+            timeoutMs = timeoutMs || 20000;
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const resp = await fetch(url, Object.assign({}, opts, { signal: controller.signal }));
+                clearTimeout(timer);
                 if (!resp.ok) throw new Error('HTTP ' + resp.status);
-                throw new Error('Ungültige Antwort vom Server');
+                const text = await resp.text();
+                try { return JSON.parse(text); }
+                catch(e) { throw new Error('Ung\u00fcltige Antwort vom Server'); }
+            } catch(e) {
+                clearTimeout(timer);
+                if (e.name === 'AbortError') throw new Error('Zeit\u00fcberschreitung (Server antwortet nicht)');
+                throw e;
             }
+        }
+
+        // Overpass query with automatic retry + fallback server
+        async function overpassQuery(query) {
+            const servers = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
+            let lastErr;
+            for (const server of servers) {
+                try {
+                    return await safeFetchJSON(server, { method: 'POST', body: 'data=' + encodeURIComponent(query) }, 35000);
+                } catch(e) { lastErr = e; }
+                try {
+                    const retryQuery = query.replace('timeout:30', 'timeout:60');
+                    return await safeFetchJSON(server, { method: 'POST', body: 'data=' + encodeURIComponent(retryQuery) }, 65000);
+                } catch(e) { lastErr = e; }
+            }
+            throw lastErr || new Error('Alle Overpass-Server nicht erreichbar');
         }
 
         async function loadCampingSites() {
@@ -4444,15 +4468,7 @@ const allPOIs = [
             query += ');out body 500;';
             
             try {
-                let data;
-                try {
-                    data = await safeFetchJSON('https://overpass-api.de/api/interpreter', { method: 'POST', body: 'data=' + encodeURIComponent(query) });
-                } catch(e1) {
-                    // Retry once with longer timeout
-                    document.getElementById('camping-results').innerHTML = '<div class="camping-loading"><div class="camping-loading-text">\u{1F3D5}\uFE0F Erneuter Versuch...</div><div class="camping-loading-sub">Server war beschäftigt, zweiter Anlauf</div><div class="camping-progress"><div class="camping-progress-bar"></div></div></div>';
-                    const retryQuery = query.replace('timeout:30', 'timeout:45');
-                    data = await safeFetchJSON('https://overpass-api.de/api/interpreter', { method: 'POST', body: 'data=' + encodeURIComponent(retryQuery) });
-                }
+                const data = await overpassQuery(query);
                 
                 campingCluster = L.markerClusterGroup({ maxClusterRadius: 40, disableClusteringAtZoom: 12,
                     iconCreateFunction: function(cluster) {
@@ -4552,7 +4568,7 @@ const allPOIs = [
                 if (campingTypes.caravan) query += 'node["tourism"="caravan_site"](' + south + ',' + west + ',' + north + ',' + east + ');';
                 if (campingTypes.parking) { query += 'node["amenity"="parking"]["camping"="yes"](' + south + ',' + west + ',' + north + ',' + east + ');'; query += 'node["tourism"="camp_pitch"](' + south + ',' + west + ',' + north + ',' + east + ');'; }
                 query += ');out body 1000;';
-                const campData = await safeFetchJSON('https://overpass-api.de/api/interpreter', { method: 'POST', body: 'data=' + encodeURIComponent(query) });
+                const campData = await overpassQuery(query);
                 const routeCoords = coords;
                 const nearRoute = (campData.elements || []).filter(site => isNearRoute(site.lat, site.lon, routeCoords, 20));
                 nearRoute.sort((a, b) => getRouteProgress(a.lat, a.lon, routeCoords) - getRouteProgress(b.lat, b.lon, routeCoords));
@@ -4602,7 +4618,10 @@ const allPOIs = [
                 map.addLayer(campingCluster);
                 document.getElementById('camping-results').innerHTML = html;
             } catch (err) {
-                document.getElementById('camping-results').innerHTML = '<div class="camping-info">\u274C Fehler: ' + err.message + '</div>';
+                let msg = err.message;
+                if (msg.includes('504') || msg.includes('berschreitung')) msg = 'Server \u00fcberlastet. Bitte in 30 Sekunden erneut versuchen.';
+                if (msg.includes('429')) msg = 'Zu viele Anfragen. Bitte 1 Minute warten.';
+                document.getElementById('camping-results').innerHTML = '<div class="camping-info">\u274C ' + msg + '<br><button onclick="searchCampingRoute()" style="margin-top:8px;padding:6px 16px;background:#4ecca3;color:#16213e;border:none;border-radius:6px;cursor:pointer;font-weight:600;">\u{1F504} Erneut versuchen</button></div>';
             }
         }
         
