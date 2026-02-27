@@ -4417,12 +4417,18 @@ const allPOIs = [
             let lastErr;
             for (const server of servers) {
                 try {
-                    return await safeFetchJSON(server, { method: 'POST', body: 'data=' + encodeURIComponent(query) }, 35000);
-                } catch(e) { lastErr = e; }
+                    console.log('[Overpass] Trying:', server);
+                    const result = await safeFetchJSON(server, { method: 'POST', body: 'data=' + encodeURIComponent(query) }, 35000);
+                    console.log('[Overpass] Success:', result.elements ? result.elements.length : 0, 'elements');
+                    return result;
+                } catch(e) { console.warn('[Overpass] Failed:', server, e.message); lastErr = e; }
                 try {
                     const retryQuery = query.replace('timeout:30', 'timeout:60');
-                    return await safeFetchJSON(server, { method: 'POST', body: 'data=' + encodeURIComponent(retryQuery) }, 65000);
-                } catch(e) { lastErr = e; }
+                    console.log('[Overpass] Retry:', server);
+                    const result = await safeFetchJSON(server, { method: 'POST', body: 'data=' + encodeURIComponent(retryQuery) }, 65000);
+                    console.log('[Overpass] Retry success:', result.elements ? result.elements.length : 0, 'elements');
+                    return result;
+                } catch(e) { console.warn('[Overpass] Retry failed:', server, e.message); lastErr = e; }
             }
             throw lastErr || new Error('Alle Overpass-Server nicht erreichbar');
         }
@@ -4450,10 +4456,14 @@ const allPOIs = [
                 query += 'node["tourism"="camp_pitch"](' + south + ',' + west + ',' + north + ',' + east + ');';
             }
             query += ');out body 500;';
-            
+            console.log('[Camping] Zoom:', zoom, 'Bounds:', south.toFixed(3), west.toFixed(3), north.toFixed(3), east.toFixed(3));
+            console.log('[Camping] Types:', JSON.stringify(campingTypes));
+
             try {
+                console.log('[Camping] Query:', query);
                 const data = await overpassQuery(query);
-                
+                console.log('[Camping] Results:', data.elements ? data.elements.length : 0, 'sites');
+
                 campingCluster = L.markerClusterGroup({ maxClusterRadius: 40, disableClusteringAtZoom: 12,
                     iconCreateFunction: function(cluster) {
                         return L.divIcon({ html: '<div style="background:#2d6b4f;color:#4ecca3;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;border:2px solid #4ecca3;">' + cluster.getChildCount() + '</div>', className: '', iconSize: [36, 36] });
