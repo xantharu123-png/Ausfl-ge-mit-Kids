@@ -1580,6 +1580,8 @@
         // ============================================
         // DATEN: Alle POIs aus dem Jahresguide 2026
         // ============================================
+
+        const allPOIs = [
 {name:"Galerie Grünau im Almtal",category:"kultur",lat:47.7177,lng:14.0019,location:"Grünau im Almtal",region:"OÖ",description:"Die Galerie in Grünau im Almtal präsentiert zeitgenössische österreichische Kunst und wechselnde Ausstellungen in stimmungsvollen historischen Gebäuden",id:96},
 {name:"Weihnachtsmarkt Bregenz",category:"weihnachten",lat:47.5423,lng:9.7405,location:"Bregenz",region:"V",description:"Der Weihnachtsmarkt in Bregenz verzaubert mit österreichischer Schokolade, Punsch, Apfelstrudel und handwerklichen Christbaumschmuck in festlicher Atmosphäre",id:734},
 {name:"Kunstmuseum Bad Ischl",category:"kultur",lat:47.6992,lng:13.6039,location:"Bad Ischl",region:"OÖ",description:"Das Kunstmuseum bei Bad Ischl beherbergt Werke österreichischer und europäischer Künstler in prächtigen Sälen mit modernen Ausstellungsräumen",id:562},
@@ -3580,6 +3582,8 @@
 {name:"Beliebtes Jahrmarkt Klagenfurt",category:"volksfest",lat:46.6610,lng:14.282,location:"Klagenfurt",region:"K",description:"Empfehlenswert in Dürnstein: Der Jahrmarkt in Klagenfurt bietet Fahrgeschäfte, Schießbuden und österreichische Leckereien wie Kaiserschmarrn und Apfelstrudel in bunter Kirmes-Atmosphäre",id:1885},
 {name:"Beliebtes Naturlehrpfad Salzburg",category:"familie",lat:47.8172,lng:13.0748,location:"Salzburg",region:"S",description:"Lohnenswert bei Seefeld in Tirol: Der Naturlehrpfad bei Salzburg erklärt an interaktiven Stationen die Alpenfauna und -flora und macht Natur für Kinder zum spannenden Abenteuer",id:1887},
 {name:"Beliebtes Eislaufen Melk",category:"sport",lat:48.2362,lng:15.325,location:"Melk",region:"NÖ",description:"Erlebnis bei Bregenz: Die Eisbahn bei Melk bietet gemütliches Eislaufen unter freiem Himmel mit festlicher Atmosphäre und Glühwein-Ständen im Winter",id:1729}
+        ];
+
         // === POI Normalization ===
         allPOIs.forEach((p, i) => {
             if (!p.id && p.id !== 0) p.id = i + 1;

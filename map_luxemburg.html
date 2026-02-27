@@ -1580,6 +1580,8 @@
         // ============================================
         // DATEN: Alle POIs aus dem Jahresguide 2026
         // ============================================
+
+        const allPOIs = [
 {name:"Heimatmuseum Luxemburg-Stadt",category:"kultur",lat:49.595,lng:6.0973,location:"Luxemburg-Stadt",region:"LUX",description:"Das Heimatmuseum in Luxemburg-Stadt dokumentiert das traditionelle luxemburgische Landleben mit Werkzeugen, Trachten und historischen Alltagesgegenständen",id:245},
 {name:"Dorffest Esch-sur-Alzette",category:"volksfest",lat:49.5127,lng:5.9606,location:"Esch-sur-Alzette",region:"SUD",description:"Das Dorffest in Esch-sur-Alzette feiert die lokale Tradition mit Blasmusik, luxemburgischen Spezialitäten und ausgelassener Stimmung auf dem Dorfplatz",id:467},
 {name:"Abtei Remich",category:"sehenswuerdigkeit",lat:49.6734,lng:6.3542,location:"Remich",region:"SUD",description:"Die historische Abtei bei Remich ist ein Ort der Stille mit romanischen Kreuzgängen und einer jahrhundertealten Tradition geistlichen Lebens",id:502},
@@ -2685,6 +2687,8 @@
 {name:"Beliebtes Krippenausstellung Luxemburg-Stadt",category:"weihnachten",lat:49.6033,lng:6.1351,location:"Luxemburg-Stadt",region:"LUX",description:"Lohnenswert bei Diekirch: Die Krippenausstellung in Luxemburg-Stadt zeigt liebevoll gestaltete Weihnachtskrippen in luxemburgischer Tradition von volkstümlich bis kunstvoll geschnitzt",id:1160},
 {name:"Beliebtes Wanderweg Vianden",category:"sport",lat:50.0840,lng:6.1883,location:"Vianden",region:"NOR",description:"Lohnenswert bei Grevenmacher: Der Wanderweg bei Vianden erschließt die vielfältige Naturlandschaft mit Felsformationen, Wäldern und Aussichtspunkten über die luxemburgische Mittelgebirgslandschaft",id:1300},
 {name:"Beliebtes Eislaufbahn-Advent Echternach",category:"weihnachten",lat:50.0342,lng:6.4517,location:"Echternach",region:"OST",description:"Lohnenswert bei Clervaux: In Echternach: Die Eislaufbahn im Advent bei Echternach bietet Schlittschuhvergnügen unter festlicher Beleuchtung mit Glühwein und Waffeln",id:1543}
+        ];
+
         // === POI Normalization ===
         allPOIs.forEach((p, i) => {
             if (!p.id && p.id !== 0) p.id = i + 1;

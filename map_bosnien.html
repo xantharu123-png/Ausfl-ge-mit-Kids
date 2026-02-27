@@ -1580,6 +1580,8 @@
         // ============================================
         // DATEN: Alle POIs aus dem Jahresguide 2026
         // ============================================
+
+        const allPOIs = [
 {name:"Schwimmbad Mostar",category:"sport",lat:43.3074,lng:17.8226,location:"Mostar",region:"HNK",description:"Das Schwimmbad in Mostar bietet Sportbecken und Ruhebereiche und ist ein beliebter Treffpunkt für Familien und Sportbegeisterte",id:89},
 {name:"Heimatmuseum Brčko",category:"kultur",lat:44.8889,lng:18.8171,location:"Brčko",region:"BRC",description:"Das Heimatmuseum in Brčko dokumentiert das traditionelle bosnische Leben mit Trachten, Handwerk und Alltagsgegenständen vergangener Epochen",id:819},
 {name:"Quelle Višegrad",category:"sehenswuerdigkeit",lat:43.7663,lng:19.2485,location:"Višegrad",region:"RSK",description:"Die Karstquelle bei Višegrad tritt in türkisblauer Farbe aus dem Fels und speist einen kristallklaren Fluss – ein Naturwunder des Balkans",id:88},
@@ -3556,6 +3558,8 @@
 {name:"Beliebtes Festung Lukomir",category:"sehenswuerdigkeit",lat:43.5846,lng:18.0458,location:"Lukomir",region:"SAR",description:"Ausflugstipp Brčko: Die mittelalterliche Festung bei Lukomir thront auf einem Hügel und bietet weite Blicke über das bosnische Tal und die umliegenden Berge",id:1536},
 {name:"Beliebtes Canyoning Lukomir",category:"sport",lat:43.5304,lng:18.0738,location:"Lukomir",region:"SAR",description:"Das Canyoning in den Schluchten bei Lukomir bietet Abseilen, Springen und Schwimmen durch Felsformationen mit türkisblauem Bergwasser",id:1533},
 {name:"Beliebtes Kunsthandwerk Stolac",category:"kultur",lat:43.1221,lng:17.9187,location:"Stolac",region:"HNK",description:"Empfehlenswert in Počitelj: Die Werkstatt in Stolac zeigt traditionelles bosnisches Kunsthandwerk wie Kupferschmiedekunst, Teppichweberei und Holzschnitzerei",id:1234}
+        ];
+
         // === POI Normalization ===
         allPOIs.forEach((p, i) => {
             if (!p.id && p.id !== 0) p.id = i + 1;

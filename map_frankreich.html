@@ -1580,6 +1580,8 @@
         // ============================================
         // DATEN: Alle POIs aus dem Jahresguide 2026
         // ============================================
+
+        const allPOIs = [
 {name:"Flohmarkt Ajaccio",category:"volksfest",lat:41.9391,lng:8.7117,location:"Ajaccio",region:"COR",description:"Der Flohmarkt bei Ajaccio lockt Schnäppchenjäger mit Antiquitäten, Vintage-Mode und Kuriositäten und ist geselliger Treffpunkt",id:899},
 {name:"Golfplatz Arles",category:"sport",lat:43.6461,lng:4.6182,location:"Arles",region:"PAC",description:"Der Golfplatz bei Arles bietet gepflegte Greens in wunderschöner französischer Landschaft mit altem Baumbestand und Wasserhindernissen",id:435},
 {name:"Blumenkorso Lille",category:"volksfest",lat:50.6474,lng:3.0363,location:"Lille",region:"HDF",description:"Der Blumenkorso bei Lille zieht mit kunstvoll geschmückten Wagen durch die Straßen und feiert die französische Gartentradition",id:934},
@@ -3580,6 +3582,8 @@
 {name:"Beliebtes Thealter-Festival Toulouse",category:"festival",lat:43.5810,lng:1.4664,location:"Toulouse",region:"OCC",description:"Empfehlenswert in Marseille: Das Theater-Festival in Toulouse präsentiert die Vielfalt der französischen Theaterszene mit Aufführungen von klassisch bis experimentell",id:1795},
 {name:"Karnevalsumzug Amiens",category:"volksfest",lat:49.8979,lng:2.2991,location:"Amiens",region:"HDF",description:"Der Karnevalsumzug in Amiens bringt farbenfrohe Kostüme, Blasmusik und Konfetti-Regen in die Straßen – französischer Karneval pur",id:1543},
 {name:"Beliebtes Golfplatz Colmar",category:"sport",lat:48.1007,lng:7.3311,location:"Colmar",region:"GES",description:"Lohnenswert bei Carcassonne: Der Golfplatz bei Colmar bietet gepflegte Greens in wunderschöner französischer Landschaft mit altem Baumbestand und Wasserhindernissen",id:1641}
+        ];
+
         // === POI Normalization ===
         allPOIs.forEach((p, i) => {
             if (!p.id && p.id !== 0) p.id = i + 1;

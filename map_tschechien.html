@@ -1580,6 +1580,8 @@
         // ============================================
         // DATEN: Alle POIs aus dem Jahresguide 2026
         // ============================================
+
+        const allPOIs = [
 {name:"Tierpark Liberec",category:"familie",lat:50.7288,lng:15.0522,location:"Liberec",region:"LIB",description:"Der Tierpark bei Liberec beherbergt heimische und exotische Tiere in naturnahen Gehegen und bietet pädagogische Programme und Fütterungen für Kinder",id:448},
 {name:"Kultursommer Mladá Boleslav",category:"festival",lat:50.4216,lng:14.8779,location:"Mladá Boleslav",region:"STR",description:"Der Kultursommer in Mladá Boleslav bietet Open-Air-Konzerte, Theateraufführungen und Lesungen an stimmungsvollen Plätzen unter böhmischem Sommerhimmel",id:910},
 {name:"Weihnachtsmarkt Třeboň",category:"weihnachten",lat:49.0299,lng:14.8061,location:"Třeboň",region:"JHC",description:"Der Weihnachtsmarkt in Třeboň verzaubert mit tschechischer Schokolade, Punsch, Trdelníky und handgefertigtem Kunsthandwerk in festlicher Adventsatmosphäre",id:672},
@@ -3580,6 +3582,8 @@
 {name:"Beliebtes Burg Lednice-Valtice",category:"sehenswuerdigkeit",lat:48.7848,lng:16.8199,location:"Lednice-Valtice",region:"JHM",description:"Empfehlenswert in Lednice-Valtice: Die mittelalterliche Burg bei Lednice-Valtice thront auf Hügeln über dem Tal mit Wehrtürmen, Burgkapelle und bietet Panoramablicke über die tschechische Landschaft",id:1263},
 {name:"Eislaufbahn-Advent Kutná Hora",category:"weihnachten",lat:49.9667,lng:15.2546,location:"Kutná Hora",region:"STR",description:"In Kutná Hora: Die Eislaufbahn im Advent bei Kutná Hora bietet Schlittschuhvergnügen unter festlicher Beleuchtung mit heißem Punsch, Trdelníky und Weihnachtsstimmung",id:1196},
 {name:"Kloster Marienbad",category:"sehenswuerdigkeit",lat:49.9481,lng:12.6922,location:"Marienbad",region:"KAR",description:"Das Kloster bei Marienbad ist ein Ort der Stille mit romanischen oder gotischen Kreuzgängen und einer jahrhundertealten Tradition klösterlichen Lebens",id:1626}
+        ];
+
         // === POI Normalization ===
         allPOIs.forEach((p, i) => {
             if (!p.id && p.id !== 0) p.id = i + 1;

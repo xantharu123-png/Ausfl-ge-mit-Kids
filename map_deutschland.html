@@ -1580,6 +1580,8 @@
         // ============================================
         // DATEN: Alle POIs aus dem Jahresguide 2026
         // ============================================
+
+        const allPOIs = [
 {name:"Schloss Idar-Oberstein",category:"sehenswuerdigkeit",lat:49.706,lng:7.3311,location:"Idar-Oberstein",region:"RP",description:"Das Schloss bei Idar-Oberstein ist ein beeindruckendes Zeugnis der adeligen Vergangenheit mit Schlossgarten, Kapelle und wechselnden Ausstellungen",id:739},
 {name:"Museum Münster",category:"kultur",lat:51.9817,lng:7.645,location:"Münster",region:"NW",description:"Das Museum in Münster zeigt Ausstellungen zur regionalen Geschichte und Kultur Deutschlands und gibt Einblicke in das Leben vergangener Epochen",id:146},
 {name:"Bootsfahrt Würzburg",category:"familie",lat:49.8301,lng:9.9055,location:"Würzburg",region:"BY",description:"Die Bootsfahrt bei Würzburg führt über Flüsse, Seen oder Kanäle durch deutsche Wasserlandschaft als Erlebnis für die Familie",id:877},
@@ -3580,6 +3582,8 @@
 {name:"Mountainbike-Trail Dresden",category:"sport",lat:51.0902,lng:13.7507,location:"Dresden",region:"SN",description:"Der Mountainbike-Trail bei Dresden bietet technische Strecken durch Schwarzwald und Alpenvorland mit Naturhindernissen und Aussichtspunkten",id:1510},
 {name:"Comic-Festival Düsseldorf",category:"festival",lat:51.2015,lng:6.8091,location:"Düsseldorf",region:"NW",description:"Das Comic-Festival bei Düsseldorf feiert die Comickultur mit Zeichnerworkshops, Ausstellungen und Signierstunden bekannter Künstler",id:1380},
 {name:"Beliebtes Bootsfahrt Lindau",category:"familie",lat:47.5556,lng:9.7031,location:"Lindau",region:"BY",description:"Empfehlenswert in Leipzig: Die Bootsfahrt bei Lindau führt über Flüsse, Seen oder Kanäle durch deutsche Wasserlandschaft als Erlebnis für die Familie",id:1744}
+        ];
+
         // === POI Normalization ===
         allPOIs.forEach((p, i) => {
             if (!p.id && p.id !== 0) p.id = i + 1;

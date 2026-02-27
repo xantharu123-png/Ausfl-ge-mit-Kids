@@ -1580,6 +1580,8 @@
         // ============================================
         // DATEN: Alle POIs aus dem Jahresguide 2026
         // ============================================
+
+        const allPOIs = [
 {name:"Radweg Bydgoszcz",category:"sport",lat:53.0865,lng:17.9904,location:"Bydgoszcz",region:"KUJ",description:"Der Radweg bei Bydgoszcz führt durch die polnischen Landschaften entlang von Seen und Flüssen vorbei an historischen Dörfern und Feldern mit vielen Pausen",id:258},
 {name:"Brauerei Gdynia",category:"kultur",lat:54.5068,lng:18.5589,location:"Gdynia",region:"POM",description:"Die Brauerei bei Gdynia zeigt traditionelle polnische Bierherstellung mit Führungen durch die Brauerei und Verkostungen verschiedener Sorten",id:563},
 {name:"Museum Tarnowskie Góry",category:"kultur",lat:50.4453,lng:18.7523,location:"Tarnowskie Góry",region:"SCH",description:"Das Museum in Tarnowskie Góry zeigt Ausstellungen zur regionalen polnischen Geschichte und Kultur mit archäologischen Funden und historischen Artefakten",id:797},
@@ -3580,6 +3582,8 @@
 {name:"Krippenausstellung Toruń",category:"weihnachten",lat:53.005,lng:18.6144,location:"Toruń",region:"KUJ",description:"Die Krippenausstellung in Toruń zeigt liebevoll gestaltete Weihnachtskrippen in polnischer Tradition – volkstümlich bis kunstvoll geschnitzt",id:1839},
 {name:"Beliebtes Theater Breslau",category:"kultur",lat:51.1140,lng:17.0563,location:"Breslau",region:"NIE",description:"Entdeckung bei Warschau: Das Theater in Breslau bietet ein abwechslungsreiches Programm aus Schauspiel, Oper und Ballett als Zentrum des kulturellen Lebens",id:1670},
 {name:"Königsschloss Warschau",category:"sehenswuerdigkeit",lat:52.1997,lng:21.0014,location:"Warschau",region:"MAS",description:"Das prächtige Königsschloss ist seit 1944 Symbol der polnischen Unabhängigkeit und beherbergt historische Kronschätze sowie Kunstsammlungen aus Jahrhunderten",id:1036}
+        ];
+
         // === POI Normalization ===
         allPOIs.forEach((p, i) => {
             if (!p.id && p.id !== 0) p.id = i + 1;

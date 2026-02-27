@@ -1580,6 +1580,8 @@
         // ============================================
         // DATEN: Alle POIs aus dem Jahresguide 2026
         // ============================================
+
+        const allPOIs = [
 {name:"Archiv/Bibliothek Jungfraujoch",category:"kultur",lat:46.5213,lng:8.0485,location:"Jungfraujoch",region:"BE",description:"Die historische Bibliothek in Jungfraujoch beherbergt rare Manuskripte und Drucke mit architektonischer Schönheit und wissenserreichernden Sammlungen",id:142},
 {name:"Naturlehrpfad Grindelwald",category:"familie",lat:46.6212,lng:8.3638,location:"Grindelwald",region:"BE",description:"Der Naturlehrpfad bei Grindelwald erklärt Flora, Fauna und Geologie der Schweizer Natur an interaktiven Stationen mit Bildungserlebnis für Kinder",id:795},
 {name:"Alpenaufzug Leukerbad",category:"volksfest",lat:46.3499,lng:7.6591,location:"Leukerbad",region:"VS",description:"Der Alpenaufzug bei Leukerbad zelebriert die Rückkehr der Kühe von der Alp mit geschmückten Vieh, Hirten in Tracht und lautem Juchzen",id:605},
@@ -3580,6 +3582,8 @@
 {name:"Beliebtes Galerie Zürich",category:"kultur",lat:47.3752,lng:8.533,location:"Zürich",region:"ZH",description:"Lohnenswert bei Thun: Die Galerie in Zürich präsentiert zeitgenössische Schweizer Kunstwerke und internationale Künstler in beeindruckenden historischen Gebäuden",id:1520},
 {name:"Beliebtes Schwimmen im See Vallée de Joux",category:"sport",lat:46.6334,lng:6.2143,location:"Vallée de Joux",region:"VD",description:"Entdeckung bei Luzern: Das See-Schwimmen bei Vallée de Joux in kristallklarem Alpen-Wasser bietet Erfrischung und Erholung mit oft wunderbar freier Sichtweite auf Berge",id:1148},
 {name:"Beliebtes Käserei Appenzell",category:"kultur",lat:47.3608,lng:9.4503,location:"Appenzell",region:"AI",description:"Empfehlenswert in Bern: Die Käserei bei Appenzell lädt zu Besichtigungen mit Live-Käseherstellung und Verkostung von Alpkäse-Raritäten ein – ursprüngliche Schweizer Tradition",id:1253}
+        ];
+
         // === POI Normalization ===
         allPOIs.forEach((p, i) => {
             if (!p.id && p.id !== 0) p.id = i + 1;

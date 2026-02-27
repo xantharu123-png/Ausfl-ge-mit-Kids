@@ -1580,6 +1580,8 @@
         // ============================================
         // DATEN: Alle POIs aus dem Jahresguide 2026
         // ============================================
+
+        const allPOIs = [
 {name:"Bierfestival Leuven",category:"festival",lat:50.8926,lng:4.7121,location:"Leuven",region:"VLB",description:"Das Bierfestival in Leuven präsentiert die Vielfalt der belgischen Braukunst mit Hunderten Biersorten, Braumeistern und Live-Musik",id:297},
 {name:"Kathedrale von Tournai",category:"sehenswuerdigkeit",lat:50.5842,lng:3.4248,location:"Tournai",region:"HEN",description:"Die romanisch-gotische Kathedrale mit fünf Türmen ist UNESCO-Welterbe und vereint zwei Baustile in einzigartiger Architektur",id:22},
 {name:"Abenteuerspielplatz Malmedy",category:"familie",lat:50.4319,lng:6.0409,location:"Malmedy",region:"LUE",description:"Der Abenteuerspielplatz bei Malmedy bietet Seilbrücken, Kletterbäume und Matschzonen für aktive Kinder im Grünen",id:165},
@@ -3580,6 +3582,8 @@
 {name:"Theater Brüssel",category:"kultur",lat:50.8369,lng:4.3663,location:"Brüssel",region:"BRU",description:"Das Theater in Brüssel bietet ein vielfältiges Programm aus Schauspiel, Oper und zeitgenössischem Tanz als kultureller Mittelpunkt der Region",id:1772},
 {name:"Comic-Festival Tournai",category:"festival",lat:50.6198,lng:3.412,location:"Tournai",region:"HEN",description:"Das Comic-Festival bei Tournai feiert die belgische Comic-Tradition mit Zeichnerworkshops, Ausstellungen und Signierstunden bekannter Künstler",id:1959},
 {name:"Beliebtes Brücke Brüssel",category:"sehenswuerdigkeit",lat:50.8808,lng:4.3137,location:"Brüssel",region:"BRU",description:"Empfehlenswert in Antwerpen: Die historische Brücke bei Brüssel überspannt den Fluss mit eleganten Bögen und bietet einen malerischen Rahmen für Spaziergänge",id:1117}
+        ];
+
         // === POI Normalization ===
         allPOIs.forEach((p, i) => {
             if (!p.id && p.id !== 0) p.id = i + 1;

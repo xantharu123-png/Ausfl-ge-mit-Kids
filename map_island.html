@@ -1581,6 +1581,8 @@
         // DATEN: Alle POIs aus dem Jahresguide 2026
         // ============================================
 
+        const allPOIs = [
+
 {name:"Eisklettern Landmannalaugar",category:"sport",lat:63.9788,lng:-19.0444,location:"Landmannalaugar",region:"HOC",description:"Das Eisklettern bei Landmannalaugar bietet mit Eispickeln und Steigeisen die Erfahrung, gefrorene Wasserfälle und Gletschereis in atemberaubender Szenerie zu erklimmen",id:555},
 {name:"Islandpferd-Erlebnis Grindavík",category:"familie",lat:63.8564,lng:-22.4432,location:"Grindavík",region:"REY",description:"Das Islandpferd-Erlebnis bei Grindavík bietet Kindern und Erwachsenen Reitstunden auf den freundlichen Pferden mit dem einzigartigen Tölt-Gang",id:272},
 {name:"Naturlehrpfad Vík",category:"familie",lat:63.4108,lng:-18.9906,location:"Vík",region:"SUE",description:"Der Naturlehrpfad bei Vík erklärt Kindern spielerisch die vulkanische Geologie, isländische Flora und die einzigartige Tierwelt der Insel",id:137},
@@ -3581,6 +3583,8 @@
 {name:"Beliebtes Eldfell-Vulkan",category:"sehenswuerdigkeit",lat:63.4794,lng:-20.2766,location:"Heimaey",region:"SUE",description:"Ausflugstipp Heimaey: Der Eldfell auf Heimaey brach 1973 aus und bedrohte die gesamte Stadt, heute kann man den noch warmen Krater besteigen und die Lavafelder durchwandern",id:1026},
 {name:"Beliebtes Adventsschwimmen Seyðisfjörður",category:"weihnachten",lat:65.2439,lng:-14.0,location:"Seyðisfjörður",region:"OST",description:"Ausflugstipp Seyðisfjörður: Das Adventsschwimmen in Seyðisfjörður bringt die Gemeinde im geothermalen Freibad zusammen für ein warmes Bad unter dem dunklen Winterhimmel Islands",id:1420},
 {name:"Beliebtes Sternenbeobachtung Grindavík",category:"familie",lat:63.8772,lng:-22.403,location:"Grindavík",region:"REY",description:"Ausflugstipp Grindavík: Die Sternenbeobachtung bei Grindavík nutzt Islands geringe Lichtverschmutzung für geführte Teleskopabende mit Blick auf die Milchstraße und Nordlichter",id:1742}
+        ];
+
         // === POI Normalization ===
         allPOIs.forEach((p, i) => {
             if (!p.id && p.id !== 0) p.id = i + 1;

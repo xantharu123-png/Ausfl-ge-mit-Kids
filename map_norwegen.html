@@ -1581,6 +1581,8 @@
         // DATEN: Alle POIs aus dem Jahresguide 2026
         // ============================================
 
+        const allPOIs = [
+
 {name:"Waldspielplatz Hamar",category:"familie",lat:60.8267,lng:11.0657,location:"Hamar",region:"INN",description:"Der Waldspielplatz bei Hamar nutzt natürliche Materialien wie Baumstämme und Steine für kreatives Spielen in der norwegischen Waldlandschaft zwischen Birken und Kiefern",id:472},
 {name:"Adventssingen Bodø",category:"weihnachten",lat:67.2714,lng:14.3921,location:"Bodø",region:"NOR",description:"Das Adventssingen in Bodø vereint norwegische Chöre in der historischen Kirche zu einem feierlichen Konzert mit nordischen Weihnachtsliedern und Hunderten von Kerzen",id:762},
 {name:"Mittsommerfest Harstad",category:"volksfest",lat:68.8265,lng:16.5163,location:"Harstad",region:"TRM",description:"Das Mittsommerfest Sankthans in Harstad feiert die Sommersonnenwende mit dem traditionellen Lagerfeuer Bål am Wasser, Grillabend und norwegischer Sommeridylle am längsten Tag",id:987},
@@ -3581,6 +3583,8 @@
 {name:"Nisse-Abend Mandal",category:"weihnachten",lat:58.0661,lng:7.4979,location:"Mandal",region:"AGD",description:"Der Nisse-Abend in Mandal feiert den norwegischen Weihnachtswichtel mit Märchenlesungen, Wichtelwerkstatt und dem Aufstellen von Julegrøt-Reisbrei für den Fjøsnisse",id:1507},
 {name:"Beliebtes Julbord-Abend Mandal",category:"weihnachten",lat:58.0261,lng:7.4635,location:"Mandal",region:"AGD",description:"Ausflugstipp Mandal: Das Julbord in Mandal zelebriert das norwegische Weihnachtsbuffet mit Pinnekjøtt, Lutefisk und Ribbe in festlicher Atmosphäre und geselliger Vorweihnachtsstimmung",id:1803},
 {name:"Beliebtes Kunstgalerie Senja",category:"kultur",lat:69.2236,lng:17.1381,location:"Senja",region:"TRM",description:"Ausflugstipp Senja: Die Kunstgalerie in Senja zeigt wechselnde Ausstellungen regionaler und norwegischer Künstler und bietet Workshops und Kreativkurse für Erwachsene und Kinder",id:1349}
+        ];
+
         // === POI Normalization ===
         allPOIs.forEach((p, i) => {
             if (!p.id && p.id !== 0) p.id = i + 1;

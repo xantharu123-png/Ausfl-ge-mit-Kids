@@ -1581,6 +1581,8 @@
         // DATEN: Alle POIs aus dem Jahresguide 2026
         // ============================================
 
+        const allPOIs = [
+
 {name:"Radweg Gällivare",category:"sport",lat:67.1733,lng:20.6734,location:"Gällivare",region:"NOR",description:"Der Radweg bei Gällivare verbindet landschaftliche Highlights mit gut markierten Strecken durch die charakteristische schwedische Natur",id:186},
 {name:"Naturlehrpfad Kiruna",category:"familie",lat:67.888,lng:20.1993,location:"Kiruna",region:"NOR",description:"Der Naturlehrpfad bei Kiruna vermittelt spielerisch Wissen über die schwedische Flora und Fauna mit Schautafeln und interaktiven Stationen für Kinder",id:534},
 {name:"Skigebiet Sälen",category:"sport",lat:61.1801,lng:13.275,location:"Sälen",region:"DAL",description:"Sälen ist eines der größten Skigebiete Schwedens mit über 100 Pisten in vier verbundenen Skiresorts und Startort des berühmten Vasalaufs",id:5},
@@ -3581,6 +3583,8 @@
 {name:"Naturreservat Sundsvall",category:"sehenswuerdigkeit",lat:62.358,lng:17.3233,location:"Sundsvall",region:"GÄV",description:"Das Naturreservat bei Sundsvall schützt eine einzigartige schwedische Naturlandschaft mit markierten Wanderwegen, Vogelbeobachtung und seltenen Pflanzenarten",id:1407},
 {name:"Herbstmarkt Trollhättan",category:"volksfest",lat:58.2639,lng:12.253,location:"Trollhättan",region:"VGO",description:"Der Herbstmarkt in Trollhättan bietet regionale Spezialitäten, Kunsthandwerk und saisonale Produkte und feiert die Erntezeit mit schwedischer Gemütlichkeit",id:1173},
 {name:"Beliebtes Bootsfahrt Ystad",category:"familie",lat:55.4377,lng:13.8462,location:"Ystad",region:"SKA",description:"Ausflugstipp Ystad: In Ystad: Die Rundfahrt mit dem Boot ab Ystad führt entlang der schwedischen Küste mit Blick auf Schären, Leuchttürme und die malerische Küstenlandschaft",id:1350}
+        ];
+
         // === POI Normalization ===
         allPOIs.forEach((p, i) => {
             if (!p.id && p.id !== 0) p.id = i + 1;

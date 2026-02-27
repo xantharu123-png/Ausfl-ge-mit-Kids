@@ -1580,6 +1580,8 @@
         // ============================================
         // DATEN: Alle POIs aus dem Jahresguide 2026
         // ============================================
+
+        const allPOIs = [
 {name:"Adventkonzert Žilina",category:"weihnachten",lat:49.1873,lng:18.7624,location:"Žilina",region:"ZIL",description:"In Žilina: Das Adventkonzert in der Kirche von Žilina bietet besinnliche Weihnachtsmusik mit Chor und Orgelspiel. Feierliche Atmosphäre unter gotischen Gewölben berührt das Herz. Traditionelle Weihnachtslieder und moderne Kompositionen wechseln. Das Konzert ist Höhepunkt der Adventszeit.",id:710},
 {name:"Denkmal Bojnice",category:"sehenswuerdigkeit",lat:48.7514,lng:18.5973,location:"Bojnice",region:"TRN",description:"Das Denkmal bei Bojnice erinnert an historische Ereignisse oder berühmte Persönlichkeiten der slowakischen Geschichte. Die künstlerische Ausgestaltung erzählt Geschichten von Kampf und Triumph. Tafeln erklären die historischen Hintergründe. Viele Denkmäler sind architektonische Kunstwerke von bekannten Künstlern.",id:826},
 {name:"Kunstmuseum Dunajec-Durchbruch",category:"kultur",lat:49.422,lng:20.23,location:"Dunajec-Durchbruch",region:"PRE",description:"Das Kunstmuseum in Dunajec-Durchbruch zeigt slowakische Kunst von Mittelalter bis Gegenwart. Sammlungen mediävaler Holzschnitzereien und moderner Werke sind oft hervorragend. Sonderausstellungen internationaler Künstler ergänzen das Programm. Das Museum ist oft in schönen Barockpalästen untergebracht.",id:543},
@@ -3580,6 +3582,8 @@
 {name:"Beliebtes Heimatmuseum Dunajec-Durchbruch",category:"kultur",lat:49.4431,lng:20.2622,location:"Dunajec-Durchbruch",region:"PRE",description:"Ausflugstipp Banská Bystrica: Das Heimatmuseum in Dunajec-Durchbruch dokumentiert traditionelles slowakisches Leben mit Werkzeugen, Trachten und Möbeln. Ethnographische Sammlungen zeigen regionale Unterschiede in Handwerk und Kultur. Kostüme und Schmuck illustrieren Festtraditionen. Aktuelle Handwerker demonstrieren traditionelle Techniken.",id:1211},
 {name:"Beliebtes Naturlehrpfad Vlkolínec",category:"familie",lat:48.9217,lng:19.0881,location:"Vlkolínec",region:"ZIL",description:"Entdeckung bei Čičmany: Der Naturlehrpfad bei Vlkolínec erklärt an bunten Infotafeln die Flora und Fauna der Region. Interaktive Stationen laden zum Anfassen ein. Die Wegstrecke ist kurz und kinderfreundlich. Der Pfad führt an Bächen und durch Wälder mit informativen Hinweisen zu Baumarten und Vogelgesang.",id:1335},
 {name:"Beliebtes Jazzfestival Detva",category:"festival",lat:48.5931,lng:19.3117,location:"Detva",region:"BAN",description:"Sehenswert bei Levoča: Das Jazzfestival in Detva bringt internationale und slowakische Jazzkünstler zusammen in intimer Atmosphäre. Aufführungen in historischen Gebäuden machen das Festival besonders. Blue Note Klänge in romantischer Umgebung rühren Jazzbefans. Workshops von Meistern gehören zum Programm.",id:1659}
+        ];
+
         // === POI Normalization ===
         allPOIs.forEach((p, i) => {
             if (!p.id && p.id !== 0) p.id = i + 1;

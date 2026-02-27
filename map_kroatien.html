@@ -1580,6 +1580,8 @@
         // ============================================
         // DATEN: Alle POIs aus dem Jahresguide 2026
         // ============================================
+
+        const allPOIs = [
 {name:"Strandmuschel-Sammlung Pula",category:"familie",lat:44.8445,lng:13.8459,location:"Pula",region:"IST",description:"Die Strände bei Pula sind paradiesisch für Kinder zum Sammeln von Muscheln, Steinen und zum Sandburgen-Bauen in warmer Adria",id:85},
 {name:"Tauchschule Baška",category:"sport",lat:45.2163,lng:14.6488,location:"Baška",region:"KVN",description:"Die Tauchschule bei Baška bietet Kurse und Tauchgänge zu versunkenen Schiffen, Höhlen und Riffen der Adria mit warmem Wasser",id:403},
 {name:"Tanzfestival Varaždin",category:"festival",lat:46.2802,lng:16.3129,location:"Varaždin",region:"MIT",description:"Das Tanzfestival in Varaždin zeigt moderne und traditionelle kroatische Folkloretänze mit Kostümen, Tamburinen und ausgelassener Tanzfreudigkeit",id:706},
@@ -3580,6 +3582,8 @@
 {name:"Beliebtes Leuchtturm Primošten",category:"sehenswuerdigkeit",lat:43.2585,lng:16.5371,location:"Primošten",region:"DAL",description:"Ausflugstipp Hvar: Der Leuchtturm bei Primošten wacht über die adriatische Küste und bietet von seiner Aussichtsplattform einen weiten Blick über Meer und Inseln",id:1732},
 {name:"Beliebtes Dorffest Split",category:"volksfest",lat:43.4978,lng:16.4298,location:"Split",region:"DAL",description:"Erlebnis bei Bol: Das Dorffest in Split feiert mit Trachtentänzern, Volksliedern, Tamburin-Musik und traditionellen kroatischen Spezialitäten",id:1171},
 {name:"Beliebtes Filmfest Kurzfilme Lovran",category:"festival",lat:45.2559,lng:14.2243,location:"Lovran",region:"KVN",description:"Entdeckung bei Osijek: Das Kurzfilm-Festival in Lovran präsentiert internationale und kroatische Kurzfilme mit Prämierungen und Diskussionen junger Filmemacher",id:1894}
+        ];
+
         // === POI Normalization ===
         allPOIs.forEach((p, i) => {
             if (!p.id && p.id !== 0) p.id = i + 1;

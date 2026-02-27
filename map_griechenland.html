@@ -1580,6 +1580,8 @@
         // ============================================
         // DATEN: Alle POIs aus dem Jahresguide 2026
         // ============================================
+
+        const allPOIs = [
 {name:"Kloster-Besuch Patras",category:"familie",lat:38.2544,lng:21.7442,location:"Patras",region:"PEL",description:"Der Kloster-Besuch bei Patras bietet Einblicke in die byzantinische Spiritualität mit beeindruckenden Ikonos-Sammlungen, Fresken und friedlicher Kloster-Atmosphäre",id:391},
 {name:"Silvesterfeier Mykonos",category:"weihnachten",lat:37.4847,lng:25.3389,location:"Mykonos",region:"KYK",description:"Die Silvesterfeier in Mykonos empfängt das neue Jahr mit Feuerwerk, Tänzen auf Plätzen und traditionellen griechischen Neujahrsbräuchen mit Glück bringenden Symbolen",id:253},
 {name:"Bootsfahrt Kos",category:"familie",lat:36.923,lng:26.7556,location:"Kos",region:"DOD",description:"Die Bootsfahrt bei Kos erkundet versteckte Grotten, kleine Inseln und Strände mit glasklarem Wasser ideal für Schnorchel-Abenteuer der ganzen Familie",id:939},
@@ -3580,6 +3582,8 @@
 {name:"Beliebtes Literaturfestival Athen",category:"festival",lat:37.9811,lng:23.7639,location:"Athen",region:"ATT",description:"Empfehlenswert in Athen: Das Literaturfestival in Athen vereint griechische und internationale Autoren mit Lesungen, Diskussionen und Signierungen im Zeichen der antiken Lyrik",id:1173},
 {name:"Beliebtes Neujahrsfeuer Volos",category:"weihnachten",lat:39.3956,lng:23.2106,location:"Volos",region:"THE",description:"Lohnenswert bei Patras: Das Neujahrsfeuer in Volos brennt zu Ehren des Jahreswechsels mit traditionellen Feuerzeremonien, Musik und gemeinschaftlichem Feiern rund um Feuer",id:1697},
 {name:"Beliebtes Tauchschule Korfu",category:"sport",lat:39.6022,lng:19.8905,location:"Korfu",region:"ION",description:"Entdeckung bei Meteora: Die Tauchschule in Korfu erkundet die faszinierenden Unterwasserwelten der ägäischen und ionischen See mit antiken Ruinen, Korallenriffen und mediterraner Fischfauna",id:1849}
+        ];
+
         // === POI Normalization ===
         allPOIs.forEach((p, i) => {
             if (!p.id && p.id !== 0) p.id = i + 1;

@@ -1580,6 +1580,8 @@
         // ============================================
         // DATEN: Alle POIs aus dem Jahresguide 2026
         // ============================================
+
+        const allPOIs = [
 {name:"Palazzo Aquila",category:"sehenswuerdigkeit",lat:42.3421,lng:13.3632,location:"Aquila",region:"ABR",description:"Der Renaissance-Palazzo bei Aquila ist ein beeindruckendes Zeugnis italienischer Architektur mit Schlossgarten, Innenhof und wechselnden Kunstausstellungen",id:50},
 {name:"Kunsthandwerk Alberobello",category:"kultur",lat:40.8352,lng:17.2583,location:"Alberobello",region:"PUG",description:"Die Kunsthandwerk-Werkstatt in Alberobello zeigt traditionelles italienisches Handwerk wie Glasmalerei, Keramik und Lederverarbeitung zum Zuschauen",id:952},
 {name:"Radweg Venedig Lido",category:"sport",lat:45.3847,lng:12.3998,location:"Venedig Lido",region:"VEN",description:"Der Radweg bei Venedig Lido führt durch malerische italienische Landschaften entlang von Weinbergen, Olivenhainen und mittelalterlichen Dörfern mit kontinuierlichen Ausblicken",id:198},
@@ -3580,6 +3582,8 @@
 {name:"Schwimmbad Palermo",category:"sport",lat:38.1366,lng:13.3585,location:"Palermo",region:"SIZ",description:"Das Schwimmbad in Palermo bietet moderne Sportbecken, Wellness-Bereiche und Wasserrutschen für Familien und Sportbegeisterte mit italienischer Gastfreundschaft",id:1721},
 {name:"Beliebtes Kunstmuseum Venedig",category:"kultur",lat:45.4423,lng:12.3495,location:"Venedig",region:"VEN",description:"Sehenswert bei Como: Das Kunstmuseum in Venedig zeigt bedeutende italienische Meisterwerke aus Renaissance und Barock mit wertvollen Sammlungen von Weltrang",id:1600},
 {name:"Abenteuerspielplatz Florenz",category:"familie",lat:43.73,lng:11.2866,location:"Florenz",region:"TOS",description:"Der Abenteuerspielplatz bei Florenz bietet Seilbrücken, Kletterbäume und Naturerlebnis-Zonen für aktive Kinder im mediterranen Grünen",id:1996}
+        ];
+
         // === POI Normalization ===
         allPOIs.forEach((p, i) => {
             if (!p.id && p.id !== 0) p.id = i + 1;

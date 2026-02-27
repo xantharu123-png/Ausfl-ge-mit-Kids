@@ -1580,6 +1580,8 @@
         // ============================================
         // DATEN: Alle POIs aus dem Jahresguide 2026
         // ============================================
+
+        const allPOIs = [
 {name:"Wanderpfad Serra Sintra",category:"sport",lat:38.7895,lng:-9.4108,location:"Sintra",region:"LIS",description:"In Sintra: Der Bergwanderpfad in den Serras bei Sintra führt durch wildnis-romantische Landschaft mit endemischen Pflanzen und Panoramaausblicken",id:690},
 {name:"Ponta da Piedade",category:"sehenswuerdigkeit",lat:37.0662,lng:-8.6359,location:"Lagos",region:"ALG",description:"Die spektakuläre Klippe mit goldenen Sandsteinfelsformationen, Höhlen und versteckten Buchten ist Europas schönster Strand und erreichbar nur vom Wasser",id:18},
 {name:"Olivenlesefest Sintra",category:"volksfest",lat:38.8253,lng:-9.3902,location:"Sintra",region:"LIS",description:"Das Olivenlesefest in Sintra feiert die Ernte mit Prozessionen, Olivenöl-Kostproben und traditionellen Rezepten",id:853},
@@ -3580,6 +3582,8 @@
 {name:"Beliebtes Abenteuerspielplatz Sagres",category:"familie",lat:36.9999,lng:-8.8887,location:"Sagres",region:"ALG",description:"Ausflugstipp Évora: Der Abenteuerspielplatz bei Sagres bietet Seilbahn, Baumklettergerüst und Waldlaufparcours für aktive Kinder, ein besonderes Erlebnis in der Region Sagres",id:1308},
 {name:"Beliebtes Musikfestival Faro",category:"festival",lat:37.0104,lng:-7.9749,location:"Faro",region:"ALG",description:"Erlebnis bei Óbidos: Das Musikfestival in Faro bringt portugiesische Künstler und internationale Acts auf die Bühne in open-air Sommernächten",id:1539},
 {name:"Beliebtes Kajakfahrt Faro",category:"sport",lat:37.0462,lng:-7.9427,location:"Faro",region:"ALG",description:"Lohnenswert bei Aveiro: In Faro: Die Kajakfahrt entlang der Küste von Faro erkundet Felsenküsten, Höhlen und Buchten mit kristallklarem Atlantikwasser",id:1336}
+        ];
+
         // === POI Normalization ===
         allPOIs.forEach((p, i) => {
             if (!p.id && p.id !== 0) p.id = i + 1;

@@ -1580,6 +1580,8 @@
         // ============================================
         // DATEN: Alle POIs aus dem Jahresguide 2026
         // ============================================
+
+        const allPOIs = [
 {name:"Wanderung Grasdächer Kirkjubøur",category:"sport",lat:62.0231,lng:-6.9282,location:"Kirkjubøur",region:"STR",description:"In Kirkjubøur: Die Wanderung über die traditionellen Grasdächer von Kirkjubøur zeigt authentische färöische Architektur und bietet spektakuläre Aussichten von den Dachkanten",id:160},
 {name:"Kajaking in Fjorden Gjógv",category:"sport",lat:62.1711,lng:-7.1987,location:"Gjógv",region:"EYS",description:"In Gjógv: Das Kajaking in den Fjorden bei Gjógv bietet Paddelspaß zwischen dramatischen Klippen mit Blick auf Wasserfälle und Meeressäuger",id:98},
 {name:"Wasserfall Mykines",category:"sehenswuerdigkeit",lat:62.104,lng:-7.2343,location:"Mykines",region:"VAG",description:"Der Wasserfall bei Mykines stürzt über dramatische Basaltklippen herab und bildet einen der schönsten Naturschauplätze der wilden Färöer-Landschaft",id:360},
@@ -2406,6 +2408,8 @@
 {name:"Beliebtes Fotoexpedition Klippen Vágar",category:"sport",lat:61.9226,lng:-7.1742,location:"Vágar",region:"VAG",description:"Empfehlenswert in Hattardalur: In Vágar: Die Fotoexpedition zu den Meeresklippen von Vágar dokumentiert die wilden Landschaften, Seevögel und Naturschauspiele der Färöer",id:1182},
 {name:"Beliebtes Fjord Sumba",category:"sehenswuerdigkeit",lat:61.5024,lng:-6.8355,location:"Sumba",region:"SUE",description:"Erlebnis bei Tórshavn (Perlagon): Der Fjord bei Sumba ist umgeben von senkrechten Felswänden mit Wasserfällen und abgelegenen Dörfern, zugänglich nur per Boot oder Tunnel",id:1129},
 {name:"Beliebtes Winterlandschaft Leynar",category:"weihnachten",lat:61.8353,lng:-7.1436,location:"Leynar",region:"VAG",description:"Lohnenswert bei Mykines: Die Winterlandschaft um Leynar bietet magische Schneekulisse mit Polarlichtern und adventlicher Stille in der rauen Natur",id:1156}
+        ];
+
         // === POI Normalization ===
         allPOIs.forEach((p, i) => {
             if (!p.id && p.id !== 0) p.id = i + 1;

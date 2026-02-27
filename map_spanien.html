@@ -1581,6 +1581,8 @@
         // DATEN: Alle POIs aus dem Jahresguide 2026
         // ============================================
 
+        const allPOIs = [
+
 {name:"Romería Nerja",category:"volksfest",lat:36.749,lng:-3.8983,location:"Nerja",region:"AND",description:"Die Romería bei Nerja ist eine traditionelle spanische Wallfahrt mit Prozession, Pferden, Ochsenkarren und einem Volksfest am Ziel",id:449},
 {name:"Radweg Mérida",category:"sport",lat:38.8884,lng:-6.3534,location:"Mérida",region:"EXT",description:"Der Radweg bei Mérida verbindet landschaftliche Highlights mit gut markierten Strecken durch die spanische Natur und vorbei an historischen Orten",id:913},
 {name:"Spielplatz Mérida",category:"familie",lat:38.885,lng:-6.3264,location:"Mérida",region:"EXT",description:"In Mérida: Der liebevoll gestaltete Spielplatz in Mérida bietet schattige Kletterbereiche, Wasserelemente und sichere Spielflächen für Familien",id:823},
@@ -3581,6 +3583,8 @@
 {name:"Beliebtes Museo Nacional de Arte Romano",category:"kultur",lat:38.8954,lng:-6.3442,location:"Mérida",region:"EXT",description:"Ausflugstipp Mérida: Das Museo Nacional de Arte Romano von Rafael Moneo zeigt in einem beeindruckenden Bau die umfangreichste Sammlung römischer Kunst Spaniens",id:1051},
 {name:"Beliebtes Mountainbike-Trail Santiago de Compostela",category:"sport",lat:42.8562,lng:-8.5536,location:"Santiago de Compostela",region:"GAL",description:"Wissenswertes: Der Mountainbike-Trail bei Santiago de Compostela bietet anspruchsvolle Strecken durch Olivenhaine, Korkeichwälder und über trockene Flussbetten",id:1277},
 {name:"Beliebtes Weihnachtsmarkt am Hafen Cádiz",category:"weihnachten",lat:36.5297,lng:-6.2652,location:"Cádiz",region:"AND",description:"In Cádiz: Der Weihnachtsmarkt am Hafen von Cádiz verbindet maritime Atmosphäre mit Weihnachtsstimmung, Turrones und Kunsthandwerk am Mittelmeer",id:1787}
+        ];
+
         // === POI Normalization ===
         allPOIs.forEach((p, i) => {
             if (!p.id && p.id !== 0) p.id = i + 1;
