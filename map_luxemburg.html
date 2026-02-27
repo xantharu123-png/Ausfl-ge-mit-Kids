@@ -3524,7 +3524,7 @@ const allPOIs = [
             let lastErr;
             for (const server of servers) {
                 try {
-                    return await safeFetchJSON(server, { method: 'POST', body: 'data=' + encodeURIComponent(query) }, 35000);
+                    return await safeFetchJSON(server, { method: 'POST', body: 'data=' + encodeURIComponent(query), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }, 35000);
                 } catch(e) { lastErr = e; }
                 try {
                     const retryQuery = query.replace('timeout:30', 'timeout:60');

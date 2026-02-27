@@ -4420,7 +4420,7 @@ const allPOIs = [
             for (const server of servers) {
                 try {
                     console.log('[Overpass] Trying:', server);
-                    const result = await safeFetchJSON(server, { method: 'POST', body: 'data=' + encodeURIComponent(query) }, 35000);
+                    const result = await safeFetchJSON(server, { method: 'POST', body: 'data=' + encodeURIComponent(query), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }, 35000);
                     console.log('[Overpass] Success:', result.elements ? result.elements.length : 0, 'elements');
                     return result;
                 } catch(e) { console.warn('[Overpass] Failed:', server, e.message); lastErr = e; }
