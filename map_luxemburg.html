@@ -2938,8 +2938,16 @@ const allPOIs = [
                     const id = parseInt(card.dataset.id);
                     const poi = allPOIs.find(p => p.id === id);
                     if (poi && markers[id]) {
-                        map.setView([49.8153, 6.1296], 10);
-                        markers[id].openPopup();
+                        map.setView([poi.lat, poi.lng], 15);
+                        setTimeout(() => {
+                            if (window._cluster) {
+                                window._cluster.zoomToShowLayer(markers[id], () => {
+                                    markers[id].openPopup();
+                                });
+                            } else {
+                                markers[id].openPopup();
+                            }
+                        }, 300);
                         highlightPOICard(id);
                     }
                 });
@@ -3399,7 +3407,7 @@ const allPOIs = [
                         const distLabel = useArea ? '📍 ' + poi.location : '📍 ' + distText + ' · ' + poi.location;
                         
                         html += `
-                            <div class="rec-card" onclick="map.setView([49.8153, 6.1296], 10); if(markers[${poi.id}]) markers[${poi.id}].openPopup();">
+                            <div class="rec-card" onclick="focusOnPOI(${poi.id})">
                                 <div class="rec-rank">#${i+1}</div>
                                 <div class="rec-info">
                                     <div class="rec-name">${catEmoji} ${poi.name}</div>
@@ -3573,7 +3581,7 @@ const allPOIs = [
                         campingCluster.addLayer(marker);
                         campingMarkers.push(marker);
                         if (i < 50) {
-                            html += '<div class="camping-card" onclick="map.setView([49.8153, 6.1296], 10);campingMarkers[' + i + '].openPopup();">';
+                            html += '<div class="camping-card" onclick="var m=campingMarkers['+ i +']; if(m){map.setView(m.getLatLng(), 15); setTimeout(()=>m.openPopup(), 300);}">';
                             html += '<div class="camping-card-name">' + (i+1) + '. ' + name + '</div>';
                             html += '<div class="camping-card-type">' + typeLabel + stars + '</div>';
                             html += '</div>';
@@ -3674,7 +3682,7 @@ const allPOIs = [
                     campingCluster.addLayer(marker);
                     campingMarkers.push(marker);
                     if (i < 80) {
-                        html += '<div class="camping-card" onclick="map.setView([49.8153, 6.1296], 10);campingMarkers[' + i + '].openPopup();">';
+                        html += '<div class="camping-card" onclick="var m=campingMarkers['+ i +']; if(m){map.setView(m.getLatLng(), 15); setTimeout(()=>m.openPopup(), 300);}">';
                         html += '<div class="camping-card-name">' + (i+1) + '. ' + name + '</div>';
                         html += '<div class="camping-card-type">' + typeLabel + stars + '</div>';
                         html += '</div>';
@@ -3937,6 +3945,23 @@ const allPOIs = [
         });
 
     </script>
-<script>setTimeout(()=>{const l=document.getElementById("loading");if(l&&!l.classList.contains("hidden"))l.classList.add("hidden");},3000);</script>
+<script>setTimeout(()=>{const l=document.getElementById("loading");if(l&&!l.classList.contains("hidden"))l.classList.add("hidden");},3000);
+        function focusOnPOI(poiId) {
+            const poi = allPOIs.find(p => p.id === poiId);
+            if (!poi || !markers[poiId]) return;
+            map.setView([poi.lat, poi.lng], 15);
+            setTimeout(() => {
+                if (window._cluster) {
+                    window._cluster.zoomToShowLayer(markers[poiId], () => {
+                        markers[poiId].openPopup();
+                    });
+                } else {
+                    markers[poiId].openPopup();
+                }
+            }, 300);
+            highlightPOICard(poiId);
+        }
+
+</script>
 </body>
 </html>
