@@ -4443,14 +4443,24 @@ const allPOIs = [{name:"Mill Island Bydgoszcz",category:"sport",lat:53.0865,lng:
             
             document.getElementById('camping-results').innerHTML = '<div class="camping-loading"><div class="camping-loading-text">\u{1F3D5}\uFE0F Lade Campingplätze...</div><div class="camping-loading-sub">Daten werden von OpenStreetMap geladen</div><div class="camping-progress"><div class="camping-progress-bar"></div></div></div>';
             
-            let query = '[out:json][timeout:30];(';
-            if (campingTypes.camping) query += 'node["tourism"="camp_site"](' + south + ',' + west + ',' + north + ',' + east + ');';
-            if (campingTypes.caravan) query += 'node["tourism"="caravan_site"](' + south + ',' + west + ',' + north + ',' + east + ');';
-            if (campingTypes.parking) {
-                query += 'node["amenity"="parking"]["camping"="yes"](' + south + ',' + west + ',' + north + ',' + east + ');';
-                query += 'node["tourism"="camp_pitch"](' + south + ',' + west + ',' + north + ',' + east + ');';
+            // Build tourism type regex based on active filters
+            const types = [];
+            if (campingTypes.camping) types.push('camp_site');
+            if (campingTypes.caravan) types.push('caravan_site');
+            if (campingTypes.parking) types.push('camp_pitch');
+            if (!types.length) { document.getElementById('camping-results').innerHTML = '<div class="camping-info">Bitte mindestens einen Typ auswählen.</div>'; campingLoading = false; return; }
+            const typeRegex = types.join('|');
+            
+            // Split into quadrants if area is large (prevents Overpass timeout)
+            const latSpan = north - south, lngSpan = east - west;
+            const needsSplit = (latSpan * lngSpan) > 4; // ~2° x 2° threshold
+            const bboxes = [];
+            if (needsSplit) {
+                const midLat = (south + north) / 2, midLng = (west + east) / 2;
+                bboxes.push([south,west,midLat,midLng], [south,midLng,midLat,east], [midLat,west,north,midLng], [midLat,midLng,north,east]);
+            } else {
+                bboxes.push([south, west, north, east]);
             }
-            query += ');out body 500;';
 
             campingLoading = true;
             
@@ -4463,7 +4473,7 @@ const allPOIs = [{name:"Mill Island Bydgoszcz",category:"sport",lat:53.0865,lng:
                     }
                 });
                 
-                const sites = data.elements || [];
+                const sites = allElements;
                 let html = '';
                 if (sites.length === 0) {
                     html = '<div class="camping-info">Keine Plätze im sichtbaren Bereich. Zoome raus oder verschiebe die Karte.</div>';
