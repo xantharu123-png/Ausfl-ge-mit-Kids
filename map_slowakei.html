@@ -4542,7 +4542,7 @@ const allPOIs = [{name:"Adventkonzert Žilina",category:"weihnachten",lat:49.187
                 if (campingRoute) map.removeLayer(campingRoute);
                 campingRoute = L.polyline(coords, { color: '#4ecca3', weight: 4, opacity: 0.8, dashArray: '10, 8' }).addTo(map);
                 map.fitBounds(campingRoute.getBounds(), { padding: [50, 50] });
-                document.getElementById('camping-results').innerHTML = '<div class="camping-loading"><div class="camping-loading-text">\u{1F3D5}\uFE0F Suche Campingpl\u00e4tze entlang der Route...</div><div class="camping-loading-sub">20km-Korridor entlang der Route</div><div class="camping-progress"><div class="camping-progress-bar"></div></div></div>';
+                document.getElementById('camping-results').innerHTML = '<div class="camping-loading"><div class="camping-loading-text">\u{1F3D5}\uFE0F Suche Campingpl\u00e4tze entlang der Route...</div><div class="camping-loading-sub">50km-Korridor entlang der Route</div><div class="camping-progress"><div class="camping-progress-bar"></div></div></div>';
                 // Sample route points every ~30km for Overpass "around" query (much faster than BBox)
                 const routeCoords = coords;
                 const samplePts = [routeCoords[0]];
@@ -4554,9 +4554,9 @@ const allPOIs = [{name:"Adventkonzert Žilina",category:"weihnachten",lat:49.187
                 if (samplePts.length < 2) samplePts.push(routeCoords[routeCoords.length - 1]);
                 const aroundStr = samplePts.map(p => p[0].toFixed(4) + ',' + p[1].toFixed(4)).join(',');
                 let query = '[out:json][timeout:30];(';
-                if (campingTypes.camping) query += 'node["tourism"="camp_site"](around:20000,' + aroundStr + ');';
-                if (campingTypes.caravan) query += 'node["tourism"="caravan_site"](around:20000,' + aroundStr + ');';
-                if (campingTypes.parking) { query += 'node["amenity"="parking"]["camping"="yes"](around:20000,' + aroundStr + ');'; query += 'node["tourism"="camp_pitch"](around:20000,' + aroundStr + ');'; }
+                if (campingTypes.camping) query += 'node["tourism"="camp_site"](around:50000,' + aroundStr + ');';
+                if (campingTypes.caravan) query += 'node["tourism"="caravan_site"](around:50000,' + aroundStr + ');';
+                if (campingTypes.parking) { query += 'node["amenity"="parking"]["camping"="yes"](around:50000,' + aroundStr + ');'; query += 'node["tourism"="camp_pitch"](around:50000,' + aroundStr + ');'; }
                 query += ');out body 500;';
                 const campData = await overpassQuery(query);
                 const nearRoute = (campData.elements || []);
