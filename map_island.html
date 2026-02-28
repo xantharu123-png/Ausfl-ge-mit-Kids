@@ -4571,24 +4571,44 @@ const allPOIs = [
                 if (campingRoute) map.removeLayer(campingRoute);
                 campingRoute = L.polyline(coords, { color: '#4ecca3', weight: 4, opacity: 0.8, dashArray: '10, 8' }).addTo(map);
                 map.fitBounds(campingRoute.getBounds(), { padding: [50, 50] });
-                document.getElementById('camping-results').innerHTML = '<div class="camping-loading"><div class="camping-loading-text">\u{1F3D5}\uFE0F Suche Campingpl\u00e4tze entlang der Route...</div><div class="camping-loading-sub">50km-Korridor entlang der Route</div><div class="camping-progress"><div class="camping-progress-bar"></div></div></div>';
-                // Sample route points every ~30km for Overpass "around" query (much faster than BBox)
+                document.getElementById('camping-results').innerHTML = '<div class="camping-loading"><div class="camping-loading-text">\u{1F3D5}\uFE0F Suche Campingpl\u00e4tze entlang der Route...</div><div class="camping-loading-sub">Suche in Segmenten entlang der Route...</div><div class="camping-progress"><div class="camping-progress-bar"></div></div></div>';
                 const routeCoords = coords;
-                const samplePts = [routeCoords[0]];
-                let accDist = 0;
+                // Build type regex
+                const rtTypes = [];
+                if (campingTypes.camping) rtTypes.push('camp_site');
+                if (campingTypes.caravan) rtTypes.push('caravan_site');
+                if (campingTypes.parking) rtTypes.push('camp_pitch');
+                const rtRegex = rtTypes.length ? rtTypes.join('|') : 'camp_site';
+                // Sample route every ~100km to create segment BBoxes
+                const segPts = [routeCoords[0]];
+                let segDist = 0;
                 for (let si = 1; si < routeCoords.length; si++) {
-                    accDist += quickDist(routeCoords[si-1][0], routeCoords[si-1][1], routeCoords[si][0], routeCoords[si][1]);
-                    if (accDist >= 30) { samplePts.push(routeCoords[si]); accDist = 0; }
+                    segDist += quickDist(routeCoords[si-1][0], routeCoords[si-1][1], routeCoords[si][0], routeCoords[si][1]);
+                    if (segDist >= 100) { segPts.push(routeCoords[si]); segDist = 0; }
                 }
-                if (samplePts.length < 2) samplePts.push(routeCoords[routeCoords.length - 1]);
-                const aroundStr = samplePts.map(p => p[0].toFixed(4) + ',' + p[1].toFixed(4)).join(',');
-                let query = '[out:json][timeout:30];(';
-                if (campingTypes.camping) query += 'node["tourism"="camp_site"](around:50000,' + aroundStr + ');';
-                if (campingTypes.caravan) query += 'node["tourism"="caravan_site"](around:50000,' + aroundStr + ');';
-                if (campingTypes.parking) { query += 'node["amenity"="parking"]["camping"="yes"](around:50000,' + aroundStr + ');'; query += 'node["tourism"="camp_pitch"](around:50000,' + aroundStr + ');'; }
-                query += ');out body 500;';
-                const campData = await overpassQuery(query);
-                const nearRoute = (campData.elements || []);
+                segPts.push(routeCoords[routeCoords.length - 1]);
+                // Create small BBoxes around each segment (0.4° buffer ≈ 40-50km)
+                let allRouteElements = [];
+                const buf = 0.4;
+                for (let si = 0; si < segPts.length - 1; si++) {
+                    const p1 = segPts[si], p2 = segPts[si + 1];
+                    const sLat = Math.min(p1[0], p2[0]) - buf, nLat = Math.max(p1[0], p2[0]) + buf;
+                    const wLng = Math.min(p1[1], p2[1]) - buf, eLng = Math.max(p1[1], p2[1]) + buf;
+                    const segQ = '[out:json][timeout:25];node["tourism"~"' + rtRegex + '"](' + sLat.toFixed(3) + ',' + wLng.toFixed(3) + ',' + nLat.toFixed(3) + ',' + eLng.toFixed(3) + ');out body 150;';
+                    try {
+                        const segData = await overpassQuery(segQ);
+                        allRouteElements = allRouteElements.concat(segData.elements || []);
+                    } catch(segErr) { console.warn('[Route] Segment', si, 'failed:', segErr.message); }
+                    // Small delay between segments to avoid rate limiting
+                    if (si < segPts.length - 2) await new Promise(r => setTimeout(r, 1200));
+                }
+                // Deduplicate and filter to within 50km of route
+                const seenIds = new Set();
+                const nearRoute = allRouteElements.filter(e => {
+                    if (seenIds.has(e.id)) return false;
+                    seenIds.add(e.id);
+                    return isNearRoute(e.lat, e.lon, routeCoords, 50);
+                });
                 nearRoute.sort((a, b) => getRouteProgress(a.lat, a.lon, routeCoords) - getRouteProgress(b.lat, b.lon, routeCoords));
                 clearCamping();
                 if (campingRoute) map.removeLayer(campingRoute);
