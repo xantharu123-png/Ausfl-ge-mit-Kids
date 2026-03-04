@@ -279,34 +279,105 @@
             max-height: 0;
         }
         
-        /* Country Switch */
-        .country-switch {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
+                /* Country Dropdown */
+        .country-dropdown-wrapper {
             padding: 10px 16px;
-            gap: 4px;
             border-bottom: 1px solid var(--border);
         }
-        .country-link {
-            padding: 6px 8px;
-            text-decoration: none;
-            
-            border-radius: 6px;
+        .country-dropdown-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        .country-dropdown {
+            position: relative;
+            width: 100%;
+        }
+        .country-dropdown-btn {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
             transition: all 0.2s;
-            opacity: 0.5;
         }
-        .country-link.active {
-            opacity: 1;
-            background: rgba(99, 102, 241, 0.2);
+        .country-dropdown-btn:hover {
+            border-color: var(--primary);
+            background: var(--bg-hover);
         }
-        .country-link img {
-            width: 32px;
-            height: auto;
-            border-radius: 4px;
+        .country-dropdown-btn img {
+            width: 24px;
+            height: 16px;
+            border-radius: 2px;
+            object-fit: cover;
         }
-        .country-link:not(.active):hover {
-            opacity: 1;
+        .country-dropdown-btn .arrow {
+            margin-left: auto;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+        .country-dropdown.open .country-dropdown-btn .arrow {
+            transform: rotate(180deg);
+        }
+        .country-dropdown-list {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            max-height: 320px;
+            overflow-y: auto;
+            z-index: 2000;
+            display: none;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+        .country-dropdown.open .country-dropdown-list {
+            display: block;
+        }
+        .country-dropdown-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .country-dropdown-list::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+        .country-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 14px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.15s;
+        }
+        .country-dropdown-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+        .country-dropdown-item.active {
+            background: rgba(233, 69, 96, 0.15);
+            color: #e94560;
+            font-weight: 600;
+        }
+        .country-dropdown-item img {
+            width: 24px;
+            height: 16px;
+            border-radius: 2px;
+            object-fit: cover;
         }
         
         /* POI List */
@@ -1369,77 +1440,43 @@
                 </div>
                 
                 <!-- Country Switch -->
-                <div class="country-switch">
-                    <a href="map_island.html" class="country-link" title="Island"><img src="https://flagcdn.com/w40/is.png" alt="IS"></a>
-                    <a href="map_faeroeer.html" class="country-link" title="Färöer"><img src="https://flagcdn.com/w40/fo.png" alt="FO"></a>
-                    <a href="map_norwegen.html" class="country-link" title="Norwegen"><img src="https://flagcdn.com/w40/no.png" alt="NO"></a>
-                    <a href="map_schweden.html" class="country-link" title="Schweden"><img src="https://flagcdn.com/w40/se.png" alt="SE"></a>
-                    <a href="map_finnland.html" class="country-link" title="Finnland"><img src="https://flagcdn.com/w40/fi.png" alt="FI"></a>
-                    <a href="map_niederlande.html" class="country-link" title="Niederlande"><img src="https://flagcdn.com/w40/nl.png" alt="NL"></a>
-                    <a href="map_belgien.html" class="country-link" title="Belgien"><img src="https://flagcdn.com/w40/be.png" alt="BE"></a>
-                    <a href="map_luxemburg.html" class="country-link" title="Luxemburg"><img src="https://flagcdn.com/w40/lu.png" alt="LU"></a>
-                    <a href="map_deutschland.html" class="country-link" title="Deutschland"><img src="https://flagcdn.com/w40/de.png" alt="DE"></a>
-                    <a href="map_polen.html" class="country-link" title="Polen"><img src="https://flagcdn.com/w40/pl.png" alt="PL"></a>
-                    <a href="map_tschechien.html" class="country-link" title="Tschechien"><img src="https://flagcdn.com/w40/cz.png" alt="CZ"></a>
-                    <a href="map_slowakei.html" class="country-link" title="Slowakei"><img src="https://flagcdn.com/w40/sk.png" alt="SK"></a>
-                    <a href="map_schweiz.html" class="country-link" title="Schweiz"><img src="https://flagcdn.com/w40/ch.png" alt="CH"></a>
-                    <a href="map_oesterreich.html" class="country-link active" title="Österreich"><img src="https://flagcdn.com/w40/at.png" alt="AT"></a>
-                    <a href="map_frankreich.html" class="country-link" title="Frankreich"><img src="https://flagcdn.com/w40/fr.png" alt="FR"></a>
-                    <a href="map_slowenien.html" class="country-link" title="Slowenien"><img src="https://flagcdn.com/w40/si.png" alt="SI"></a>
-                    <a href="map_italien.html" class="country-link" title="Italien"><img src="https://flagcdn.com/w40/it.png" alt="IT"></a>
-                    <a href="map_kroatien.html" class="country-link" title="Kroatien"><img src="https://flagcdn.com/w40/hr.png" alt="HR"></a>
-                    <a href="map_bosnien.html" class="country-link" title="Bosnien"><img src="https://flagcdn.com/w40/ba.png" alt="BA"></a>
-                    <a href="map_spanien.html" class="country-link" title="Spanien"><img src="https://flagcdn.com/w40/es.png" alt="ES"></a>
-                    <a href="map_portugal.html" class="country-link" title="Portugal"><img src="https://flagcdn.com/w40/pt.png" alt="PT"></a>
-                    <a href="map_griechenland.html" class="country-link" title="Griechenland"><img src="https://flagcdn.com/w40/gr.png" alt="GR"></a>
-                </div>
-                
-                <div class="stats-bar">
-                    <div class="stat-item">
-                        <span>📍</span>
-                        <strong id="total-pois">0</strong> Orte
+                <div class="country-dropdown-wrapper">
+                    <div class="country-dropdown-label">Land wechseln</div>
+                    <div class="country-dropdown" id="countryDropdown">
+                        <button class="country-dropdown-btn" onclick="document.getElementById('countryDropdown').classList.toggle('open')">
+                            <img src="https://flagcdn.com/w40/at.png" alt="AT">
+                            <span>Österreich</span>
+                            <span class="arrow">▼</span>
+                        </button>
+                        <div class="country-dropdown-list">
+                            <a href="map_island.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/is.png" alt="IS">Island</a>
+                            <a href="map_faeroeer.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/fo.png" alt="FO">Färöer</a>
+                            <a href="map_norwegen.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/no.png" alt="NO">Norwegen</a>
+                            <a href="map_schweden.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/se.png" alt="SE">Schweden</a>
+                            <a href="map_finnland.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/fi.png" alt="FI">Finnland</a>
+                            <a href="map_niederlande.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/nl.png" alt="NL">Niederlande</a>
+                            <a href="map_belgien.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/be.png" alt="BE">Belgien</a>
+                            <a href="map_luxemburg.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/lu.png" alt="LU">Luxemburg</a>
+                            <a href="map_deutschland.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/de.png" alt="DE">Deutschland</a>
+                            <a href="map_polen.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/pl.png" alt="PL">Polen</a>
+                            <a href="map_tschechien.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/cz.png" alt="CZ">Tschechien</a>
+                            <a href="map_slowakei.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/sk.png" alt="SK">Slowakei</a>
+                            <a href="index.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/ch.png" alt="CH">Schweiz</a>
+                            <a href="map_oesterreich.html" class="country-dropdown-item active"><img src="https://flagcdn.com/w40/at.png" alt="AT">Österreich</a>
+                            <a href="map_frankreich.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/fr.png" alt="FR">Frankreich</a>
+                            <a href="map_slowenien.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/si.png" alt="SI">Slowenien</a>
+                            <a href="map_italien.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/it.png" alt="IT">Italien</a>
+                            <a href="map_kroatien.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/hr.png" alt="HR">Kroatien</a>
+                            <a href="map_bosnien.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/ba.png" alt="BA">Bosnien</a>
+                            <a href="map_spanien.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/es.png" alt="ES">Spanien</a>
+                            <a href="map_portugal.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/pt.png" alt="PT">Portugal</a>
+                            <a href="map_griechenland.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/gr.png" alt="GR">Griechenland</a>
+                            <a href="map_zypern.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/cy.png" alt="CY">Zypern</a>
+                            <a href="map_vae.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/ae.png" alt="AE">VAE</a>
+                            <a href="map_katar.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/qa.png" alt="QA">Katar</a>
+                            <a href="map_japan.html" class="country-dropdown-item"><img src="https://flagcdn.com/w40/jp.png" alt="JP">Japan</a>
+                        </div>
                     </div>
-                    <div class="stat-item">
-                        <span>🎉</span>
-                        <strong id="total-events">0</strong> Events
-                    </div>
-                    <div class="stat-item">
-                        <span>⭐</span>
-                        <strong>50+</strong> Highlights
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Suche -->
-            <div style="padding: 12px 24px 0;">
-                    <button id="rec-btn" onclick="showRecommendations()">🎯 Was kann ich heute unternehmen?</button>
-                    <div id="rec-panel"></div>
-                </div>
-                <div class="camping-toggle">
-                    <label onclick="toggleCampingMode()">
-                        🏕️ Camping Modus
-                        <div id="camping-switch" class="camping-switch"></div>
-                    </label>
-                </div>
-                <div id="camping-panel" class="camping-panel">
-                    <div class="camping-filter-row">
-                        <button id="cf-camping" class="camping-filter-btn active" onclick="toggleCampingFilter('camping')">🏕️ Camping</button>
-                        <button id="cf-caravan" class="camping-filter-btn active" onclick="toggleCampingFilter('caravan')">🚐 Wohnmobil</button>
-                        <button id="cf-parking" class="camping-filter-btn active" onclick="toggleCampingFilter('parking')">🅿️ Stellplatz</button>
-                    </div>
-                    
-                    <div class="poi-visibility-toggle">
-                        <label onclick="togglePOIVisibility()">
-                            📍 POIs anzeigen
-                            <div id="poi-switch" class="poi-switch"></div>
-                        </label>
-                    </div>
-                    <div class="camping-route-inputs">
-                        <div style="position:relative"><input type="text" id="camping-from" placeholder="🚗 Start (z.B. Winterthur)"></div>
-                        <div style="position:relative"><input type="text" id="camping-to" placeholder="🏁 Ziel (z.B. Pompeji)"></div>
-                        <button class="camping-route-btn" onclick="searchCampingRoute()">🗺️ Route berechnen & Plätze finden</button>
-                    </div>
-                    <div id="camping-results"></div>
                 </div>
                 <div class="filters-section">
                 <div class="search-box">
@@ -5321,6 +5358,14 @@ const allPOIs = [
             highlightPOICard(poiId);
         }
 
+
+    // Close country dropdown on outside click
+    document.addEventListener('click', function(e) {
+        const dd = document.getElementById('countryDropdown');
+        if (dd && !dd.contains(e.target)) {
+            dd.classList.remove('open');
+        }
+    });
 </script>
 </body>
 </html>
