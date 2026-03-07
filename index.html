@@ -4584,14 +4584,34 @@
         }
         
 
-        // Safe JSON fetch with error handling
-        async function safeFetchJSON(url, opts) {
-            const resp = await fetch(url, opts);
-            const text = await resp.text();
-            try { return JSON.parse(text); }
-            catch(e) {
-                if (!resp.ok) throw new Error('HTTP ' + resp.status);
-                throw new Error('Ungültige Antwort vom Server');
+        // Safe JSON fetch with error handling and auto-retry
+        async function safeFetchJSON(url, opts, retries) {
+            retries = retries || 0;
+            const maxRetries = 2;
+            try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 25000);
+                const resp = await fetch(url, Object.assign({}, opts, { signal: controller.signal }));
+                clearTimeout(timeout);
+                const text = await resp.text();
+                if (resp.status === 429 || resp.status === 504) {
+                    if (retries < maxRetries) {
+                        await new Promise(r => setTimeout(r, 3000 * (retries + 1)));
+                        return safeFetchJSON(url, opts, retries + 1);
+                    }
+                    throw new Error('Server überlastet (HTTP ' + resp.status + ')');
+                }
+                try { return JSON.parse(text); }
+                catch(e) {
+                    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                    throw new Error('Ungültige Antwort vom Server');
+                }
+            } catch(err) {
+                if (err.name === 'AbortError' && retries < maxRetries) {
+                    await new Promise(r => setTimeout(r, 2000));
+                    return safeFetchJSON(url, opts, retries + 1);
+                }
+                throw err;
             }
         }
 
@@ -4621,13 +4641,21 @@
             
             try {
                 let data;
-                try {
-                    data = await safeFetchJSON('https://overpass-api.de/api/interpreter', { method: 'POST', body: 'data=' + encodeURIComponent(query) });
-                } catch(e1) {
-                    // Retry once with longer timeout
-                    document.getElementById('camping-results').innerHTML = '<div class="camping-loading"><div class="camping-loading-text">\u{1F3D5}\uFE0F Erneuter Versuch...</div><div class="camping-loading-sub">Server war beschäftigt, zweiter Anlauf</div><div class="camping-progress"><div class="camping-progress-bar"></div></div></div>';
-                    const retryQuery = query.replace('timeout:30', 'timeout:45');
-                    data = await safeFetchJSON('https://overpass-api.de/api/interpreter', { method: 'POST', body: 'data=' + encodeURIComponent(retryQuery) });
+                const servers = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
+                for (let attempt = 0; attempt < 3; attempt++) {
+                    try {
+                        const tq = attempt >= 2 ? query.replace('timeout:30', 'timeout:45') : query;
+                        data = await safeFetchJSON(servers[attempt % servers.length], { method: 'POST', body: 'data=' + encodeURIComponent(tq) });
+                        if (data && data.elements) break;
+                    } catch(retryErr) {
+                        console.warn('[Camping] Versuch', attempt + 1, 'fehlgeschlagen:', retryErr.message);
+                        if (attempt < 2) {
+                            document.getElementById('camping-results').innerHTML = '<div class="camping-loading"><div class="camping-loading-text">🏕️ Erneuter Versuch (' + (attempt + 2) + '/3)...</div><div class="camping-loading-sub">Server war beschäftigt, warte kurz...</div><div class="camping-progress"><div class="camping-progress-bar"></div></div></div>';
+                            await new Promise(r => setTimeout(r, 3000 * (attempt + 1)));
+                        } else {
+                            throw retryErr;
+                        }
+                    }
                 }
                 
                 campingCluster = L.markerClusterGroup({ maxClusterRadius: 40, disableClusteringAtZoom: 12,
@@ -4763,6 +4791,7 @@
                 const buf = 0.5;
                 const overpassServers = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
                 let serverIdx = 0;
+                let failedSegments = [];
                 for (let si = 0; si < segPts.length - 1; si++) {
                     const p1 = segPts[si], p2 = segPts[si + 1];
                     const sLat = Math.min(p1[0], p2[0]) - buf, nLat = Math.max(p1[0], p2[0]) + buf;
@@ -4773,28 +4802,49 @@
                         segQ += 'way[' + t + '](' + sLat.toFixed(3) + ',' + wLng.toFixed(3) + ',' + nLat.toFixed(3) + ',' + eLng.toFixed(3) + ');';
                     });
                     segQ += ');out center 500;';
-                    try {
-                        const url = overpassServers[serverIdx % overpassServers.length];
-                        const segData = await safeFetchJSON(url, { method: 'POST', body: 'data=' + encodeURIComponent(segQ) });
-                        allRouteElements = allRouteElements.concat(segData.elements || []);
-                    } catch(segErr) {
-                        console.warn('[Route] Segment', si, 'failed:', segErr.message);
-                        // Try alternate server
-                        serverIdx++;
+                    let segSuccess = false;
+                    for (let attempt = 0; attempt < 2 && !segSuccess; attempt++) {
                         try {
-                            const url2 = overpassServers[serverIdx % overpassServers.length];
-                            const segData2 = await safeFetchJSON(url2, { method: 'POST', body: 'data=' + encodeURIComponent(segQ) });
-                            allRouteElements = allRouteElements.concat(segData2.elements || []);
-                        } catch(e2) { console.warn('[Route] Segment', si, 'retry also failed'); }
+                            const url = overpassServers[(serverIdx + attempt) % overpassServers.length];
+                            const segData = await safeFetchJSON(url, { method: 'POST', body: 'data=' + encodeURIComponent(segQ) });
+                            allRouteElements = allRouteElements.concat(segData.elements || []);
+                            segSuccess = true;
+                        } catch(segErr) {
+                            console.warn('[Route] Segment', si, 'attempt', attempt, 'failed:', segErr.message);
+                            if (attempt === 0) await new Promise(r => setTimeout(r, 3000));
+                        }
                     }
+                    if (!segSuccess) failedSegments.push(si);
                     // Update progress
                     const pct = Math.round((si + 1) / (segPts.length - 1) * 100);
                     const progEl = document.querySelector('.camping-progress-bar');
                     if (progEl) progEl.style.width = pct + '%';
                     const subEl = document.querySelector('.camping-loading-sub');
                     if (subEl) subEl.textContent = 'Segment ' + (si + 1) + '/' + (segPts.length - 1) + ' · ' + allRouteElements.length + ' Plätze gefunden';
-                    // Small delay between segments to avoid rate limiting
-                    if (si < segPts.length - 2) await new Promise(r => setTimeout(r, 1000));
+                    // Delay between segments to avoid rate limiting
+                    if (si < segPts.length - 2) await new Promise(r => setTimeout(r, 1500));
+                }
+                // Retry failed segments once more after all others succeeded (cache should be warm now)
+                if (failedSegments.length > 0) {
+                    const subEl = document.querySelector('.camping-loading-sub');
+                    if (subEl) subEl.textContent = failedSegments.length + ' Segmente werden nachgeladen...';
+                    await new Promise(r => setTimeout(r, 3000));
+                    for (const si of failedSegments) {
+                        const p1 = segPts[si], p2 = segPts[si + 1];
+                        const sLat = Math.min(p1[0], p2[0]) - buf, nLat = Math.max(p1[0], p2[0]) + buf;
+                        const wLng = Math.min(p1[1], p2[1]) - buf, eLng = Math.max(p1[1], p2[1]) + buf;
+                        let segQ = '[out:json][timeout:45];(';
+                        rtTypes.forEach(t => {
+                            segQ += 'node[' + t + '](' + sLat.toFixed(3) + ',' + wLng.toFixed(3) + ',' + nLat.toFixed(3) + ',' + eLng.toFixed(3) + ');';
+                            segQ += 'way[' + t + '](' + sLat.toFixed(3) + ',' + wLng.toFixed(3) + ',' + nLat.toFixed(3) + ',' + eLng.toFixed(3) + ');';
+                        });
+                        segQ += ');out center 500;';
+                        try {
+                            const segData = await safeFetchJSON(overpassServers[0], { method: 'POST', body: 'data=' + encodeURIComponent(segQ) });
+                            allRouteElements = allRouteElements.concat(segData.elements || []);
+                        } catch(e) { console.warn('[Route] Final retry for segment', si, 'failed'); }
+                        await new Promise(r => setTimeout(r, 2000));
+                    }
                 }
                 // Deduplicate by OSM id and filter to within 40km of route
                 // For way elements, use center coordinates
