@@ -1972,12 +1972,15 @@ const allPOIs = [
             if (cached) return cached;
             if (!googlePlacesReady) return null;
             return new Promise((resolve) => {
+                const timeout = setTimeout(() => { resolve(null); }, 8000);
+                try {
                 const svc = new google.maps.places.PlacesService(document.createElement('div'));
                 svc.findPlaceFromQuery({
                     query: poi.name + ' ' + (poi.location || ''),
                     fields: ['rating', 'user_ratings_total', 'name'],
-                    locationBias: { lat: poi.lat, lng: poi.lng }
+                    locationBias: new google.maps.LatLng(poi.lat, poi.lng)
                 }, (res, st) => {
+                    clearTimeout(timeout);
                     if (st === google.maps.places.PlacesServiceStatus.OK && res && res.length > 0) {
                         const d = { rating: res[0].rating || 0, count: res[0].user_ratings_total || 0 };
                         ratingCache[poi.id] = d;
@@ -1989,6 +1992,7 @@ const allPOIs = [
                         resolve({ rating: 0, count: 0 });
                     }
                 });
+                } catch(e) { clearTimeout(timeout); resolve(null); }
             });
         }
         async function loadAllRatings() {
@@ -2003,13 +2007,15 @@ const allPOIs = [
             if (uncached.length === 0) {
                 prog.textContent = '\u2713 Alle Bewertungen geladen!'; btn.disabled = false; btn.textContent = '\u2B50 Google Bewertungen laden'; filterPOIs(false); return;
             }
-            let loaded = 0;
-            for (let i = 0; i < uncached.length; i += 5) {
-                const batch = uncached.slice(i, i + 5);
-                await Promise.all(batch.map(p => fetchSingleRating(p).catch(() => null)));
+            let loaded = 0; let errors = 0;
+            for (let i = 0; i < uncached.length; i += 3) {
+                const batch = uncached.slice(i, i + 3);
+                const results = await Promise.all(batch.map(p => fetchSingleRating(p).catch(() => null)));
+                results.forEach(r => { if (!r) errors++; });
                 loaded += batch.length;
-                prog.textContent = loaded + '/' + uncached.length + ' (' + Math.round(loaded/uncached.length*100) + '%)';
-                if (i + 5 < uncached.length) await new Promise(r => setTimeout(r, 300));
+                prog.textContent = loaded + '/' + uncached.length + ' (' + Math.round(loaded/uncached.length*100) + '%)' + (errors > 0 ? ' \u00B7 ' + errors + ' Fehler' : '');
+                if (loaded % 30 === 0) filterPOIs(false);
+                if (i + 3 < uncached.length) await new Promise(r => setTimeout(r, 500));
             }
             prog.textContent = '\u2713 ' + uncached.length + ' Bewertungen geladen!';
             btn.disabled = false; btn.textContent = '\u2B50 Google Bewertungen laden';
