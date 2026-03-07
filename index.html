@@ -5017,12 +5017,7 @@
             if (campingMode) {
                 sw.classList.add('active');
                 panel.classList.add('visible');
-                if (map.getZoom() < 8) {
-                    map.setZoom(9);
-                    // loadCampingSites triggers via moveend
-                } else {
-                    loadCampingSites();
-                }
+                document.getElementById('camping-results').innerHTML = '<div class="camping-info">🗺️ Verschiebe oder zoome die Karte um Campingplätze im sichtbaren Bereich zu laden, oder berechne eine Route.</div>';
             } else {
                 sw.classList.remove('active');
                 panel.classList.remove('visible');
@@ -5039,7 +5034,7 @@
         function toggleCampingFilter(type) {
             campingTypes[type] = !campingTypes[type];
             document.getElementById('cf-' + type).classList.toggle('active');
-            if (campingMode) loadCampingSites();
+            if (campingMode && campingMarkers.length > 0) loadCampingSites();
         }
         
         function clearCamping() {
