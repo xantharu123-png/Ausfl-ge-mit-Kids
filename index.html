@@ -4132,14 +4132,14 @@
             return ratingCache[poiId] || null;
         }
 
+        let _lastPlacesError = '';
         async function fetchSingleRating(poi) {
             const cached = ratingCache[poi.id];
             if (cached) return cached;
             if (!googlePlacesReady) return null;
 
             return new Promise((resolve) => {
-                // Timeout: resolve with null after 8s if API doesn't respond
-                const timeout = setTimeout(() => { resolve(null); }, 8000);
+                const timeout = setTimeout(() => { _lastPlacesError = 'TIMEOUT (8s)'; resolve(null); }, 8000);
                 try {
                     const service = new google.maps.places.PlacesService(document.createElement('div'));
                     const request = {
@@ -4152,16 +4152,18 @@
                         if (status === google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
                             const data = { rating: results[0].rating || 0, count: results[0].user_ratings_total || 0 };
                             ratingCache[poi.id] = data;
-                            localStorage.setItem('ratingCacheCH', JSON.stringify(ratingCache));
                             resolve(data);
-                        } else {
+                        } else if (status === 'ZERO_RESULTS' || status === 'NOT_FOUND') {
                             ratingCache[poi.id] = { rating: 0, count: 0 };
-                            localStorage.setItem('ratingCacheCH', JSON.stringify(ratingCache));
                             resolve({ rating: 0, count: 0 });
+                        } else {
+                            _lastPlacesError = status || 'UNKNOWN';
+                            resolve(null);
                         }
                     });
                 } catch(e) {
                     clearTimeout(timeout);
+                    _lastPlacesError = e.message || 'EXCEPTION';
                     resolve(null);
                 }
             });
@@ -4200,29 +4202,56 @@
             progress.textContent = '0/' + total + ' geladen...';
             let loaded = 0;
             let errors = 0;
+            let success = 0;
 
-            // Process in batches of 3 with 500ms delay
-            for (let i = 0; i < uncached.length; i += 3) {
+            // First: test with 1 POI to check if API works
+            _lastPlacesError = '';
+            const testResult = await fetchSingleRating(uncached[0]).catch(() => null);
+            if (!testResult) {
+                let errMsg = '❌ Places API Fehler: ' + (_lastPlacesError || 'Keine Antwort');
+                if (_lastPlacesError === 'REQUEST_DENIED') {
+                    errMsg += '\n\n→ Bitte in der Google Cloud Console die "Places API" aktivieren (nicht nur "Maps JavaScript API")';
+                } else if (_lastPlacesError === 'OVER_QUERY_LIMIT') {
+                    errMsg += '\n\n→ API Limit erreicht. Warte einige Minuten.';
+                } else if (_lastPlacesError.includes('TIMEOUT')) {
+                    errMsg += '\n\n→ API antwortet nicht. Prüfe ob "Places API" aktiviert ist und der Key keine HTTP-Referrer-Einschränkung hat.';
+                }
+                progress.innerHTML = errMsg.replace(/\n/g, '<br>');
+                progress.style.color = '#e94560';
+                btn.disabled = false;
+                btn.textContent = '⭐ Google Bewertungen laden';
+                return;
+            }
+            success = 1;
+            loaded = 1;
+            progress.textContent = '1/' + total + ' ✓ API funktioniert! Lade Rest...';
+
+            // Process rest in batches of 3
+            for (let i = 1; i < uncached.length; i += 3) {
                 const batch = uncached.slice(i, i + 3);
                 const results = await Promise.all(batch.map(p => fetchSingleRating(p).catch(() => null)));
-                results.forEach(r => { if (!r) errors++; });
+                results.forEach(r => { if (r) success++; else errors++; });
                 loaded += batch.length;
                 const pct = Math.round(loaded / total * 100);
-                progress.textContent = loaded + '/' + total + ' (' + pct + '%)' + (errors > 0 ? ' · ' + errors + ' Fehler' : '');
-                // Save cache periodically (every 30)
+                progress.textContent = loaded + '/' + total + ' (' + pct + '%) · ✓' + success + (errors > 0 ? ' · ✗' + errors : '');
+                if (_lastPlacesError === 'OVER_QUERY_LIMIT') {
+                    progress.textContent += ' — Limit erreicht, warte 5s...';
+                    await new Promise(r => setTimeout(r, 5000));
+                    _lastPlacesError = '';
+                }
+                // Save cache periodically
                 if (loaded % 30 === 0) {
                     localStorage.setItem('ratingCacheCH', JSON.stringify(ratingCache));
-                    filterPOIs(false); // Update list with new ratings
+                    filterPOIs(false);
                 }
-                // Delay between batches
                 if (i + 3 < uncached.length) {
                     await new Promise(r => setTimeout(r, 500));
                 }
             }
 
-            // Final save
             localStorage.setItem('ratingCacheCH', JSON.stringify(ratingCache));
-            progress.textContent = '✓ ' + (total - errors) + '/' + total + ' Bewertungen geladen!';
+            progress.style.color = '#4ecca3';
+            progress.textContent = '✓ ' + success + ' Bewertungen geladen' + (errors > 0 ? ' (' + errors + ' nicht gefunden)' : '') + '!';
             btn.disabled = false;
             btn.textContent = '⭐ Google Bewertungen laden';
             filterPOIs(false);
