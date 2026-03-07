@@ -1366,6 +1366,26 @@
     
 
 
+
+        /* Settings */
+        .settings-btn { position: absolute; top: 20px; right: 20px; width: 32px; height: 32px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; transition: all 0.2s; color: #8a9ab5; }
+        .settings-btn:hover { background: rgba(255,255,255,0.15); color: #e8edf3; }
+        .settings-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center; }
+        .settings-modal.open { display: flex; }
+        .settings-modal-content { background: #16213e; border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 24px; max-width: 420px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+        .settings-modal-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: #e8edf3; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+        .settings-modal-close { background: none; border: none; color: #8a9ab5; font-size: 20px; cursor: pointer; padding: 4px; }
+        .settings-group { margin-bottom: 16px; }
+        .settings-group label { display: block; font-size: 12px; color: #8a9ab5; margin-bottom: 6px; font-weight: 500; }
+        .settings-group .settings-input-row { display: flex; gap: 8px; }
+        .settings-group input { flex: 1; background: #1a2332; border: 1px solid #2a3a4a; border-radius: 8px; color: #e8edf3; padding: 8px 12px; font-size: 13px; font-family: monospace; }
+        .settings-group input:focus { outline: none; border-color: #4ecca3; }
+        .settings-save-btn { background: #4ecca3; color: #1a1a2e; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .settings-load-btn { width: 100%; background: linear-gradient(135deg, #f39c12, #e67e22); color: white; border: none; border-radius: 8px; padding: 10px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        .settings-load-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .settings-status { font-size: 11px; color: #4ecca3; margin-top: 6px; }
+        .settings-hint { font-size: 11px; color: #5a6a7a; margin-top: 6px; line-height: 1.4; }
+
         /* Google Bewertungen */
         .rating-stars { display: inline-flex; align-items: center; gap: 2px; font-size: 12px; }
         .rating-stars .star { color: #f1c40f; font-size: 13px; }
@@ -1374,15 +1394,7 @@
         .rating-val { font-size: 12px; font-weight: 600; color: #f1c40f; margin-right: 3px; }
         .rating-count { font-size: 10px; color: #7a8a9a; }
         .rating-loading { font-size: 11px; color: #5a6a7a; font-style: italic; }
-        .api-key-section { padding: 8px 0; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 4px; }
-        .api-key-section summary { cursor: pointer; font-size: 12px; color: #8a9ab5; user-select: none; }
-        .api-key-section summary:hover { color: #b8c5d6; }
-        .api-key-input-row { display: flex; gap: 6px; margin-top: 6px; }
-        .api-key-input-row input { flex: 1; background: #1a2332; border: 1px solid #2a3a4a; border-radius: 6px; color: #e8edf3; padding: 6px 8px; font-size: 11px; font-family: monospace; }
-        .api-key-input-row button { background: #4ecca3; color: #1a1a2e; border: none; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 600; cursor: pointer; }
-        .rating-load-btn { width: 100%; background: linear-gradient(135deg, #f39c12, #e67e22); color: white; border: none; border-radius: 6px; padding: 8px; font-size: 12px; font-weight: 600; cursor: pointer; margin-top: 6px; }
-        .rating-load-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .rating-progress { font-size: 11px; color: #8a9ab5; margin-top: 4px; }
+
         .rating-filter-section { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
         .rating-filter-btn { background: #1a2332; border: 1px solid #2a3a4a; color: #8a9ab5; padding: 3px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; transition: all 0.2s; }
         .rating-filter-btn:hover { border-color: #f1c40f; color: #f1c40f; }
@@ -1465,7 +1477,8 @@
 
     <div class="app-container">
         <div class="sidebar">
-            <div class="sidebar-header">
+            <div class="sidebar-header" style="position:relative;">
+                <button class="settings-btn" onclick="document.getElementById('settings-modal').classList.add('open')" title="Einstellungen">⚙️</button>
                 <div class="logo">
                     <div class="logo-icon">🗺️</div>
                     <div class="logo-text">
@@ -1685,15 +1698,6 @@
                         <button class="rating-filter-btn" data-rating="4" onclick="setRatingFilter(4, this)">4.0+</button>
                         <button class="rating-filter-btn" data-rating="4.5" onclick="setRatingFilter(4.5, this)">4.5+</button>
                     </div>
-                    <details class="api-key-section">
-                        <summary>🔑 Google API Key</summary>
-                        <div class="api-key-input-row">
-                            <input type="password" id="google-api-key" placeholder="AIza..." value="">
-                            <button onclick="saveGoogleApiKey()">Speichern</button>
-                        </div>
-                        <button class="rating-load-btn" id="rating-load-btn" onclick="loadAllRatings()">⭐ Google Bewertungen laden</button>
-                        <div class="rating-progress" id="rating-progress"></div>
-                    </details>
                 </div>
             </div>
 
@@ -3779,8 +3783,8 @@ const allPOIs = [
         let minRatingFilter = 0;
         let googlePlacesReady = false;
         function saveGoogleApiKey() {
-            const key = document.getElementById('google-api-key').value.trim();
-            if (key) { googleApiKey = key; localStorage.setItem('googleApiKey', key); loadGooglePlacesAPI(key); document.getElementById('rating-progress').textContent = '\u2713 Key gespeichert'; }
+            const key = document.getElementById('google-api-key-modal').value.trim();
+            if (key) { googleApiKey = key; localStorage.setItem('googleApiKey', key); loadGooglePlacesAPI(key); var st = document.getElementById('settings-api-status'); if(st) st.textContent = '\u2713 Key gespeichert'; }
         }
         function loadGooglePlacesAPI(key) {
             if (googlePlacesReady) return Promise.resolve();
@@ -3862,7 +3866,7 @@ const allPOIs = [
             filterPOIs(false);
         }
         if (googleApiKey) { setTimeout(() => {
-            const kf = document.getElementById('google-api-key');
+            const kf = document.getElementById('google-api-key-modal');
             if (kf) kf.value = googleApiKey;
             loadGooglePlacesAPI(googleApiKey).catch(() => {});
         }, 500); }
@@ -5236,5 +5240,29 @@ const allPOIs = [
         }
     });
 </script>
+
+    <!-- Settings Modal -->
+    <div class="settings-modal" id="settings-modal" onclick="if(event.target===this)this.classList.remove('open')">
+        <div class="settings-modal-content">
+            <div class="settings-modal-title">
+                <span>⚙️ Einstellungen</span>
+                <button class="settings-modal-close" onclick="document.getElementById('settings-modal').classList.remove('open')">✕</button>
+            </div>
+            <div class="settings-group">
+                <label>🔑 Google Places API Key</label>
+                <div class="settings-input-row">
+                    <input type="password" id="google-api-key-modal" placeholder="AIza...">
+                    <button class="settings-save-btn" onclick="saveGoogleApiKey()">Speichern</button>
+                </div>
+                <div class="settings-status" id="settings-api-status"></div>
+                <div class="settings-hint">Für Google-Bewertungen bei POIs.<br>Kostenlos unter <a href="https://console.cloud.google.com" target="_blank" style="color:#4ecca3;">console.cloud.google.com</a></div>
+            </div>
+            <div class="settings-group">
+                <button class="settings-load-btn" id="rating-load-btn" onclick="loadAllRatings()">⭐ Google Bewertungen für alle POIs laden</button>
+                <div class="settings-status" id="rating-progress"></div>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
