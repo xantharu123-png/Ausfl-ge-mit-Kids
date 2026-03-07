@@ -2176,6 +2176,26 @@ const allPOIs = [
         let googleApiKey = localStorage.getItem('googleApiKey') || '';
         let ratingCache = JSON.parse(localStorage.getItem('ratingCacheLU') || '{}');
         let minRatingFilter = 0;
+
+        // Load baseline ratings from JSON file (survives git push)
+        (function loadBaselineRatings() {
+            fetch('ratings_LU.json').then(r => r.ok ? r.json() : null).then(data => {
+                if (data && typeof data === 'object') {
+                    let merged = 0;
+                    Object.keys(data).forEach(k => {
+                        if (!ratingCache[k] || (ratingCache[k].rating === 0 && data[k].rating > 0)) {
+                            ratingCache[k] = data[k];
+                            merged++;
+                        }
+                    });
+                    if (merged > 0) {
+                        localStorage.setItem('ratingCacheLU', JSON.stringify(ratingCache));
+                        console.log('Baseline ratings loaded: ' + merged + ' new entries from JSON');
+                        if (typeof filterPOIs === 'function') filterPOIs(false);
+                    }
+                }
+            }).catch(() => {});
+        })();
                 function saveGoogleApiKey() {
             const key = document.getElementById('google-api-key-modal').value.trim();
             if (key) { googleApiKey = key; localStorage.setItem('googleApiKey', key); var st = document.getElementById('settings-api-status'); if(st) { st.textContent = '\u2713 Key gespeichert!'; st.style.color = '#4ecca3'; } }
