@@ -1365,6 +1365,29 @@
 
     
 
+
+        /* Google Bewertungen */
+        .rating-stars { display: inline-flex; align-items: center; gap: 2px; font-size: 12px; }
+        .rating-stars .star { color: #f1c40f; font-size: 13px; }
+        .rating-stars .star.empty { color: #3a3a4a; }
+        .rating-stars .star.half { background: linear-gradient(90deg, #f1c40f 50%, #3a3a4a 50%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .rating-val { font-size: 12px; font-weight: 600; color: #f1c40f; margin-right: 3px; }
+        .rating-count { font-size: 10px; color: #7a8a9a; }
+        .rating-loading { font-size: 11px; color: #5a6a7a; font-style: italic; }
+        .api-key-section { padding: 8px 0; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 4px; }
+        .api-key-section summary { cursor: pointer; font-size: 12px; color: #8a9ab5; user-select: none; }
+        .api-key-section summary:hover { color: #b8c5d6; }
+        .api-key-input-row { display: flex; gap: 6px; margin-top: 6px; }
+        .api-key-input-row input { flex: 1; background: #1a2332; border: 1px solid #2a3a4a; border-radius: 6px; color: #e8edf3; padding: 6px 8px; font-size: 11px; font-family: monospace; }
+        .api-key-input-row button { background: #4ecca3; color: #1a1a2e; border: none; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 600; cursor: pointer; }
+        .rating-load-btn { width: 100%; background: linear-gradient(135deg, #f39c12, #e67e22); color: white; border: none; border-radius: 6px; padding: 8px; font-size: 12px; font-weight: 600; cursor: pointer; margin-top: 6px; }
+        .rating-load-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .rating-progress { font-size: 11px; color: #8a9ab5; margin-top: 4px; }
+        .rating-filter-section { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .rating-filter-btn { background: #1a2332; border: 1px solid #2a3a4a; color: #8a9ab5; padding: 3px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; transition: all 0.2s; }
+        .rating-filter-btn:hover { border-color: #f1c40f; color: #f1c40f; }
+        .rating-filter-btn.active { background: rgba(241,196,15,0.15); border-color: #f1c40f; color: #f1c40f; font-weight: 600; }
+
         /* Favoriten */
         .fav-btn {
             display: inline-flex; align-items: center; justify-content: center;
@@ -1647,6 +1670,33 @@
                 </div>
             </div>
             
+
+            <!-- Bewertungen Filter -->
+            <div class="filter-section collapsed" id="section-ratings">
+                <div class="filter-section-header" onclick="toggleSection('section-ratings')">
+                    <span class="filter-section-title">⭐ Bewertungen</span>
+                    <span class="filter-section-toggle">▼</span>
+                </div>
+                <div class="filter-section-content">
+                    <div class="rating-filter-section">
+                        <button class="rating-filter-btn active" data-rating="0" onclick="setRatingFilter(0, this)">Alle</button>
+                        <button class="rating-filter-btn" data-rating="3" onclick="setRatingFilter(3, this)">3.0+</button>
+                        <button class="rating-filter-btn" data-rating="3.5" onclick="setRatingFilter(3.5, this)">3.5+</button>
+                        <button class="rating-filter-btn" data-rating="4" onclick="setRatingFilter(4, this)">4.0+</button>
+                        <button class="rating-filter-btn" data-rating="4.5" onclick="setRatingFilter(4.5, this)">4.5+</button>
+                    </div>
+                    <details class="api-key-section">
+                        <summary>🔑 Google API Key</summary>
+                        <div class="api-key-input-row">
+                            <input type="password" id="google-api-key" placeholder="AIza..." value="">
+                            <button onclick="saveGoogleApiKey()">Speichern</button>
+                        </div>
+                        <button class="rating-load-btn" id="rating-load-btn" onclick="loadAllRatings()">⭐ Google Bewertungen laden</button>
+                        <div class="rating-progress" id="rating-progress"></div>
+                    </details>
+                </div>
+            </div>
+
             <!-- Visited Stats -->
             <div class="visited-stats" id="visited-stats"></div>
             
@@ -3720,6 +3770,101 @@ const allPOIs = [
         let areaBounds = null;
         let visitedFilter = 'all';
 
+
+        // Google Bewertungen
+        let googleApiKey = localStorage.getItem('googleApiKey') || '';
+        let ratingCache = JSON.parse(localStorage.getItem('ratingCachePL') || '{}');
+        let minRatingFilter = 0;
+        let googlePlacesReady = false;
+        function saveGoogleApiKey() {
+            const key = document.getElementById('google-api-key').value.trim();
+            if (key) { googleApiKey = key; localStorage.setItem('googleApiKey', key); loadGooglePlacesAPI(key); document.getElementById('rating-progress').textContent = '\u2713 Key gespeichert'; }
+        }
+        function loadGooglePlacesAPI(key) {
+            if (googlePlacesReady) return Promise.resolve();
+            return new Promise((resolve, reject) => {
+                if (window.google && window.google.maps && window.google.maps.places) { googlePlacesReady = true; resolve(); return; }
+                const s = document.createElement('script');
+                s.src = 'https://maps.googleapis.com/maps/api/js?key=' + key + '&libraries=places';
+                s.onload = () => { googlePlacesReady = true; resolve(); };
+                s.onerror = reject;
+                document.head.appendChild(s);
+            });
+        }
+        function renderStarsHTML(rating, count) {
+            if (!rating && rating !== 0) return '';
+            if (rating === 0) return '';
+            let h = '<span class="rating-stars"><span class="rating-val">' + rating.toFixed(1) + '</span>';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= Math.floor(rating)) h += '<span class="star">\u2605</span>';
+                else if (i - 0.5 <= rating) h += '<span class="star half">\u2605</span>';
+                else h += '<span class="star empty">\u2605</span>';
+            }
+            if (count) h += '<span class="rating-count">(' + count + ')</span>';
+            h += '</span>';
+            return h;
+        }
+        function getPoiRating(poiId) { return ratingCache[poiId] || null; }
+        async function fetchSingleRating(poi) {
+            const cached = ratingCache[poi.id];
+            if (cached) return cached;
+            if (!googlePlacesReady) return null;
+            return new Promise((resolve) => {
+                const svc = new google.maps.places.PlacesService(document.createElement('div'));
+                svc.findPlaceFromQuery({
+                    query: poi.name + ' ' + (poi.location || ''),
+                    fields: ['rating', 'user_ratings_total', 'name'],
+                    locationBias: { lat: poi.lat, lng: poi.lng }
+                }, (res, st) => {
+                    if (st === google.maps.places.PlacesServiceStatus.OK && res && res.length > 0) {
+                        const d = { rating: res[0].rating || 0, count: res[0].user_ratings_total || 0 };
+                        ratingCache[poi.id] = d;
+                        localStorage.setItem('ratingCachePL', JSON.stringify(ratingCache));
+                        resolve(d);
+                    } else {
+                        ratingCache[poi.id] = { rating: 0, count: 0 };
+                        localStorage.setItem('ratingCachePL', JSON.stringify(ratingCache));
+                        resolve({ rating: 0, count: 0 });
+                    }
+                });
+            });
+        }
+        async function loadAllRatings() {
+            if (!googleApiKey) { document.getElementById('rating-progress').textContent = '\u26A0\uFE0F Bitte API Key eingeben'; return; }
+            const btn = document.getElementById('rating-load-btn');
+            btn.disabled = true; btn.textContent = '\u23F3 Lade...';
+            const prog = document.getElementById('rating-progress');
+            try { await loadGooglePlacesAPI(googleApiKey); } catch(e) {
+                prog.textContent = '\u274C API laden fehlgeschlagen'; btn.disabled = false; btn.textContent = '\u2B50 Google Bewertungen laden'; return;
+            }
+            const uncached = allPOIs.filter(p => !ratingCache[p.id]);
+            if (uncached.length === 0) {
+                prog.textContent = '\u2713 Alle Bewertungen geladen!'; btn.disabled = false; btn.textContent = '\u2B50 Google Bewertungen laden'; filterPOIs(false); return;
+            }
+            let loaded = 0;
+            for (let i = 0; i < uncached.length; i += 5) {
+                const batch = uncached.slice(i, i + 5);
+                await Promise.all(batch.map(p => fetchSingleRating(p).catch(() => null)));
+                loaded += batch.length;
+                prog.textContent = loaded + '/' + uncached.length + ' (' + Math.round(loaded/uncached.length*100) + '%)';
+                if (i + 5 < uncached.length) await new Promise(r => setTimeout(r, 300));
+            }
+            prog.textContent = '\u2713 ' + uncached.length + ' Bewertungen geladen!';
+            btn.disabled = false; btn.textContent = '\u2B50 Google Bewertungen laden';
+            filterPOIs(false);
+        }
+        function setRatingFilter(min, btn) {
+            minRatingFilter = min;
+            document.querySelectorAll('.rating-filter-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            filterPOIs(false);
+        }
+        if (googleApiKey) { setTimeout(() => {
+            const kf = document.getElementById('google-api-key');
+            if (kf) kf.value = googleApiKey;
+            loadGooglePlacesAPI(googleApiKey).catch(() => {});
+        }, 500); }
+
         // Favoriten
         let favoritePOIs = JSON.parse(localStorage.getItem('favPOIsPL') || '[]');
         function toggleFavoritePOI(poiId, btn) {
@@ -3838,6 +3983,15 @@ const allPOIs = [
                 });
                 
                 const popupContent = createPopupContent(poi);
+                marker.on('popupopen', async function() {
+                    if (googlePlacesReady && !ratingCache[poi.id]) {
+                        const rating = await fetchSingleRating(poi);
+                        if (rating && rating.rating > 0) {
+                            const el = document.getElementById('popup-rating-' + poi.id);
+                            if (el) el.innerHTML = renderStarsHTML(rating.rating, rating.count);
+                        }
+                    }
+                });
                 marker.bindPopup(popupContent, {
                     maxWidth: 320,
                     className: 'custom-popup'
@@ -3867,6 +4021,7 @@ const allPOIs = [
                         <h3 class="popup-title">${poi.name}</h3>
                         <div class="popup-location">📍 ${poi.location} (${poi.region})</div>
                         <p class="popup-description">${poi.description}</p>
+                        <div id="popup-rating-${poi.id}">${(() => { const r = getPoiRating(poi.id); return r && r.rating > 0 ? renderStarsHTML(r.rating, r.count) : (googlePlacesReady ? '<span class="rating-loading">⭐ Bewertung wird geladen...</span>' : ''); })()}</div>
                         <div style="margin-bottom:12px;">${highlightsHTML}</div>
                         <div class="popup-details">
                             <div class="popup-detail">
@@ -3946,6 +4101,7 @@ const allPOIs = [
                                         <span class="poi-tag price">💰 ${poi.price}</span>
                                         ${poi.isHighlight ? '<span class="poi-tag highlight">⭐ Highlight</span>' : ''}
                                     </div>
+                                    ${(() => { const r = getPoiRating(poi.id); return r && r.rating > 0 ? renderStarsHTML(r.rating, r.count) : ''; })()}
                                 </div>
                             </div>
                         </div>
@@ -4031,6 +4187,14 @@ const allPOIs = [
             }
             else if (visitedFilter === 'favorites') {
                 filtered = filtered.filter(p => favoritePOIs.includes(p.id));
+            }
+            
+            // Rating filter
+            if (minRatingFilter > 0) {
+                filtered = filtered.filter(p => {
+                    const r = getPoiRating(p.id);
+                    return r && r.rating >= minRatingFilter;
+                });
             }
             
             addMarkers(filtered);
