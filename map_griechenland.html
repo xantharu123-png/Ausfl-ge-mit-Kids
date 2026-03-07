@@ -1467,6 +1467,65 @@
         .camping-route-inputs .ac-item:hover {
             background: rgba(78,204,163,0.12);
         }
+    
+        .camping-open-filter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            font-size: 12px;
+            color: #b8c5d6;
+        }
+        .camping-open-filter label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .camping-open-filter input[type="checkbox"] {
+            accent-color: #4ecca3;
+        }
+        .fav-filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            font-size: 12px;
+            color: #b8c5d6;
+        }
+        .fav-filter-bar label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .fav-filter-bar input[type="checkbox"] {
+            accent-color: #e94560;
+        }
+        .camping-badge-open {
+            display: inline-block;
+            font-size: 10px;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-left: 4px;
+        }
+        .camping-badge-open.open {
+            background: #1a3a20;
+            color: #4ecca3;
+        }
+        .camping-badge-open.closed {
+            background: #5a2020;
+            color: #e85050;
+        }
+        .camping-badge-open.unknown {
+            background: #3a3520;
+            color: #c0a030;
+        }
+        .camping-card-name .fav-btn {
+            font-size: 14px;
+            width: 22px;
+            height: 22px;
+        }
     </style>
 </head>
 <body>
@@ -1571,6 +1630,19 @@
                             📍 POIs anzeigen
                             <div id="poi-switch" class="poi-switch"></div>
                         </label>
+                    </div>
+                    <div class="camping-open-filter">
+                        <label><input type="checkbox" id="cf-open-only" onchange="campingOpenOnly=this.checked"> Nur aktuell geöffnete anzeigen</label>
+                    </div>
+                    <div class="fav-filter-bar">
+                        <label><input type="checkbox" id="cf-fav-only" onchange="campingFavOnly=this.checked;if(document.getElementById('camping-results').innerHTML)loadCampingSites();"> ❤️ Nur Favoriten anzeigen <span id="camping-fav-count" class="fav-count-badge" style="display:none;">0</span></label>
+                    </div>
+                    <div class="camping-open-filter" style="flex-wrap:wrap;gap:4px;">
+                        <span style="font-size:11px;color:#8a9ab5;margin-right:2px;">⭐ Min. Bewertung:</span>
+                        <button class="rating-filter-btn active" onclick="setCampRatingFilter(0, this)">Alle</button>
+                        <button class="rating-filter-btn" onclick="setCampRatingFilter(3.5, this)">3.5+</button>
+                        <button class="rating-filter-btn" onclick="setCampRatingFilter(4, this)">4.0+</button>
+                        <button class="rating-filter-btn" onclick="setCampRatingFilter(4.5, this)">4.5+</button>
                     </div>
                     <div class="camping-route-inputs">
                         <div style="position:relative"><input type="text" id="camping-from" placeholder="🚗 Start (z.B. Winterthur)"></div>
@@ -4366,6 +4438,133 @@ const allPOIs = [
             if (btn) btn.classList.add('active');
             filterPOIs(false);
         }
+
+        // Camping Favoriten
+        let favoriteCamping = JSON.parse(localStorage.getItem('favoriteCamping') || '[]');
+        let campingFavOnly = false;
+
+        // Camping Google Bewertungen
+        let campRatingCache = JSON.parse(localStorage.getItem('campRatingCache') || '{}');
+        let minCampRatingFilter = 0;
+
+        function getCampRatingCacheKey(name, lat, lon) {
+            return name.substring(0,40).replace(/[^a-zA-Z0-9]/g,'_') + '_' + parseFloat(lat).toFixed(3) + '_' + parseFloat(lon).toFixed(3);
+        }
+
+        async function fetchCampRating(name, lat, lon) {
+            const ckey = getCampRatingCacheKey(name, lat, lon);
+            if (campRatingCache[ckey]) return campRatingCache[ckey];
+            if (!googleApiKey) return null;
+            try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 8000);
+                const resp = await fetch('https://places.googleapis.com/v1/places:searchText', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': googleApiKey, 'X-Goog-FieldMask': 'places.rating,places.userRatingCount,places.displayName' },
+                    body: JSON.stringify({ textQuery: name, locationBias: { circle: { center: { latitude: lat, longitude: lon }, radius: 5000.0 } }, maxResultCount: 1 }),
+                    signal: controller.signal
+                });
+                clearTimeout(timeout);
+                if (!resp.ok) return null;
+                const data = await resp.json();
+                if (data.places && data.places.length > 0) {
+                    const d = { rating: data.places[0].rating || 0, count: data.places[0].userRatingCount || 0 };
+                    campRatingCache[ckey] = d;
+                    localStorage.setItem('campRatingCache', JSON.stringify(campRatingCache));
+                    return d;
+                } else {
+                    campRatingCache[ckey] = { rating: 0, count: 0 };
+                    localStorage.setItem('campRatingCache', JSON.stringify(campRatingCache));
+                    return { rating: 0, count: 0 };
+                }
+            } catch(e) { return null; }
+        }
+
+        function getCachedCampRating(name, lat, lon) {
+            const ckey = getCampRatingCacheKey(name, lat, lon);
+            return campRatingCache[ckey] || null;
+        }
+
+        function setCampRatingFilter(min, btn) {
+            minCampRatingFilter = min;
+            btn.parentElement.querySelectorAll('.rating-filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if (campingMode && campingMarkers.length > 0) { loadCampingSites(); }
+        }
+
+        let campingOpenOnly = false;
+
+        function checkOpenStatus(ohStr) {
+            if (!ohStr) return 'unknown';
+            const oh = ohStr.trim().toLowerCase();
+            if (oh === '24/7' || oh === 'yes') return 'open';
+            const now = new Date();
+            const curMonth = now.getMonth() + 1;
+            const monthNames = {jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+            const monthRange = oh.match(/^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s*\d*\s*-\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s*\d*/i);
+            if (monthRange) {
+                const startM = monthNames[monthRange[1].toLowerCase()];
+                const endM = monthNames[monthRange[2].toLowerCase()];
+                if (startM && endM) {
+                    if (startM <= endM) return (curMonth >= startM && curMonth <= endM) ? 'open' : 'closed';
+                    else return (curMonth >= startM || curMonth <= endM) ? 'open' : 'closed';
+                }
+            }
+            const numRange = oh.match(/^(\d{1,2})\s*-\s*(\d{1,2})$/);
+            if (numRange) {
+                const s = parseInt(numRange[1]), e = parseInt(numRange[2]);
+                if (s >= 1 && s <= 12 && e >= 1 && e <= 12) {
+                    if (s <= e) return (curMonth >= s && curMonth <= e) ? 'open' : 'closed';
+                    else return (curMonth >= s || curMonth <= e) ? 'open' : 'closed';
+                }
+            }
+            if (oh.includes('closed') || oh === 'off') return 'closed';
+            return 'unknown';
+        }
+
+        function getOpenBadge(status) {
+            if (status === 'open') return '<span class="camping-badge-open open">\u2713 Offen</span>';
+            if (status === 'closed') return '<span class="camping-badge-open closed">\u2717 Geschlossen</span>';
+            return '<span class="camping-badge-open unknown">? Unbekannt</span>';
+        }
+
+        function toggleFavoriteCamping(campKey, btn) {
+            const idx = favoriteCamping.findIndex(c => c.key === campKey);
+            if (idx > -1) { favoriteCamping.splice(idx, 1); }
+            else {
+                const data = window._campingSiteData && window._campingSiteData[campKey];
+                favoriteCamping.push({ key: campKey, data: data || null });
+            }
+            localStorage.setItem('favoriteCamping', JSON.stringify(favoriteCamping));
+            const isFav = favoriteCamping.some(c => c.key === campKey);
+            if (btn) { btn.textContent = isFav ? '\u2764\uFE0F' : '\uD83E\uDD0D'; btn.classList.toggle('active', isFav); }
+            document.querySelectorAll('.fav-btn[data-camp-key="' + campKey + '"]').forEach(b => {
+                b.textContent = isFav ? '\u2764\uFE0F' : '\uD83E\uDD0D';
+                b.classList.toggle('active', isFav);
+            });
+            updateFavCounts();
+        }
+
+        function isCampFav(campKey) { return favoriteCamping.some(c => c.key === campKey); }
+
+        function getCampKey(site) {
+            return (site.tags && site.tags.name ? site.tags.name : 'camp') + '_' + site.lat.toFixed(4) + '_' + (site.lon||site.lng||0).toFixed(4);
+        }
+
+        window._campingSiteData = {};
+
+        function updateFavCounts() {
+            const poiCountEl = document.getElementById('poi-fav-count');
+            if (poiCountEl) {
+                if (favoritePOIs.length > 0) { poiCountEl.textContent = favoritePOIs.length; poiCountEl.style.display = 'inline'; }
+                else { poiCountEl.style.display = 'none'; }
+            }
+            const campCountEl = document.getElementById('camping-fav-count');
+            if (campCountEl) {
+                if (favoriteCamping.length > 0) { campCountEl.textContent = favoriteCamping.length; campCountEl.style.display = 'inline'; }
+                else { campCountEl.style.display = 'none'; }
+            }
+        }
         if (googleApiKey) { setTimeout(() => {
             const kf = document.getElementById('google-api-key-modal');
             if (kf) kf.value = googleApiKey;
@@ -5286,7 +5485,8 @@ const allPOIs = [
                     html = '<div class="camping-info">Keine Plätze im sichtbaren Bereich. Zoome raus oder verschiebe die Karte.</div>';
                 } else {
                     html = '<div class="camping-info">' + sites.length + ' Plätze gefunden</div>';
-                    sites.forEach((site, i) => {
+                    if (campingOpenOnly) sites = sites.filter(s => s.tags && checkOpenStatus(s.tags.opening_hours) !== 'closed');
+                sites.forEach((site, i) => {
                         const name = site.tags.name || site.tags.description || 'Unbenannter Platz';
                         let type = 'camping';
                         if (site.tags.tourism === 'caravan_site') type = 'caravan';
@@ -5306,16 +5506,41 @@ const allPOIs = [
                         if (phone) popup += '<br>\u{1F4DE} ' + phone;
                         popup += '<br><a href="https://www.google.com/search?q=' + encodeURIComponent(name) + '" target="_blank" style="color:#4ecca3;">\u{1F50D} Google Suche</a>';
                         popup += ' · <a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(name) + '+' + site.lat + ',' + site.lon + '" target="_blank" style="color:#ff9800;">\u{1F4CD} Maps</a>';
-                        popup += '<div style="font-size:10px;color:#5a6a7a;margin-top:6px;border-top:1px solid #2a3a4a;padding-top:4px;">ℹ️ Daten: OpenStreetMap · Angaben ohne Gewähr</div>';
+var ck1 = getCampKey(site);
+                        popup += '<br><button class="fav-btn' + (isCampFav(ck1) ? ' active' : '') + '" data-camp-key="' + ck1 + '" onclick="toggleFavoriteCamping(\'' + ck1.replace(/'/g,"\\'") + '\',this);">' + (isCampFav(ck1) ? '\u2764\uFE0F' : '\uD83E\uDD0D') + '</button> <span style="font-size:11px;color:#b8c5d6;">' + (isCampFav(ck1) ? 'Favorit' : 'Favorit speichern') + '</span>';
+                        var cachedR1 = getCachedCampRating(name, site.lat, site.lon);
+                        popup += '<div id="camp-rating-1-' + i + '">' + (cachedR1 && cachedR1.rating > 0 ? renderStarsHTML(cachedR1.rating, cachedR1.count) : '') + '</div>';
+                                                popup += '<div style="font-size:10px;color:#5a6a7a;margin-top:6px;border-top:1px solid #2a3a4a;padding-top:4px;">ℹ️ Daten: OpenStreetMap · Angaben ohne Gewähr</div>';
                         popup += '</div>';
                         marker.bindPopup(popup, { maxWidth: 280 });
+                        (function(mName, mLat, mLon, mIdx) {
+                            marker.on('popupopen', async function() {
+                                if (googleApiKey) {
+                                    var r = await fetchCampRating(mName, mLat, mLon);
+                                    if (r && r.rating > 0) {
+                                        var el = document.getElementById('camp-rating-1-' + mIdx);
+                                        if (el && !el.innerHTML) el.innerHTML = renderStarsHTML(r.rating, r.count);
+                                    }
+                                }
+                            });
+                        })(name, site.lat, site.lon, i);
+                        window._campingSiteData[getCampKey(site)] = { name: name, lat: site.lat, lon: site.lon, type: typeLabel, tags: site.tags };
                         campingCluster.addLayer(marker);
                         campingMarkers.push(marker);
                         if (i < 50) {
                             html += '<div class="camping-card" onclick="var m=campingMarkers['+ i +']; if(m){map.setView(m.getLatLng(), 15); setTimeout(()=>m.openPopup(), 300);}">';
-                            html += '<div class="camping-card-name">' + (i+1) + '. ' + name + '</div>';
-                            html += '<div class="camping-card-type">' + typeLabel + stars + '</div>';
+                            var openStatus = typeof openStatus !== 'undefined' ? openStatus : checkOpenStatus(site.tags.opening_hours);
+                            var campKey = getCampKey(site);
+                            var cr1 = getCachedCampRating(name, site.lat, site.lon);
+                            var skipRating1 = minCampRatingFilter > 0 && (!cr1 || cr1.rating < minCampRatingFilter);
+                            if ((campingFavOnly && !isCampFav(campKey)) || skipRating1) { /* skip */ } else {
+                            let cardDetails = [];
+                            if (cr1 && cr1.rating > 0) cardDetails.push(renderStarsHTML(cr1.rating, cr1.count));
+                            if (site.tags.opening_hours) cardDetails.push('🕐 ' + site.tags.opening_hours);
+                            html += '<div class="camping-card-name"><button class="fav-btn' + (isCampFav(campKey) ? ' active' : '') + '" data-camp-key="' + campKey + '" onclick="event.stopPropagation();toggleFavoriteCamping(\'' + campKey.replace(/'/g,"\\'") + '\',this);">' + (isCampFav(campKey) ? '❤️' : '🤍') + '</button> ' + (i+1) + '. ' + name + ' ' + getOpenBadge(openStatus) + '</div>';
+                            if (cardDetails.length) html += '<div class="camping-card-details">' + cardDetails.join('<br>') + '</div>';
                             html += '</div>';
+                            }
                         }
                     });
                 }
@@ -5436,16 +5661,41 @@ const allPOIs = [
                     if (phone) popup += '<br>\u{1F4DE} ' + phone;
                     popup += '<br><a href="https://www.google.com/search?q=' + encodeURIComponent(name) + '" target="_blank" style="color:#4ecca3;">\u{1F50D} Google Suche</a>';
                     popup += ' · <a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(name) + '+' + site.lat + ',' + site.lon + '" target="_blank" style="color:#ff9800;">\u{1F4CD} Maps</a>';
-                    popup += '<div style="font-size:10px;color:#5a6a7a;margin-top:6px;border-top:1px solid #2a3a4a;padding-top:4px;">ℹ️ Daten: OpenStreetMap · Angaben ohne Gewähr</div>';
+var ck1 = getCampKey(site);
+                        popup += '<br><button class="fav-btn' + (isCampFav(ck1) ? ' active' : '') + '" data-camp-key="' + ck1 + '" onclick="toggleFavoriteCamping(\'' + ck1.replace(/'/g,"\\'") + '\',this);">' + (isCampFav(ck1) ? '\u2764\uFE0F' : '\uD83E\uDD0D') + '</button> <span style="font-size:11px;color:#b8c5d6;">' + (isCampFav(ck1) ? 'Favorit' : 'Favorit speichern') + '</span>';
+                        var cachedR1 = getCachedCampRating(name, site.lat, site.lon);
+                        popup += '<div id="camp-rating-2-' + i + '">' + (cachedR1 && cachedR1.rating > 0 ? renderStarsHTML(cachedR1.rating, cachedR1.count) : '') + '</div>';
+                                            popup += '<div style="font-size:10px;color:#5a6a7a;margin-top:6px;border-top:1px solid #2a3a4a;padding-top:4px;">ℹ️ Daten: OpenStreetMap · Angaben ohne Gewähr</div>';
                     popup += '</div>';
                     marker.bindPopup(popup, { maxWidth: 280 });
+                        (function(mName, mLat, mLon, mIdx) {
+                            marker.on('popupopen', async function() {
+                                if (googleApiKey) {
+                                    var r = await fetchCampRating(mName, mLat, mLon);
+                                    if (r && r.rating > 0) {
+                                        var el = document.getElementById('camp-rating-2-' + mIdx);
+                                        if (el && !el.innerHTML) el.innerHTML = renderStarsHTML(r.rating, r.count);
+                                    }
+                                }
+                            });
+                        })(name, site.lat, site.lon, i);
+                        window._campingSiteData[getCampKey(site)] = { name: name, lat: site.lat, lon: site.lon, type: typeLabel, tags: site.tags };
                     campingCluster.addLayer(marker);
                     campingMarkers.push(marker);
                     if (i < 80) {
                         html += '<div class="camping-card" onclick="var m=campingMarkers['+ i +']; if(m){map.setView(m.getLatLng(), 15); setTimeout(()=>m.openPopup(), 300);}">';
-                        html += '<div class="camping-card-name">' + (i+1) + '. ' + name + '</div>';
-                        html += '<div class="camping-card-type">' + typeLabel + stars + '</div>';
-                        html += '</div>';
+                        var openStatus2 = typeof openStatus2 !== 'undefined' ? openStatus2 : checkOpenStatus(site.tags.opening_hours);
+                            var campKey2 = getCampKey(site);
+                            var cr2 = getCachedCampRating(name, site.lat, site.lon);
+                            var skipRating2 = minCampRatingFilter > 0 && (!cr2 || cr2.rating < minCampRatingFilter);
+                            if ((campingFavOnly && !isCampFav(campKey2)) || skipRating2) { /* skip */ } else {
+                            let cardDetails2 = [];
+                            if (cr2 && cr2.rating > 0) cardDetails2.push(renderStarsHTML(cr2.rating, cr2.count));
+                            if (site.tags.opening_hours) cardDetails2.push('🕐 ' + site.tags.opening_hours);
+                            html += '<div class="camping-card-name"><button class="fav-btn' + (isCampFav(campKey2) ? ' active' : '') + '" data-camp-key="' + campKey2 + '" onclick="event.stopPropagation();toggleFavoriteCamping(\'' + campKey2.replace(/'/g,"\\'") + '\',this);">' + (isCampFav(campKey2) ? '❤️' : '🤍') + '</button> ' + (i+1) + '. ' + name + ' ' + getOpenBadge(openStatus2) + '</div>';
+                            if (cardDetails2.length) html += '<div class="camping-card-details">' + cardDetails2.join('<br>') + '</div>';
+                            html += '</div>';
+                            }
                     }
                 });
                 map.addLayer(campingCluster);
