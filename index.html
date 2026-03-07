@@ -4204,30 +4204,40 @@
             let errors = 0;
             let success = 0;
 
-            // First: test with 1 POI to check if API works
+            // First: test with 3 POIs to check if API works
             _lastPlacesError = '';
-            const testResult = await fetchSingleRating(uncached[0]).catch(() => null);
-            if (!testResult) {
-                let errMsg = '❌ Places API Fehler: ' + (_lastPlacesError || 'Keine Antwort');
+            progress.textContent = 'Teste API-Verbindung...';
+            const testResults = [];
+            for (let t = 0; t < Math.min(3, uncached.length); t++) {
+                const r = await fetchSingleRating(uncached[t]).catch(() => null);
+                testResults.push(r);
+                if (!r && _lastPlacesError) break; // Stop on real error
+                await new Promise(r => setTimeout(r, 300));
+            }
+            const testErrors = testResults.filter(r => !r).length;
+            if (testErrors === testResults.length && _lastPlacesError) {
+                let errMsg = '<b style="color:#e94560;">❌ Places API Fehler: ' + _lastPlacesError + '</b>';
                 if (_lastPlacesError === 'REQUEST_DENIED') {
-                    errMsg += '\n\n→ Bitte in der Google Cloud Console die "Places API" aktivieren (nicht nur "Maps JavaScript API")';
+                    errMsg += '<br><br>Die <b>"Places API"</b> ist nicht aktiviert!<br>→ Google Cloud Console → APIs & Services → Library<br>→ Suche nach <b>"Places API"</b> → Klicke <b>"Enable"</b><br><br><small>(Hinweis: "Maps JavaScript API" allein reicht nicht)</small>';
                 } else if (_lastPlacesError === 'OVER_QUERY_LIMIT') {
-                    errMsg += '\n\n→ API Limit erreicht. Warte einige Minuten.';
+                    errMsg += '<br><br>Tages-Limit erreicht. Warte einige Minuten oder prüfe die Billing-Einstellungen.';
                 } else if (_lastPlacesError.includes('TIMEOUT')) {
-                    errMsg += '\n\n→ API antwortet nicht. Prüfe ob "Places API" aktiviert ist und der Key keine HTTP-Referrer-Einschränkung hat.';
+                    errMsg += '<br><br>API antwortet nicht. Mögliche Ursachen:<br>• "Places API" nicht aktiviert<br>• API Key hat HTTP-Referrer-Einschränkung (bei "Credentials" → Key → auf "None" setzen)';
+                } else {
+                    errMsg += '<br><br>Prüfe ob "Places API" in der Cloud Console aktiviert ist.';
                 }
-                progress.innerHTML = errMsg.replace(/\n/g, '<br>');
-                progress.style.color = '#e94560';
+                progress.innerHTML = errMsg;
                 btn.disabled = false;
                 btn.textContent = '⭐ Google Bewertungen laden';
                 return;
             }
-            success = 1;
-            loaded = 1;
-            progress.textContent = '1/' + total + ' ✓ API funktioniert! Lade Rest...';
+            success = testResults.filter(r => r).length;
+            errors = testErrors;
+            loaded = testResults.length;
+            progress.textContent = loaded + '/' + total + ' — API Test OK! Lade Rest...';
 
             // Process rest in batches of 3
-            for (let i = 1; i < uncached.length; i += 3) {
+            for (let i = testResults.length; i < uncached.length; i += 3) {
                 const batch = uncached.slice(i, i + 3);
                 const results = await Promise.all(batch.map(p => fetchSingleRating(p).catch(() => null)));
                 results.forEach(r => { if (r) success++; else errors++; });
@@ -4329,7 +4339,7 @@
             btn.parentElement.querySelectorAll('.rating-filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             // Re-render current camping results if available
-            if (campingMode && campingMarkers.length > 0) loadCampingSites();
+            if (campingMode && campingMarkers.length > 0) { loadCampingSites(); }
         }
 
 
@@ -5217,12 +5227,7 @@
             if (campingMode) {
                 sw.classList.add('active');
                 panel.classList.add('visible');
-                if (map.getZoom() < 8) {
-                    map.setZoom(9);
-                    // loadCampingSites triggers via moveend
-                } else {
-                    loadCampingSites();
-                }
+                document.getElementById('camping-results').innerHTML = '<div class="camping-info">🗺️ Karte verschieben um Plätze zu laden, oder Route berechnen.</div>';
             } else {
                 sw.classList.remove('active');
                 panel.classList.remove('visible');
