@@ -1362,6 +1362,56 @@
             color: #8a9ab5;
             margin-top: 2px;
         }
+        .camping-card-details {
+            font-size: 11px;
+            color: #8a9ab5;
+            margin-top: 3px;
+            line-height: 1.5;
+        }
+        .camping-card-details a {
+            color: #4ecca3;
+            text-decoration: none;
+        }
+        .camping-card-details a:hover {
+            text-decoration: underline;
+        }
+        .camping-badge-open {
+            display: inline-block;
+            font-size: 10px;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            margin-left: 4px;
+        }
+        .camping-badge-open.open {
+            background: #2d6b4f;
+            color: #4ecca3;
+        }
+        .camping-badge-open.closed {
+            background: #5a2020;
+            color: #e85050;
+        }
+        .camping-badge-open.unknown {
+            background: #3a3520;
+            color: #c0a030;
+        }
+        .camping-open-filter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            font-size: 12px;
+            color: #b8c5d6;
+        }
+        .camping-open-filter label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .camping-open-filter input[type="checkbox"] {
+            accent-color: #4ecca3;
+        }
 
     
         /* Autocomplete Dropdown */
@@ -1520,6 +1570,9 @@
                             📍 POIs anzeigen
                             <div id="poi-switch" class="poi-switch"></div>
                         </label>
+                    </div>
+                    <div class="camping-open-filter">
+                        <label><input type="checkbox" id="cf-open-only" onchange="campingOpenOnly=this.checked"> Nur aktuell geöffnete anzeigen</label>
                     </div>
                     <div class="camping-route-inputs">
                         <div style="position:relative"><input type="text" id="camping-from" placeholder="🚗 Start (z.B. Winterthur)"></div>
@@ -4421,6 +4474,62 @@
         let campingRoute = null;
         let campingCluster = null;
         const campingTypes = { camping: true, caravan: true, parking: true };
+        let campingOpenOnly = false;
+
+        // Simple opening_hours parser - checks if currently open
+        function checkOpenStatus(ohStr) {
+            if (!ohStr) return 'unknown';
+            const oh = ohStr.trim().toLowerCase();
+            if (oh === '24/7' || oh === 'yes') return 'open';
+            // Check for month ranges like "Apr-Oct" or "03-10"
+            const now = new Date();
+            const curMonth = now.getMonth() + 1; // 1-12
+            const curDay = now.getDay(); // 0=Sun
+            const monthNames = {jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+            // Match patterns like "Apr-Oct", "Mar 15-Nov 15", "Apr-Sep: ..."
+            const monthRange = oh.match(/^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s*\d*\s*-\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s*\d*/i);
+            if (monthRange) {
+                const startM = monthNames[monthRange[1].toLowerCase()];
+                const endM = monthNames[monthRange[2].toLowerCase()];
+                if (startM && endM) {
+                    if (startM <= endM) {
+                        return (curMonth >= startM && curMonth <= endM) ? 'open' : 'closed';
+                    } else {
+                        return (curMonth >= startM || curMonth <= endM) ? 'open' : 'closed';
+                    }
+                }
+            }
+            // Match numeric month ranges like "03-10" or "3-11"
+            const numRange = oh.match(/^(\d{1,2})\s*-\s*(\d{1,2})$/);
+            if (numRange) {
+                const s = parseInt(numRange[1]), e = parseInt(numRange[2]);
+                if (s >= 1 && s <= 12 && e >= 1 && e <= 12) {
+                    if (s <= e) return (curMonth >= s && curMonth <= e) ? 'open' : 'closed';
+                    else return (curMonth >= s || curMonth <= e) ? 'open' : 'closed';
+                }
+            }
+            // "off" or "closed" anywhere
+            if (oh.includes('closed') || oh === 'off') return 'closed';
+            // If it has day ranges or times but we can't parse deeply, return unknown
+            return 'unknown';
+        }
+
+        function getOpenBadge(status) {
+            if (status === 'open') return '<span class="camping-badge-open open">✓ Offen</span>';
+            if (status === 'closed') return '<span class="camping-badge-open closed">✗ Geschlossen</span>';
+            return '<span class="camping-badge-open unknown">? Unbekannt</span>';
+        }
+
+        function formatPrice(tags) {
+            if (tags.fee === 'no') return '✓ Kostenlos';
+            let price = '';
+            if (tags.charge) price = tags.charge;
+            else if (tags.fee && tags.fee !== 'yes' && tags.fee !== 'no') price = tags.fee;
+            else if (tags['fee:amount']) price = tags['fee:amount'];
+            if (price) return '💰 ' + price;
+            if (tags.fee === 'yes') return '💰 Kostenpflichtig';
+            return '';
+        }
         
         function toggleCampingMode() {
             campingMode = !campingMode;
@@ -4502,13 +4611,13 @@
             document.getElementById('camping-results').innerHTML = '<div class="camping-loading"><div class="camping-loading-text">\u{1F3D5}\uFE0F Lade Campingplätze...</div><div class="camping-loading-sub">Daten werden von OpenStreetMap geladen</div><div class="camping-progress"><div class="camping-progress-bar"></div></div></div>';
             
             let query = '[out:json][timeout:30];(';
-            if (campingTypes.camping) query += 'node["tourism"="camp_site"](' + south + ',' + west + ',' + north + ',' + east + ');';
-            if (campingTypes.caravan) query += 'node["tourism"="caravan_site"](' + south + ',' + west + ',' + north + ',' + east + ');';
+            if (campingTypes.camping) { query += 'node["tourism"="camp_site"](' + south + ',' + west + ',' + north + ',' + east + ');'; query += 'way["tourism"="camp_site"](' + south + ',' + west + ',' + north + ',' + east + ');'; }
+            if (campingTypes.caravan) { query += 'node["tourism"="caravan_site"](' + south + ',' + west + ',' + north + ',' + east + ');'; query += 'way["tourism"="caravan_site"](' + south + ',' + west + ',' + north + ',' + east + ');'; query += 'node["amenity"="motorhome_station"](' + south + ',' + west + ',' + north + ',' + east + ');'; }
             if (campingTypes.parking) {
                 query += 'node["amenity"="parking"]["camping"="yes"](' + south + ',' + west + ',' + north + ',' + east + ');';
                 query += 'node["tourism"="camp_pitch"](' + south + ',' + west + ',' + north + ',' + east + ');';
             }
-            query += ');out body 500;';
+            query += ');out center 500;';
             
             try {
                 let data;
@@ -4527,41 +4636,64 @@
                     }
                 });
                 
-                const sites = data.elements || [];
+                let sites = (data.elements || []).map(e => {
+                    // Normalize way center coords
+                    if (!e.lat && e.center) { e.lat = e.center.lat; e.lon = e.center.lon; }
+                    return e;
+                }).filter(e => e.lat && e.lon && e.tags);
+                // Filter by open status if checkbox is checked
+                if (campingOpenOnly) sites = sites.filter(s => checkOpenStatus(s.tags.opening_hours) !== 'closed');
                 let html = '';
                 if (sites.length === 0) {
-                    html = '<div class="camping-info">Keine Plätze im sichtbaren Bereich. Zoome raus oder verschiebe die Karte.</div>';
+                    html = '<div class="camping-info">Keine Plätze im sichtbaren Bereich.' + (campingOpenOnly ? ' Versuche ohne "Nur geöffnete" Filter.' : ' Zoome raus oder verschiebe die Karte.') + '</div>';
                 } else {
                     html = '<div class="camping-info">' + sites.length + ' Plätze gefunden</div>';
                     sites.forEach((site, i) => {
                         const name = site.tags.name || site.tags.description || 'Unbenannter Platz';
                         let type = 'camping';
-                        if (site.tags.tourism === 'caravan_site') type = 'caravan';
+                        if (site.tags.tourism === 'caravan_site' || site.tags.amenity === 'motorhome_station') type = 'caravan';
                         if (site.tags.amenity === 'parking' || site.tags.tourism === 'camp_pitch') type = 'parking';
-                        const typeLabel = { camping: 'Campingplatz', caravan: 'Wohnmobilstellplatz', parking: 'Stellplatz/Parking' }[type];
-                        const stars = site.tags.stars ? ' \u2B50' + site.tags.stars : '';
+                        const typeLabel = { camping: 'Campingplatz', caravan: 'Wohnmobilstellplatz', parking: 'Stellplatz' }[type];
+                        const stars = site.tags.stars ? ' ⭐' + site.tags.stars : '';
                         const website = site.tags.website || site.tags.url || site.tags['contact:website'] || '';
                         const phone = site.tags.phone || site.tags['contact:phone'] || '';
+                        const email = site.tags.email || site.tags['contact:email'] || '';
+                        const openStatus = checkOpenStatus(site.tags.opening_hours);
+                        const priceStr = formatPrice(site.tags);
                         const marker = L.marker([site.lat, site.lon], { icon: createCampingIcon(type) });
-                        let popup = '<div style="min-width:200px"><strong>' + name + '</strong><br><span style="color:#4ecca3;font-size:12px;">' + typeLabel + stars + '</span>';
-                        if (site.tags.opening_hours) popup += '<br>\u{1F552} ' + site.tags.opening_hours;
-                        if (site.tags.capacity) popup += '<br>\u{1F4CA} Kapazität: ' + site.tags.capacity + ' Plätze';
-                        if (site.tags.fee) popup += '<br>\u{1F4B0} Gebühr: ' + (site.tags.fee === 'yes' ? 'Ja' : site.tags.fee === 'no' ? 'Kostenlos' : site.tags.fee);
-                        if (site.tags.power_supply) popup += '<br>\u{1F50C} Strom: ' + (site.tags.power_supply === 'yes' ? 'Ja' : 'Nein');
-                        if (site.tags.drinking_water) popup += '<br>\u{1F4A7} Wasser: ' + (site.tags.drinking_water === 'yes' ? 'Ja' : 'Nein');
-                        if (site.tags.internet_access) popup += '<br>\u{1F4F6} WiFi: ' + (site.tags.internet_access === 'yes' || site.tags.internet_access === 'wlan' ? 'Ja' : 'Nein');
-                        if (phone) popup += '<br>\u{1F4DE} ' + phone;
-                        popup += '<br><a href="https://www.google.com/search?q=' + encodeURIComponent(name) + '" target="_blank" style="color:#4ecca3;">\u{1F50D} Google Suche</a>';
-                        popup += ' · <a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(name) + '+' + site.lat + ',' + site.lon + '" target="_blank" style="color:#ff9800;">\u{1F4CD} Maps</a>';
+                        // Rich popup
+                        let popup = '<div style="min-width:220px"><strong>' + name + '</strong> ' + getOpenBadge(openStatus);
+                        popup += '<br><span style="color:#4ecca3;font-size:12px;">' + typeLabel + stars + '</span>';
+                        if (site.tags.opening_hours) popup += '<br>🕐 ' + site.tags.opening_hours;
+                        if (priceStr) popup += '<br>' + priceStr;
+                        if (site.tags.capacity) popup += '<br>📊 ' + site.tags.capacity + ' Plätze';
+                        let amenities = [];
+                        if (site.tags.power_supply === 'yes') amenities.push('🔌 Strom');
+                        if (site.tags.drinking_water === 'yes') amenities.push('💧 Wasser');
+                        if (site.tags.internet_access === 'yes' || site.tags.internet_access === 'wlan') amenities.push('📶 WiFi');
+                        if (site.tags.toilets === 'yes') amenities.push('🚻 WC');
+                        if (site.tags.shower === 'yes') amenities.push('🚿 Dusche');
+                        if (site.tags.sanitary_dump_station === 'yes') amenities.push('🚰 Entsorgung');
+                        if (amenities.length) popup += '<br><span style="font-size:11px;">' + amenities.join(' · ') + '</span>';
+                        if (phone) popup += '<br>📞 <a href="tel:' + phone.replace(/\s/g,'') + '" style="color:#4ecca3;">' + phone + '</a>';
+                        if (email) popup += '<br>✉️ <a href="mailto:' + email + '" style="color:#4ecca3;font-size:11px;">' + email + '</a>';
+                        if (website) popup += '<br>🌐 <a href="' + (website.startsWith('http') ? website : 'https://'+website) + '" target="_blank" style="color:#4ecca3;font-size:11px;">' + website.replace(/^https?:\/\/(www\.)?/,'').substring(0,35) + '</a>';
+                        popup += '<br><a href="https://www.google.com/search?q=' + encodeURIComponent(name + ' camping') + '" target="_blank" style="color:#4ecca3;font-size:11px;">🔍 Google</a>';
+                        popup += ' · <a href="https://www.google.com/maps/search/?api=1&query=' + site.lat + ',' + site.lon + '" target="_blank" style="color:#ff9800;font-size:11px;">📍 Maps</a>';
                         popup += '<div style="font-size:10px;color:#5a6a7a;margin-top:6px;border-top:1px solid #2a3a4a;padding-top:4px;">ℹ️ Daten: OpenStreetMap · Angaben ohne Gewähr</div>';
                         popup += '</div>';
-                        marker.bindPopup(popup, { maxWidth: 280 });
+                        marker.bindPopup(popup, { maxWidth: 300 });
                         campingCluster.addLayer(marker);
                         campingMarkers.push(marker);
-                        if (i < 50) {
-                            html += '<div class="camping-card" onclick="map.setView([46.8182, 8.2275], 8);campingMarkers[' + i + '].openPopup();">';
-                            html += '<div class="camping-card-name">' + (i+1) + '. ' + name + '</div>';
+                        if (i < 80) {
+                            let cardDetails = [];
+                            if (site.tags.opening_hours) cardDetails.push('🕐 ' + site.tags.opening_hours);
+                            if (priceStr) cardDetails.push(priceStr);
+                            if (website) cardDetails.push('🌐 <a href="' + (website.startsWith('http') ? website : 'https://'+website) + '" target="_blank" onclick="event.stopPropagation();">' + website.replace(/^https?:\/\/(www\.)?/,'').substring(0,30) + '</a>');
+                            html += '<div class="camping-card" onclick="map.setView([' + site.lat + ',' + site.lon + '], 13);campingMarkers[' + i + '].openPopup();">';
+                            html += '<div class="camping-card-name">' + (i+1) + '. ' + name + ' ' + getOpenBadge(openStatus) + '</div>';
                             html += '<div class="camping-card-type">' + typeLabel + stars + '</div>';
+                            if (cardDetails.length) html += '<div class="camping-card-details">' + cardDetails.join('<br>') + '</div>';
                             html += '</div>';
                         }
                     });
@@ -4685,38 +4817,60 @@
                 });
                 const duration = Math.round(routeDuration / 3600 * 10) / 10;
                 const distance = Math.round(routeDistance / 1000);
-                let html = '<div class="camping-info">🚗 ' + distance + ' km, ~' + duration + 'h Fahrt<br>🏕️ ' + nearRoute.length + ' Plätze entlang der Route (±40km)</div>';
-                nearRoute.forEach((site, i) => {
+                // Filter by open status if checkbox is checked
+                const displayList = campingOpenOnly ? nearRoute.filter(s => checkOpenStatus(s.tags.opening_hours) !== 'closed') : nearRoute;
+                const totalFound = nearRoute.length;
+                const shownCount = displayList.length;
+                let html = '<div class="camping-info">🚗 ' + distance + ' km, ~' + duration + 'h Fahrt<br>🏕️ ' + shownCount + ' Plätze entlang der Route (±40km)' + (campingOpenOnly && shownCount < totalFound ? '<br><span style="font-size:11px;color:#c0a030;">(' + (totalFound - shownCount) + ' geschlossene ausgeblendet)</span>' : '') + '</div>';
+                displayList.forEach((site, i) => {
                     const name = site.tags.name || site.tags.description || 'Unbenannter Platz';
                     let type = 'camping';
-                    if (site.tags.tourism === 'caravan_site') type = 'caravan';
+                    if (site.tags.tourism === 'caravan_site' || site.tags.amenity === 'motorhome_station') type = 'caravan';
                     if (site.tags.amenity === 'parking' || site.tags.tourism === 'camp_pitch') type = 'parking';
                     const typeLabel = { camping: 'Campingplatz', caravan: 'Wohnmobilstellplatz', parking: 'Stellplatz' }[type];
                     const website = site.tags.website || site.tags.url || site.tags['contact:website'] || '';
                     const phone = site.tags.phone || site.tags['contact:phone'] || '';
-                    const stars = site.tags.stars ? ' \u2B50' + site.tags.stars : '';
+                    const email = site.tags.email || site.tags['contact:email'] || '';
+                    const stars = site.tags.stars ? ' ⭐' + site.tags.stars : '';
+                    const openStatus = checkOpenStatus(site.tags.opening_hours);
+                    const priceStr = formatPrice(site.tags);
                     const marker = L.marker([site.lat, site.lon], { icon: createCampingIcon(type) });
-                    let popup = '<div style="min-width:200px"><strong>' + name + '</strong><br><span style="color:#4ecca3;font-size:12px;">' + typeLabel + stars + '</span>';
-                    if (site.tags.opening_hours) popup += '<br>\u{1F552} ' + site.tags.opening_hours;
-                    if (site.tags.capacity) popup += '<br>\u{1F4CA} ' + site.tags.capacity + ' Plätze';
-                    if (site.tags.fee) popup += '<br>\u{1F4B0} ' + (site.tags.fee === 'yes' ? 'Kostenpflichtig' : site.tags.fee === 'no' ? 'Kostenlos' : site.tags.fee);
-                    if (site.tags.power_supply) popup += '<br>\u{1F50C} Strom: ' + (site.tags.power_supply === 'yes' ? 'Ja' : 'Nein');
-                    if (site.tags.drinking_water) popup += '<br>\u{1F4A7} Wasser: ' + (site.tags.drinking_water === 'yes' ? 'Ja' : 'Nein');
-                    if (site.tags.internet_access) popup += '<br>\u{1F4F6} WiFi: Ja';
-                    if (site.tags.toilets) popup += '<br>\u{1F6BB} Toiletten: ' + (site.tags.toilets === 'yes' ? 'Ja' : 'Nein');
-                    if (site.tags.shower) popup += '<br>\u{1F6BF} Duschen: ' + (site.tags.shower === 'yes' ? 'Ja' : 'Nein');
-                    if (phone) popup += '<br>\u{1F4DE} ' + phone;
-                    popup += '<br><a href="https://www.google.com/search?q=' + encodeURIComponent(name) + '" target="_blank" style="color:#4ecca3;">\u{1F50D} Google Suche</a>';
-                    popup += ' · <a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(name) + '+' + site.lat + ',' + site.lon + '" target="_blank" style="color:#ff9800;">\u{1F4CD} Maps</a>';
+                    // Build rich popup
+                    let popup = '<div style="min-width:220px"><strong>' + name + '</strong> ' + getOpenBadge(openStatus);
+                    popup += '<br><span style="color:#4ecca3;font-size:12px;">' + typeLabel + stars + '</span>';
+                    if (site.tags.opening_hours) popup += '<br>🕐 ' + site.tags.opening_hours;
+                    if (priceStr) popup += '<br>' + priceStr;
+                    if (site.tags.capacity) popup += '<br>📊 ' + site.tags.capacity + ' Plätze';
+                    // Amenities row
+                    let amenities = [];
+                    if (site.tags.power_supply === 'yes') amenities.push('🔌 Strom');
+                    if (site.tags.drinking_water === 'yes') amenities.push('💧 Wasser');
+                    if (site.tags.internet_access === 'yes' || site.tags.internet_access === 'wlan') amenities.push('📶 WiFi');
+                    if (site.tags.toilets === 'yes') amenities.push('🚻 WC');
+                    if (site.tags.shower === 'yes') amenities.push('🚿 Dusche');
+                    if (site.tags.washing_machine === 'yes') amenities.push('🧺 Waschm.');
+                    if (site.tags.sanitary_dump_station === 'yes') amenities.push('🚰 Entsorgung');
+                    if (amenities.length) popup += '<br><span style="font-size:11px;">' + amenities.join(' · ') + '</span>';
+                    if (phone) popup += '<br>📞 <a href="tel:' + phone.replace(/\s/g,'') + '" style="color:#4ecca3;">' + phone + '</a>';
+                    if (email) popup += '<br>✉️ <a href="mailto:' + email + '" style="color:#4ecca3;font-size:11px;">' + email + '</a>';
+                    if (website) popup += '<br>🌐 <a href="' + (website.startsWith('http') ? website : 'https://'+website) + '" target="_blank" style="color:#4ecca3;font-size:11px;">' + website.replace(/^https?:\/\/(www\.)?/,'').substring(0,35) + '</a>';
+                    popup += '<br><a href="https://www.google.com/search?q=' + encodeURIComponent(name + ' camping') + '" target="_blank" style="color:#4ecca3;font-size:11px;">🔍 Google</a>';
+                    popup += ' · <a href="https://www.google.com/maps/search/?api=1&query=' + site.lat + ',' + site.lon + '" target="_blank" style="color:#ff9800;font-size:11px;">📍 Maps</a>';
                     popup += '<div style="font-size:10px;color:#5a6a7a;margin-top:6px;border-top:1px solid #2a3a4a;padding-top:4px;">ℹ️ Daten: OpenStreetMap · Angaben ohne Gewähr</div>';
                     popup += '</div>';
-                    marker.bindPopup(popup, { maxWidth: 280 });
+                    marker.bindPopup(popup, { maxWidth: 300 });
                     campingCluster.addLayer(marker);
                     campingMarkers.push(marker);
-                    if (i < 100) {
+                    if (i < 120) {
+                        // Build card with details
+                        let cardDetails = [];
+                        if (site.tags.opening_hours) cardDetails.push('🕐 ' + site.tags.opening_hours);
+                        if (priceStr) cardDetails.push(priceStr);
+                        if (website) cardDetails.push('🌐 <a href="' + (website.startsWith('http') ? website : 'https://'+website) + '" target="_blank" onclick="event.stopPropagation();">' + website.replace(/^https?:\/\/(www\.)?/,'').substring(0,30) + '</a>');
                         html += '<div class="camping-card" onclick="map.setView([' + site.lat + ',' + site.lon + '], 13);campingMarkers[' + i + '].openPopup();">';
-                        html += '<div class="camping-card-name">' + (i+1) + '. ' + name + '</div>';
+                        html += '<div class="camping-card-name">' + (i+1) + '. ' + name + ' ' + getOpenBadge(openStatus) + '</div>';
                         html += '<div class="camping-card-type">' + typeLabel + stars + '</div>';
+                        if (cardDetails.length) html += '<div class="camping-card-details">' + cardDetails.join('<br>') + '</div>';
                         html += '</div>';
                     }
                 });
