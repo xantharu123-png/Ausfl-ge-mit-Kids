@@ -4072,11 +4072,10 @@
         let visitedFilter = 'all'; // 'all', 'visited', 'unvisited'
 
 
-        // ===== Google Bewertungen System =====
+        // ===== Google Bewertungen System (Places API New - REST) =====
         let googleApiKey = localStorage.getItem('googleApiKey') || '';
         let ratingCache = JSON.parse(localStorage.getItem('ratingCacheCH') || '{}');
         let minRatingFilter = 0;
-        let googlePlacesReady = false;
         let ratingsLoadQueue = [];
 
         function saveGoogleApiKey() {
@@ -4084,30 +4083,15 @@
             if (key) {
                 googleApiKey = key;
                 localStorage.setItem('googleApiKey', key);
-                loadGooglePlacesAPI(key).then(() => {
-                    document.getElementById('settings-api-status').textContent = '✓ API Key gespeichert und geladen';
-                    document.getElementById('settings-api-status').style.color = '#4ecca3';
-                }).catch(() => {
-                    document.getElementById('settings-api-status').textContent = '⚠️ Key gespeichert, aber API konnte nicht geladen werden';
-                    document.getElementById('settings-api-status').style.color = '#e94560';
-                });
+                document.getElementById('settings-api-status').textContent = '✓ API Key gespeichert!';
+                document.getElementById('settings-api-status').style.color = '#4ecca3';
             }
         }
 
         function loadGooglePlacesAPI(key) {
-            if (googlePlacesReady) return Promise.resolve();
-            return new Promise((resolve, reject) => {
-                if (window.google && window.google.maps && window.google.maps.places) {
-                    googlePlacesReady = true;
-                    resolve();
-                    return;
-                }
-                const script = document.createElement('script');
-                script.src = 'https://maps.googleapis.com/maps/api/js?key=' + key + '&libraries=places';
-                script.onload = () => { googlePlacesReady = true; resolve(); };
-                script.onerror = () => { reject(new Error('API laden fehlgeschlagen')); };
-                document.head.appendChild(script);
-            });
+            // New REST API needs no JS library — just the key
+            if (key) { googleApiKey = key; }
+            return Promise.resolve();
         }
 
         function renderStarsHTML(rating, count) {
@@ -4136,37 +4120,51 @@
         async function fetchSingleRating(poi) {
             const cached = ratingCache[poi.id];
             if (cached) return cached;
-            if (!googlePlacesReady) return null;
+            if (!googleApiKey) return null;
 
-            return new Promise((resolve) => {
-                const timeout = setTimeout(() => { _lastPlacesError = 'TIMEOUT (8s)'; resolve(null); }, 8000);
-                try {
-                    const service = new google.maps.places.PlacesService(document.createElement('div'));
-                    const request = {
-                        query: poi.name + ' ' + (poi.location || ''),
-                        fields: ['rating', 'user_ratings_total', 'name'],
-                        locationBias: new google.maps.LatLng(poi.lat, poi.lng)
-                    };
-                    service.findPlaceFromQuery(request, (results, status) => {
-                        clearTimeout(timeout);
-                        if (status === google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
-                            const data = { rating: results[0].rating || 0, count: results[0].user_ratings_total || 0 };
-                            ratingCache[poi.id] = data;
-                            resolve(data);
-                        } else if (status === 'ZERO_RESULTS' || status === 'NOT_FOUND') {
-                            ratingCache[poi.id] = { rating: 0, count: 0 };
-                            resolve({ rating: 0, count: 0 });
-                        } else {
-                            _lastPlacesError = status || 'UNKNOWN';
-                            resolve(null);
-                        }
-                    });
-                } catch(e) {
-                    clearTimeout(timeout);
-                    _lastPlacesError = e.message || 'EXCEPTION';
-                    resolve(null);
+            try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 8000);
+                const resp = await fetch('https://places.googleapis.com/v1/places:searchText', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Goog-Api-Key': googleApiKey,
+                        'X-Goog-FieldMask': 'places.rating,places.userRatingCount,places.displayName'
+                    },
+                    body: JSON.stringify({
+                        textQuery: poi.name + ' ' + (poi.location || ''),
+                        locationBias: {
+                            circle: {
+                                center: { latitude: poi.lat, longitude: poi.lng },
+                                radius: 5000.0
+                            }
+                        },
+                        maxResultCount: 1
+                    }),
+                    signal: controller.signal
+                });
+                clearTimeout(timeout);
+                if (!resp.ok) {
+                    const errBody = await resp.text().catch(() => '');
+                    _lastPlacesError = 'HTTP ' + resp.status + (errBody.includes('API_KEY_INVALID') ? ' (Ungültiger Key)' : errBody.includes('not enabled') ? ' (API nicht aktiviert!)' : '');
+                    return null;
                 }
-            });
+                const data = await resp.json();
+                if (data.places && data.places.length > 0) {
+                    const place = data.places[0];
+                    const result = { rating: place.rating || 0, count: place.userRatingCount || 0 };
+                    ratingCache[poi.id] = result;
+                    return result;
+                } else {
+                    ratingCache[poi.id] = { rating: 0, count: 0 };
+                    return { rating: 0, count: 0 };
+                }
+            } catch(e) {
+                if (e.name === 'AbortError') { _lastPlacesError = 'TIMEOUT (8s)'; }
+                else { _lastPlacesError = e.message || 'EXCEPTION'; }
+                return null;
+            }
         }
 
         async function loadAllRatings() {
@@ -4179,14 +4177,7 @@
             btn.textContent = '⏳ Lade...';
             const progress = document.getElementById('rating-progress');
 
-            try {
-                await loadGooglePlacesAPI(googleApiKey);
-            } catch(e) {
-                progress.textContent = '❌ API konnte nicht geladen werden. Prüfe den Key.';
-                btn.disabled = false;
-                btn.textContent = '⭐ Google Bewertungen laden';
-                return;
-            }
+            await loadGooglePlacesAPI(googleApiKey);
 
             // Find POIs without cached rating
             const uncached = allPOIs.filter(p => !ratingCache[p.id]);
@@ -4217,14 +4208,16 @@
             const testErrors = testResults.filter(r => !r).length;
             if (testErrors === testResults.length && _lastPlacesError) {
                 let errMsg = '<b style="color:#e94560;">❌ Places API Fehler: ' + _lastPlacesError + '</b>';
-                if (_lastPlacesError === 'REQUEST_DENIED') {
-                    errMsg += '<br><br>Die <b>"Places API"</b> ist nicht aktiviert!<br>→ Google Cloud Console → APIs & Services → Library<br>→ Suche nach <b>"Places API"</b> → Klicke <b>"Enable"</b><br><br><small>(Hinweis: "Maps JavaScript API" allein reicht nicht)</small>';
-                } else if (_lastPlacesError === 'OVER_QUERY_LIMIT') {
-                    errMsg += '<br><br>Tages-Limit erreicht. Warte einige Minuten oder prüfe die Billing-Einstellungen.';
+                if (_lastPlacesError.includes('403') || _lastPlacesError.includes('nicht aktiviert')) {
+                    errMsg += '<br><br>Die <b>"Places API (New)"</b> ist nicht aktiviert!<br>→ Google Cloud Console → APIs & Services → Library<br>→ Suche nach <b>"Places API (New)"</b> → Klicke <b>"Enable"</b>';
+                } else if (_lastPlacesError.includes('429') || _lastPlacesError.includes('RATE')) {
+                    errMsg += '<br><br>Rate-Limit erreicht. Warte einige Minuten oder prüfe die Billing-Einstellungen.';
                 } else if (_lastPlacesError.includes('TIMEOUT')) {
-                    errMsg += '<br><br>API antwortet nicht. Mögliche Ursachen:<br>• "Places API" nicht aktiviert<br>• API Key hat HTTP-Referrer-Einschränkung (bei "Credentials" → Key → auf "None" setzen)';
+                    errMsg += '<br><br>API antwortet nicht. Mögliche Ursachen:<br>• "Places API (New)" nicht aktiviert<br>• API Key hat HTTP-Referrer-Einschränkung (bei "Credentials" → Key → auf "None" setzen)';
+                } else if (_lastPlacesError.includes('400')) {
+                    errMsg += '<br><br>Ungültige Anfrage. Prüfe ob der API Key korrekt ist.';
                 } else {
-                    errMsg += '<br><br>Prüfe ob "Places API" in der Cloud Console aktiviert ist.';
+                    errMsg += '<br><br>Prüfe ob "Places API (New)" in der Cloud Console aktiviert ist.';
                 }
                 progress.innerHTML = errMsg;
                 btn.disabled = false;
@@ -4244,8 +4237,8 @@
                 loaded += batch.length;
                 const pct = Math.round(loaded / total * 100);
                 progress.textContent = loaded + '/' + total + ' (' + pct + '%) · ✓' + success + (errors > 0 ? ' · ✗' + errors : '');
-                if (_lastPlacesError === 'OVER_QUERY_LIMIT') {
-                    progress.textContent += ' — Limit erreicht, warte 5s...';
+                if (_lastPlacesError.includes('429')) {
+                    progress.textContent += ' — Rate-Limit, warte 5s...';
                     await new Promise(r => setTimeout(r, 5000));
                     _lastPlacesError = '';
                 }
@@ -4299,34 +4292,46 @@
         async function fetchCampRating(name, lat, lon) {
             const ckey = getCampRatingCacheKey(name, lat, lon);
             if (campRatingCache[ckey]) return campRatingCache[ckey];
-            if (!googlePlacesReady) return null;
+            if (!googleApiKey) return null;
 
-            return new Promise((resolve) => {
-                const timeout = setTimeout(() => { resolve(null); }, 8000);
-                try {
-                    const svc = new google.maps.places.PlacesService(document.createElement('div'));
-                    svc.findPlaceFromQuery({
-                        query: name,
-                        fields: ['rating', 'user_ratings_total', 'name'],
-                        locationBias: new google.maps.LatLng(lat, lon)
-                    }, (results, status) => {
-                        clearTimeout(timeout);
-                        if (status === google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
-                            const d = { rating: results[0].rating || 0, count: results[0].user_ratings_total || 0 };
-                            campRatingCache[ckey] = d;
-                            localStorage.setItem('campRatingCache', JSON.stringify(campRatingCache));
-                            resolve(d);
-                        } else {
-                            campRatingCache[ckey] = { rating: 0, count: 0 };
-                            localStorage.setItem('campRatingCache', JSON.stringify(campRatingCache));
-                            resolve({ rating: 0, count: 0 });
-                        }
-                    });
-                } catch(e) {
-                    clearTimeout(timeout);
-                    resolve(null);
+            try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 8000);
+                const resp = await fetch('https://places.googleapis.com/v1/places:searchText', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Goog-Api-Key': googleApiKey,
+                        'X-Goog-FieldMask': 'places.rating,places.userRatingCount,places.displayName'
+                    },
+                    body: JSON.stringify({
+                        textQuery: name,
+                        locationBias: {
+                            circle: {
+                                center: { latitude: lat, longitude: lon },
+                                radius: 5000.0
+                            }
+                        },
+                        maxResultCount: 1
+                    }),
+                    signal: controller.signal
+                });
+                clearTimeout(timeout);
+                if (!resp.ok) return null;
+                const data = await resp.json();
+                if (data.places && data.places.length > 0) {
+                    const d = { rating: data.places[0].rating || 0, count: data.places[0].userRatingCount || 0 };
+                    campRatingCache[ckey] = d;
+                    localStorage.setItem('campRatingCache', JSON.stringify(campRatingCache));
+                    return d;
+                } else {
+                    campRatingCache[ckey] = { rating: 0, count: 0 };
+                    localStorage.setItem('campRatingCache', JSON.stringify(campRatingCache));
+                    return { rating: 0, count: 0 };
                 }
-            });
+            } catch(e) {
+                return null;
+            }
         }
 
         function getCachedCampRating(name, lat, lon) {
@@ -4519,7 +4524,7 @@
                 
                 const popupContent = createPopupContent(poi);
                 marker.on('popupopen', async function() {
-                    if (googlePlacesReady && !ratingCache[poi.id]) {
+                    if (googleApiKey && !ratingCache[poi.id]) {
                         const rating = await fetchSingleRating(poi);
                         if (rating && rating.rating > 0) {
                             const el = document.getElementById('popup-rating-' + poi.id);
@@ -4556,7 +4561,7 @@
                         <h3 class="popup-title">${poi.name}</h3>
                         <div class="popup-location">📍 ${poi.location} (${poi.region})</div>
                         <p class="popup-description">${poi.description}</p>
-                        <div id="popup-rating-${poi.id}">${(() => { const r = getPoiRating(poi.id); return r && r.rating > 0 ? renderStarsHTML(r.rating, r.count) : (googlePlacesReady ? '<span class="rating-loading">⭐ Bewertung wird geladen...</span>' : ''); })()}</div>
+                        <div id="popup-rating-${poi.id}">${(() => { const r = getPoiRating(poi.id); return r && r.rating > 0 ? renderStarsHTML(r.rating, r.count) : (googleApiKey ? '<span class="rating-loading">⭐ Bewertung wird geladen...</span>' : ''); })()}</div>
                         <div style="margin-bottom:12px;">${highlightsHTML}</div>
                         <div class="popup-details">
                             <div class="popup-detail">
@@ -5401,7 +5406,7 @@
                         marker.bindPopup(popup, { maxWidth: 300 });
                         (function(mName, mLat, mLon, mIdx) {
                             marker.on('popupopen', async function() {
-                                if (googlePlacesReady) {
+                                if (googleApiKey) {
                                     var r = await fetchCampRating(mName, mLat, mLon);
                                     if (r && r.rating > 0) {
                                         var el = document.getElementById('camp-mv-rating-' + mIdx);
@@ -5623,7 +5628,7 @@
                     marker.bindPopup(popup, { maxWidth: 300 });
                     (function(mName, mLat, mLon, mIdx) {
                         marker.on('popupopen', async function() {
-                            if (googlePlacesReady) {
+                            if (googleApiKey) {
                                 var r = await fetchCampRating(mName, mLat, mLon);
                                 if (r && r.rating > 0) {
                                     var el = document.getElementById('camp-rt-rating-' + mIdx);
