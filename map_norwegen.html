@@ -3852,6 +3852,13 @@ const allPOIs = [
             btn.disabled = false; btn.textContent = '\u2B50 Google Bewertungen laden';
             filterPOIs(false);
         }
+        function clearRatingCache() {
+            ratingCache = {};
+            localStorage.removeItem('ratingCacheNO');
+            document.getElementById('rating-progress').textContent = '\U0001F5D1\uFE0F Cache gel\u00F6scht! Klicke jetzt "Bewertungen laden".';
+            document.getElementById('rating-progress').style.color = '#f39c12';
+            filterPOIs(false);
+        }
         function setRatingFilter(min, btn) {
             minRatingFilter = min;
             document.querySelectorAll('.rating-filter-btn').forEach(b => b.classList.remove('active'));
@@ -5264,6 +5271,7 @@ const allPOIs = [
             </div>
             <div class="settings-group">
                 <button class="settings-load-btn" id="rating-load-btn" onclick="loadAllRatings()">⭐ Google Bewertungen für alle POIs laden</button>
+                <button class="settings-load-btn" style="background:#e94560;margin-top:6px;" onclick="clearRatingCache()">🗑️ Bewertungs-Cache löschen &amp; neu laden</button>
                 <div class="settings-status" id="rating-progress"></div>
             </div>
         </div>

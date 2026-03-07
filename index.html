@@ -2012,6 +2012,7 @@
             </div>
             <div class="settings-group">
                 <button class="settings-load-btn" id="rating-load-btn" onclick="loadAllRatings()">⭐ Google Bewertungen für alle POIs laden</button>
+                <button class="settings-load-btn" style="background:#e94560;margin-top:6px;" onclick="clearRatingCache()">🗑️ Bewertungs-Cache löschen &amp; neu laden</button>
                 <div class="settings-status" id="rating-progress"></div>
             </div>
         </div>
@@ -4257,6 +4258,16 @@
             progress.textContent = '✓ ' + success + ' Bewertungen geladen' + (errors > 0 ? ' (' + errors + ' nicht gefunden)' : '') + '!';
             btn.disabled = false;
             btn.textContent = '⭐ Google Bewertungen laden';
+            filterPOIs(false);
+        }
+
+        function clearRatingCache() {
+            ratingCache = {};
+            localStorage.removeItem('ratingCacheCH');
+            campRatingCache = {};
+            localStorage.removeItem('campRatingCache');
+            document.getElementById('rating-progress').textContent = '🗑️ Cache gelöscht! Klicke jetzt "Bewertungen laden".';
+            document.getElementById('rating-progress').style.color = '#f39c12';
             filterPOIs(false);
         }
 
