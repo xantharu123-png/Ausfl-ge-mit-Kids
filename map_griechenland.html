@@ -1364,6 +1364,21 @@
         }
 
     
+
+        /* Favoriten */
+        .fav-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px; border: none; background: transparent;
+            cursor: pointer; font-size: 16px; transition: transform 0.2s; padding: 0; vertical-align: middle;
+        }
+        .fav-btn:hover { transform: scale(1.3); }
+        .fav-btn.active { animation: favPop 0.3s ease; }
+        @keyframes favPop { 0% { transform: scale(1); } 50% { transform: scale(1.4); } 100% { transform: scale(1); } }
+        .fav-count-badge {
+            background: #e94560; color: white; font-size: 10px;
+            padding: 1px 5px; border-radius: 8px; margin-left: 4px; font-weight: 600;
+        }
+
         /* Autocomplete Dropdown */
         .autocomplete-wrap {
             position: relative;
@@ -1627,6 +1642,7 @@
                         <button class="visited-filter-btn active" data-filter="all">Alle</button>
                         <button class="visited-filter-btn" data-filter="visited">✓ Besucht</button>
                         <button class="visited-filter-btn" data-filter="unvisited">○ Offen</button>
+                        <button class="visited-filter-btn" data-filter="favorites" style="color:#e94560;">❤️ Favoriten <span id="poi-fav-count" class="fav-count-badge" style="display:none;">0</span></button>
                     </div>
                 </div>
             </div>
@@ -4202,7 +4218,26 @@ const allPOIs = [
         let selectedPOIs = [];
         let areaFilterActive = false;
         let areaBounds = null;
-        let visitedFilter = 'all'; // 'all', 'visited', 'unvisited'
+        let visitedFilter = 'all';
+
+        // Favoriten
+        let favoritePOIs = JSON.parse(localStorage.getItem('favPOIsGR') || '[]');
+        function toggleFavoritePOI(poiId, btn) {
+            const idx = favoritePOIs.indexOf(poiId);
+            if (idx > -1) { favoritePOIs.splice(idx, 1); } else { favoritePOIs.push(poiId); }
+            localStorage.setItem('favPOIsGR', JSON.stringify(favoritePOIs));
+            const isFav = favoritePOIs.includes(poiId);
+            if (btn) { btn.textContent = isFav ? '\u2764\uFE0F' : '\uD83E\uDD0D'; btn.classList.toggle('active', isFav); }
+            document.querySelectorAll('.fav-btn[data-poi-id="' + poiId + '"]').forEach(b => {
+                b.textContent = isFav ? '\u2764\uFE0F' : '\uD83E\uDD0D'; b.classList.toggle('active', isFav);
+            });
+            updateFavCount();
+        }
+        function updateFavCount() {
+            const el = document.getElementById('poi-fav-count');
+            if (el) { if (favoritePOIs.length > 0) { el.textContent = favoritePOIs.length; el.style.display = 'inline'; } else { el.style.display = 'none'; } }
+        }
+ // 'all', 'visited', 'unvisited'
         
         // Load visited POIs from localStorage
         let visitedPOIs = JSON.parse(localStorage.getItem('visitedPOIsGR') || '[]');
@@ -4343,6 +4378,10 @@ const allPOIs = [
                                 <div class="popup-detail-value">${poi.price}</div>
                             </div>
                         </div>
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                            <button class="fav-btn${favoritePOIs.includes(poi.id) ? ' active' : ''}" data-poi-id="${poi.id}" onclick="event.stopPropagation();toggleFavoritePOI(${poi.id}, this);">${favoritePOIs.includes(poi.id) ? '\u2764\uFE0F' : '\uD83E\uDD0D'}</button>
+                            <span style="font-size:12px;color:#b8c5d6;">${favoritePOIs.includes(poi.id) ? 'Favorit' : 'Als Favorit speichern'}</span>
+                        </div>
                         <div class="visited-toggle ${isVisited ? 'checked' : ''}" onclick="toggleVisited(${poi.id}, this)">
                             <input type="checkbox" ${isVisited ? 'checked' : ''} onclick="event.stopPropagation()">
                             <label>${isVisited ? '✓ Besucht' : 'Als besucht markieren'}</label>
@@ -4400,7 +4439,7 @@ const allPOIs = [
                             <div class="poi-header">
                                 <img src="${poi.image}" alt="${poi.name}" class="poi-image" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80'">
                                 <div class="poi-info">
-                                    <div class="poi-title">${poi.name}</div>
+                                    <div class="poi-title"><button class="fav-btn${favoritePOIs.includes(poi.id) ? ' active' : ''}" data-poi-id="${poi.id}" onclick="event.stopPropagation();toggleFavoritePOI(${poi.id}, this);">${favoritePOIs.includes(poi.id) ? '\u2764\uFE0F' : '\uD83E\uDD0D'}</button> ${poi.name}</div>
                                     <div class="poi-location">📍 ${poi.location}</div>
                                     <div class="poi-meta">
                                         <span class="poi-tag date">📅 ${poi.date}</span>
@@ -4490,10 +4529,14 @@ const allPOIs = [
             } else if (visitedFilter === 'unvisited') {
                 filtered = filtered.filter(p => !visitedPOIs.includes(p.id));
             }
+            else if (visitedFilter === 'favorites') {
+                filtered = filtered.filter(p => favoritePOIs.includes(p.id));
+            }
             
             addMarkers(filtered);
             renderPOIList(filtered);
             updateVisitedStats();
+            updateFavCount();
             updateCounts();
             
             // Fit map to filtered results (only if requested)
