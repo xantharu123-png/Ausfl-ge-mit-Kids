@@ -5028,7 +5028,7 @@ const allPOIs = [
             if (familyMode) {
                 sw.classList.add('active'); panel.classList.add('visible');
                 highlightFamilyPOIs(true);
-                document.getElementById('family-results').innerHTML = '<div class="family-info">🗺️ Karte verschieben um familienfreundliche Orte zu laden.</div>';
+                loadFamilyPlaces();
             } else {
                 sw.classList.remove('active'); panel.classList.remove('visible');
                 clearFamily(); highlightFamilyPOIs(false);
@@ -5044,7 +5044,29 @@ const allPOIs = [
             if (familyCluster) { map.removeLayer(familyCluster); familyCluster = null; }
             document.getElementById('family-results').innerHTML = '';
         }
-        function highlightFamilyPOIs(show) { if (typeof filterPOIs === 'function') filterPOIs(false); }
+        function highlightFamilyPOIs(show) {
+            if (show) {
+                if (window._cluster) {
+                    window._cluster.eachLayer(function(layer) {
+                        if (layer._icon) {
+                            const poi = allPOIs.find(p => p.lat === layer.getLatLng().lat && p.lng === layer.getLatLng().lng);
+                            if (poi && poi.category !== 'familie') {
+                                layer._icon.style.opacity = '0.25';
+                            } else if (poi) {
+                                layer._icon.style.opacity = '1';
+                                layer._icon.style.filter = 'drop-shadow(0 0 6px #e94560)';
+                            }
+                        }
+                    });
+                }
+            } else {
+                if (window._cluster) {
+                    window._cluster.eachLayer(function(layer) {
+                        if (layer._icon) { layer._icon.style.opacity = '1'; layer._icon.style.filter = ''; }
+                    });
+                }
+            }
+        }
         function createFamilyIcon(type) {
             const icons = { playground:'🛝', pool:'🏊', zoo:'🦁', theme_park:'🎡', indoor:'🏠', changing:'🍼' };
             const colors = { playground:'#e94560', pool:'#3498db', zoo:'#e67e22', theme_park:'#9b59b6', indoor:'#1abc9c', changing:'#f39c12' };

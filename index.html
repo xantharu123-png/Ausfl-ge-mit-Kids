@@ -5481,9 +5481,10 @@
             if (familyMode) {
                 sw.classList.add('active');
                 panel.classList.add('visible');
-                // Highlight existing "familie" POIs
+                // Filter existing POIs to show only "familie" category
                 highlightFamilyPOIs(true);
-                document.getElementById('family-results').innerHTML = '<div class="family-info">🗺️ Karte verschieben um familienfreundliche Orte zu laden.</div>';
+                // Immediately load OSM family places
+                loadFamilyPlaces();
             } else {
                 sw.classList.remove('active');
                 panel.classList.remove('visible');
@@ -5506,13 +5507,31 @@
         }
 
         function highlightFamilyPOIs(show) {
-            // Filter existing POIs to show only "familie" category when family mode is on
             if (show) {
-                // Add a visual indicator - we'll use the existing filter system
-                filterPOIs(false);
+                // Dim non-family POIs, highlight "familie" category
+                if (window._cluster) {
+                    window._cluster.eachLayer(function(layer) {
+                        if (layer._icon) {
+                            const poi = allPOIs.find(p => p.lat === layer.getLatLng().lat && p.lng === layer.getLatLng().lng);
+                            if (poi && poi.category !== 'familie') {
+                                layer._icon.style.opacity = '0.25';
+                            } else if (poi) {
+                                layer._icon.style.opacity = '1';
+                                layer._icon.style.filter = 'drop-shadow(0 0 6px #e94560)';
+                            }
+                        }
+                    });
+                }
             } else {
-                filterPOIs(false);
-            }
+                // Restore all POIs to normal
+                if (window._cluster) {
+                    window._cluster.eachLayer(function(layer) {
+                        if (layer._icon) {
+                            layer._icon.style.opacity = '1';
+                            layer._icon.style.filter = '';
+                        }
+                    });
+                }
         }
 
         function createFamilyIcon(type) {
