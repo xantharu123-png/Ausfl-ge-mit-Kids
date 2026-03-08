@@ -4,14 +4,15 @@ Fetch family-friendly places from OpenStreetMap Overpass API and save as JSON fi
 These JSON files are loaded by the HTML maps as pre-loaded family places.
 
 Usage:
-    python3 fetch_family.py
+    python3 fetch_family.py                    # Alle Länder
+    python3 fetch_family.py --country CH       # Nur Schweiz
+    python3 fetch_family.py --country NL --force  # Niederlande neu laden
     python3 fetch_family.py --file map_italien.html
-    python3 fetch_family.py --country CH
 
 FREE - no API key needed! Uses OpenStreetMap Overpass API.
 """
 
-import json, os, re, sys, time, glob
+import json, os, re, sys, time, glob, math
 try:
     import requests
 except ImportError:
@@ -57,8 +58,10 @@ COUNTRY_BOUNDS = {
     'CA_O': [44.99, -79.76, 62.59, -52.62],      # Kanada Ost
 }
 
-# Map filenames to country codes
-FILE_TO_COUNTRY = {}
+# Maximum bbox area (in degrees²) before we split into tiles
+# ~4° lat x 5° lon = 20 sq degrees works well for most of Europe
+MAX_BBOX_AREA = 25.0
+
 
 def get_country_from_file(filepath):
     """Extract country code from HTML file's ratingCache key."""
@@ -69,38 +72,79 @@ def get_country_from_file(filepath):
         return match.group(1)
     return None
 
-def build_overpass_query(bounds, limit=2000):
+
+def bbox_area(bounds):
+    """Calculate approximate area of a bounding box in degrees²."""
+    south, west, north, east = bounds
+    return (north - south) * (east - west)
+
+
+def split_bbox(bounds, max_area=MAX_BBOX_AREA):
+    """Split a large bounding box into smaller tiles."""
+    south, west, north, east = bounds
+    area = bbox_area(bounds)
+
+    if area <= max_area:
+        return [bounds]
+
+    # Calculate how many splits we need
+    n_splits = math.ceil(area / max_area)
+    # Split along the longer dimension
+    lat_range = north - south
+    lon_range = east - west
+
+    if lat_range >= lon_range:
+        # Split by latitude
+        n_rows = max(2, math.ceil(math.sqrt(n_splits * lat_range / max(lon_range, 0.1))))
+        n_cols = max(1, math.ceil(n_splits / n_rows))
+    else:
+        # Split by longitude
+        n_cols = max(2, math.ceil(math.sqrt(n_splits * lon_range / max(lat_range, 0.1))))
+        n_rows = max(1, math.ceil(n_splits / n_cols))
+
+    lat_step = lat_range / n_rows
+    lon_step = lon_range / n_cols
+    tiles = []
+
+    for r in range(n_rows):
+        for c in range(n_cols):
+            tile = [
+                south + r * lat_step,
+                west + c * lon_step,
+                min(south + (r + 1) * lat_step, north),
+                min(west + (c + 1) * lon_step, east)
+            ]
+            tiles.append(tile)
+
+    return tiles
+
+
+def build_overpass_query(bounds):
     """Build Overpass query for family-friendly places."""
     south, west, north, east = bounds
     bbox = f"{south},{west},{north},{east}"
 
-    return f"""[out:json][timeout:120];
+    return f"""[out:json][timeout:90];
 (
-  // Spielplätze
   node["leisure"="playground"]({bbox});
   way["leisure"="playground"]({bbox});
-  // Schwimmbäder & Wasserspass
   node["leisure"="swimming_pool"]["access"!="private"]({bbox});
   way["leisure"="swimming_pool"]["access"!="private"]({bbox});
   node["leisure"="water_park"]({bbox});
   way["leisure"="water_park"]({bbox});
-  // Zoos & Tierparks
   node["tourism"="zoo"]({bbox});
   way["tourism"="zoo"]({bbox});
   relation["tourism"="zoo"]({bbox});
-  // Freizeitparks
   node["tourism"="theme_park"]({bbox});
   way["tourism"="theme_park"]({bbox});
   relation["tourism"="theme_park"]({bbox});
-  // Indoor-Spielplätze
   node["leisure"="indoor_play"]({bbox});
   way["leisure"="indoor_play"]({bbox});
   node["indoor_play"="yes"]({bbox});
-  // Wickelräume
   node["changing_table"="yes"]({bbox});
   node["diaper"="yes"]({bbox});
 );
-out center body {limit};"""
+out center body;"""
 
 
 def parse_overpass_results(data):
@@ -164,51 +208,134 @@ def parse_overpass_results(data):
     return places
 
 
+def fetch_tile(bounds, country_code, tile_num=0, total_tiles=1, retries=0):
+    """Fetch family places for one tile/bounding box. Returns list of places or None on error."""
+    query = build_overpass_query(bounds)
+    tile_label = f"Kachel {tile_num}/{total_tiles}" if total_tiles > 1 else ""
+
+    try:
+        resp = requests.post(OVERPASS_URL, data={'data': query}, timeout=120)
+
+        if resp.status_code == 429:
+            wait = 30 + retries * 15
+            print(f"    ⏳ Rate limit {tile_label} - warte {wait}s...")
+            time.sleep(wait)
+            if retries < 3:
+                return fetch_tile(bounds, country_code, tile_num, total_tiles, retries + 1)
+            print(f"    ❌ Rate limit nach {retries} Versuchen {tile_label}")
+            return None
+
+        if resp.status_code == 504 or resp.status_code == 500:
+            if retries < 2:
+                wait = 15 + retries * 10
+                print(f"    ⏳ Server-Fehler {resp.status_code} {tile_label} - warte {wait}s und versuche erneut...")
+                time.sleep(wait)
+                return fetch_tile(bounds, country_code, tile_num, total_tiles, retries + 1)
+            print(f"    ❌ Server-Fehler {resp.status_code} nach Retries {tile_label}")
+            return None
+
+        if resp.status_code != 200:
+            print(f"    ❌ HTTP {resp.status_code} {tile_label}: {resp.text[:150]}")
+            return None
+
+        # Check for valid JSON
+        try:
+            data = resp.json()
+        except json.JSONDecodeError:
+            print(f"    ❌ Ungültige JSON-Antwort {tile_label}")
+            return None
+
+        # Check for Overpass error in response
+        if 'remark' in data and 'runtime error' in data.get('remark', '').lower():
+            if retries < 2:
+                print(f"    ⏳ Overpass runtime error {tile_label} - warte 20s...")
+                time.sleep(20)
+                return fetch_tile(bounds, country_code, tile_num, total_tiles, retries + 1)
+            print(f"    ❌ Overpass error: {data['remark'][:100]}")
+            return None
+
+        places = parse_overpass_results(data)
+        if tile_label:
+            print(f"    ✓ {tile_label}: {len(places)} Orte")
+        return places
+
+    except requests.Timeout:
+        if retries < 2:
+            print(f"    ⏳ Timeout {tile_label} - warte 15s und versuche erneut...")
+            time.sleep(15)
+            return fetch_tile(bounds, country_code, tile_num, total_tiles, retries + 1)
+        print(f"    ❌ Timeout nach Retries {tile_label}")
+        return None
+    except Exception as e:
+        print(f"    ❌ Fehler {tile_label}: {e}")
+        return None
+
+
 def fetch_country(country_code, bounds, force=False):
-    """Fetch family places for one country."""
+    """Fetch family places for one country. Splits large areas into tiles."""
     json_file = os.path.join(SCRIPT_DIR, f"family_{country_code}.json")
 
     if os.path.exists(json_file) and not force:
         with open(json_file, 'r', encoding='utf-8') as f:
             existing = json.load(f)
-        print(f"  ✅ Bereits vorhanden: {json_file} ({len(existing)} Orte)")
+        if len(existing) > 0:
+            print(f"  ✅ Bereits vorhanden: {len(existing)} Orte (--force zum Neuladen)")
+            return
+        else:
+            print(f"  ⚠️  Datei vorhanden aber leer - lade neu...")
+
+    # Split large countries into tiles
+    tiles = split_bbox(bounds)
+    area = bbox_area(bounds)
+
+    if len(tiles) > 1:
+        print(f"  🔍 Fläche {area:.0f}° → aufgeteilt in {len(tiles)} Kacheln")
+    else:
+        print(f"  🔍 Lade Daten von Overpass API...")
+
+    all_places = []
+    failed_tiles = 0
+
+    for i, tile in enumerate(tiles):
+        result = fetch_tile(tile, country_code, i + 1, len(tiles))
+        if result is not None:
+            all_places.extend(result)
+        else:
+            failed_tiles += 1
+
+        # Wait between tiles to be nice to the API
+        if i < len(tiles) - 1:
+            time.sleep(5)
+
+    if failed_tiles > 0:
+        print(f"  ⚠️  {failed_tiles}/{len(tiles)} Kacheln fehlgeschlagen")
+
+    if not all_places and failed_tiles == len(tiles):
+        print(f"  ❌ Keine Daten erhalten für {country_code} - JSON nicht erstellt")
         return
 
-    query = build_overpass_query(bounds)
+    # Deduplicate across tiles
+    seen = set()
+    unique_places = []
+    for p in all_places:
+        key = f"{p['type']}_{round(p['lat'], 4)}_{round(p['lon'], 4)}"
+        if key not in seen:
+            seen.add(key)
+            unique_places.append(p)
 
-    print(f"  🔍 Lade Daten von Overpass API für {country_code}...")
-    try:
-        resp = requests.post(OVERPASS_URL, data={'data': query}, timeout=180)
-        if resp.status_code == 429:
-            print(f"  ⏳ Rate limit - warte 30s...")
-            time.sleep(30)
-            resp = requests.post(OVERPASS_URL, data={'data': query}, timeout=180)
+    # Sort by type
+    unique_places.sort(key=lambda p: p['type'])
 
-        if resp.status_code != 200:
-            print(f"  ❌ HTTP {resp.status_code}: {resp.text[:200]}")
-            return
+    with open(json_file, 'w', encoding='utf-8') as f:
+        json.dump(unique_places, f, ensure_ascii=False)
 
-        data = resp.json()
-        places = parse_overpass_results(data)
+    # Count by type
+    types = {}
+    for p in unique_places:
+        types[p['type']] = types.get(p['type'], 0) + 1
 
-        # Sort by type for better readability
-        places.sort(key=lambda p: p['type'])
-
-        with open(json_file, 'w', encoding='utf-8') as f:
-            json.dump(places, f, ensure_ascii=False)
-
-        # Count by type
-        types = {}
-        for p in places:
-            types[p['type']] = types.get(p['type'], 0) + 1
-
-        type_str = ', '.join(f"{k}: {v}" for k, v in sorted(types.items()))
-        print(f"  💾 {json_file}: {len(places)} Orte ({type_str})")
-
-    except requests.Timeout:
-        print(f"  ❌ Timeout für {country_code}")
-    except Exception as e:
-        print(f"  ❌ Fehler: {e}")
+    type_str = ', '.join(f"{k}: {v}" for k, v in sorted(types.items()))
+    print(f"  💾 {len(unique_places)} Orte gespeichert ({type_str})")
 
 
 def main():
@@ -245,12 +372,13 @@ def main():
 
     else:
         # Process all
-        print("🌍 Lade Family-Places für alle Länder...\n")
+        print("🌍 Lade Family-Places für alle Länder...")
+        print(f"   (Komplett kostenlos - OpenStreetMap Overpass API)\n")
 
         # Index.html = Schweiz
-        print("📍 index.html → CH")
+        print("📍 index.html → CH (Schweiz)")
         fetch_country('CH', COUNTRY_BOUNDS['CH'], force)
-        time.sleep(2)
+        time.sleep(3)
 
         # All country maps
         for fpath in sorted(glob.glob(os.path.join(SCRIPT_DIR, 'map_*.html'))):
@@ -261,12 +389,14 @@ def main():
             if cc and cc in COUNTRY_BOUNDS:
                 print(f"\n📍 {fname} → {cc}")
                 fetch_country(cc, COUNTRY_BOUNDS[cc], force)
-                time.sleep(3)  # Be nice to Overpass API
+                time.sleep(5)  # Pause between countries
             else:
                 print(f"\n⚠️  {fname}: Code={cc} - kein Bounding-Box")
 
-    print("\n✅ Fertig! JSON-Dateien gespeichert.")
+    print("\n" + "=" * 50)
+    print("✅ Fertig! JSON-Dateien gespeichert.")
     print("   Die HTML-Karten laden diese automatisch beim Öffnen.")
+    print("   Zum Neuladen: python3 fetch_family.py --force")
 
 
 if __name__ == '__main__':
