@@ -1247,6 +1247,27 @@
         .family-loading { padding: 20px; text-align: center; }
         .family-loading-text { font-size: 14px; font-weight: 600; color: #e94560; margin-bottom: 6px; }
         .family-badge { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 4px; background: rgba(233,69,96,0.15); color: #e94560; margin-left: 4px; }
+        /* Family Mode - dim non-family POIs via CSS class on map */
+        .family-mode-active .leaflet-marker-icon:not(.family-place-icon):not(.leaflet-div-icon) {
+            opacity: 0.15 !important;
+            filter: grayscale(100%) !important;
+            transition: opacity 0.3s, filter 0.3s;
+        }
+        .family-mode-active .leaflet-marker-icon.family-highlight {
+            opacity: 1 !important;
+            filter: none !important;
+            transform: scale(1.3);
+            z-index: 9000 !important;
+            animation: familyPulse 2s ease-in-out infinite;
+        }
+        .family-mode-active .family-place-icon {
+            opacity: 1 !important;
+            filter: none !important;
+        }
+        @keyframes familyPulse {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(233,69,96,0.8)); }
+            50% { filter: drop-shadow(0 0 14px rgba(233,69,96,1)); }
+        }
 
                 .camping-panel {
             display: none;
@@ -4517,6 +4538,7 @@
             }
             
             addMarkers(filtered);
+            if (typeof familyMode !== 'undefined' && familyMode) { setTimeout(function() { highlightFamilyPOIs(true); }, 200); }
             renderPOIList(filtered);
             updateVisitedStats();
             updateFavCount();
@@ -5019,6 +5041,16 @@
         let familyLoading = false;
         let familyTypes = { playground: true, pool: true, zoo: true, theme_park: true, indoor: true, changing: true };
 
+        let familyBaselineData = null;
+        (function loadBaselineFamilyPlaces() {
+            fetch('family_SI.json').then(function(r){ return r.ok ? r.json() : null; }).then(function(data) {
+                if (data && Array.isArray(data) && data.length > 0) {
+                    familyBaselineData = data;
+                    console.log('Family baseline loaded: ' + data.length + ' places');
+                }
+            }).catch(function(){});
+        })();
+
         function toggleFamilyMode() {
             familyMode = !familyMode;
             const sw = document.getElementById('family-switch');
@@ -5043,24 +5075,24 @@
             document.getElementById('family-results').innerHTML = '';
         }
         function highlightFamilyPOIs(show) {
+            var mapEl = document.getElementById('map');
             if (show) {
+                mapEl.classList.add('family-mode-active');
                 if (window._cluster) {
                     window._cluster.eachLayer(function(layer) {
                         if (layer._icon) {
-                            const poi = allPOIs.find(p => p.lat === layer.getLatLng().lat && p.lng === layer.getLatLng().lng);
-                            if (poi && poi.category !== 'familie') {
-                                layer._icon.style.opacity = '0.25';
-                            } else if (poi) {
-                                layer._icon.style.opacity = '1';
-                                layer._icon.style.filter = 'drop-shadow(0 0 6px #e94560)';
+                            var poi = allPOIs.find(function(p) { return p.lat === layer.getLatLng().lat && p.lng === layer.getLatLng().lng; });
+                            if (poi && poi.category === 'familie') {
+                                layer._icon.classList.add('family-highlight');
                             }
                         }
                     });
                 }
             } else {
+                mapEl.classList.remove('family-mode-active');
                 if (window._cluster) {
                     window._cluster.eachLayer(function(layer) {
-                        if (layer._icon) { layer._icon.style.opacity = '1'; layer._icon.style.filter = ''; }
+                        if (layer._icon) { layer._icon.classList.remove('family-highlight'); }
                     });
                 }
             }
@@ -5068,7 +5100,7 @@
         function createFamilyIcon(type) {
             const icons = { playground:'🛝', pool:'🏊', zoo:'🦁', theme_park:'🎡', indoor:'🏠', changing:'🍼' };
             const colors = { playground:'#e94560', pool:'#3498db', zoo:'#e67e22', theme_park:'#9b59b6', indoor:'#1abc9c', changing:'#f39c12' };
-            return L.divIcon({ html:'<div style="background:'+(colors[type]||'#e94560')+';width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);">'+(icons[type]||'👨‍👩‍👧')+' </div>', className:'', iconSize:[28,28], iconAnchor:[14,14] });
+            return L.divIcon({ html:'<div style="background:'+(colors[type]||'#e94560')+';width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);">'+(icons[type]||'👨‍👩‍👧')+' </div>', className:'family-place-icon', iconSize:[28,28], iconAnchor:[14,14] });
         }
         function buildFamilyOverpassQuery(bounds) {
             const s=bounds.getSouth(),w=bounds.getWest(),n=bounds.getNorth(),e=bounds.getEast();
@@ -5094,8 +5126,42 @@
         function getFamilyTypeLabel(type) {
             return {playground:'Spielplatz',pool:'Schwimmbad / Freibad',zoo:'Zoo / Tierpark',theme_park:'Freizeitpark',indoor:'Indoor-Spielplatz',changing:'Wickelraum'}[type]||'Familienort';
         }
+        function renderFamilyPlaces(places) {
+            clearFamily();
+            familyCluster = L.markerClusterGroup({ maxClusterRadius: 40, disableClusteringAtZoom: 15 });
+            var html = '', bounds = map.getBounds();
+            places.forEach(function(p, i) {
+                if (!familyTypes[p.type]) return;
+                if (!bounds.contains([p.lat, p.lon])) return;
+                var name = p.name || getFamilyTypeLabel(p.type);
+                var marker = L.marker([p.lat, p.lon], { icon: createFamilyIcon(p.type) });
+                var popup = '<div style="min-width:200px"><strong>' + name + '</strong><br><span style="color:#e94560;font-size:12px;">' + getFamilyTypeLabel(p.type) + '</span>';
+                if (p.hours) popup += '<br>🕐 ' + p.hours;
+                if (p.wheelchair) popup += '<br>♿ Rollstuhlgerecht / 👶 Kinderwagentauglich';
+                if (p.free) popup += '<br>✓ Kostenlos';
+                if (p.url) popup += '<br>🌐 <a href="' + (p.url.startsWith('http') ? p.url : 'https://' + p.url) + '" target="_blank" style="color:#e94560;font-size:11px;">' + p.url.replace(/^https?:\/\/(www\.)?/, '').substring(0, 30) + '</a>';
+                popup += '<br><a href="https://www.google.com/maps/search/?api=1&query=' + p.lat + ',' + p.lon + '" target="_blank" style="color:#ff9800;font-size:11px;">📍 Google Maps</a>';
+                popup += '<div style="font-size:10px;color:#5a6a7a;margin-top:6px;border-top:1px solid #2a3a4a;padding-top:4px;">ℹ️ Daten: OpenStreetMap</div></div>';
+                marker.bindPopup(popup, { maxWidth: 300 });
+                familyCluster.addLayer(marker); familyMarkers.push(marker);
+                if (familyMarkers.length <= 80) {
+                    html += '<div class="family-card" onclick="map.setView([' + p.lat + ',' + p.lon + '],16);familyMarkers[' + (familyMarkers.length - 1) + '].openPopup();">';
+                    html += '<div class="family-card-name">' + familyMarkers.length + '. ' + name;
+                    if (p.wheelchair) html += ' <span class="family-badge">♿ Barrierefrei</span>';
+                    html += '</div><div class="family-card-type">' + getFamilyTypeLabel(p.type) + '</div>';
+                    var det = []; if (p.hours) det.push('🕐 ' + p.hours); if (p.free) det.push('✓ Kostenlos');
+                    if (det.length) html += '<div class="family-card-details">' + det.join(' · ') + '</div>';
+                    html += '</div>';
+                }
+            });
+            map.addLayer(familyCluster);
+            html = '<div class="family-info">👨‍👩‍👧‍👦 ' + familyMarkers.length + ' Familienorte gefunden</div>' + html;
+            document.getElementById('family-results').innerHTML = html;
+        }
+
         async function loadFamilyPlaces() {
             if (familyLoading) return;
+            if (familyBaselineData && familyBaselineData.length > 0) { renderFamilyPlaces(familyBaselineData); return; }
             if (map.getZoom()<10) { document.getElementById('family-results').innerHTML='<div class="family-info">🔍 Bitte zoome etwas rein (mind. Zoom 10).</div>'; return; }
             familyLoading=true; clearFamily();
             document.getElementById('family-results').innerHTML='<div class="family-loading"><div class="family-loading-text">👨‍👩‍👧‍👦 Lade Familienorte...</div><div class="family-loading-sub">Daten von OpenStreetMap</div></div>';

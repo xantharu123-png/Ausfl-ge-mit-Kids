@@ -1311,6 +1311,27 @@
             color: #e94560;
             margin-left: 4px;
         }
+        /* Family Mode - dim non-family POIs via CSS class on map */
+        .family-mode-active .leaflet-marker-icon:not(.family-place-icon):not(.leaflet-div-icon) {
+            opacity: 0.15 !important;
+            filter: grayscale(100%) !important;
+            transition: opacity 0.3s, filter 0.3s;
+        }
+        .family-mode-active .leaflet-marker-icon.family-highlight {
+            opacity: 1 !important;
+            filter: none !important;
+            transform: scale(1.3);
+            z-index: 9000 !important;
+            animation: familyPulse 2s ease-in-out infinite;
+        }
+        .family-mode-active .family-place-icon {
+            opacity: 1 !important;
+            filter: none !important;
+        }
+        @keyframes familyPulse {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(233,69,96,0.8)); }
+            50% { filter: drop-shadow(0 0 14px rgba(233,69,96,1)); }
+        }
         /* Camping Panel */
         .camping-panel {
             display: none;
@@ -4920,7 +4941,12 @@
             updateVisitedStats();
             updateFavCounts();
             updateCounts();
-            
+
+            // Re-apply family highlighting after markers are rebuilt
+            if (typeof familyMode !== 'undefined' && familyMode) {
+                setTimeout(function() { highlightFamilyPOIs(true); }, 200);
+            }
+
             // Fit map to filtered results (only if requested)
             if (fitBounds && filtered.length > 0 && !areaFilterActive) {
                 const bounds = L.latLngBounds(filtered.map(p => [p.lat, p.lng]));
@@ -5464,6 +5490,7 @@
         let familyMarkers = [];
         let familyCluster = null;
         let familyLoading = false;
+        let familyBaselineData = null; // Pre-loaded from JSON
         let familyTypes = {
             playground: true,
             pool: true,
@@ -5472,6 +5499,16 @@
             indoor: true,
             changing: true
         };
+
+        // Load baseline family places from JSON file (instant, no API call)
+        (function loadBaselineFamilyPlaces() {
+            fetch('family_CH.json').then(function(r) { return r.ok ? r.json() : null; }).then(function(data) {
+                if (data && Array.isArray(data) && data.length > 0) {
+                    familyBaselineData = data;
+                    console.log('Family baseline loaded: ' + data.length + ' places from JSON');
+                }
+            }).catch(function() {});
+        })();
 
         function toggleFamilyMode() {
             familyMode = !familyMode;
@@ -5507,28 +5544,26 @@
         }
 
         function highlightFamilyPOIs(show) {
+            var mapEl = document.getElementById('map');
             if (show) {
-                // Dim non-family POIs, highlight "familie" category
+                mapEl.classList.add('family-mode-active');
+                // Add highlight class to "familie" category POI markers
                 if (window._cluster) {
                     window._cluster.eachLayer(function(layer) {
                         if (layer._icon) {
-                            const poi = allPOIs.find(p => p.lat === layer.getLatLng().lat && p.lng === layer.getLatLng().lng);
-                            if (poi && poi.category !== 'familie') {
-                                layer._icon.style.opacity = '0.25';
-                            } else if (poi) {
-                                layer._icon.style.opacity = '1';
-                                layer._icon.style.filter = 'drop-shadow(0 0 6px #e94560)';
+                            var poi = allPOIs.find(function(p) { return p.lat === layer.getLatLng().lat && p.lng === layer.getLatLng().lng; });
+                            if (poi && poi.category === 'familie') {
+                                layer._icon.classList.add('family-highlight');
                             }
                         }
                     });
                 }
             } else {
-                // Restore all POIs to normal
+                mapEl.classList.remove('family-mode-active');
                 if (window._cluster) {
                     window._cluster.eachLayer(function(layer) {
                         if (layer._icon) {
-                            layer._icon.style.opacity = '1';
-                            layer._icon.style.filter = '';
+                            layer._icon.classList.remove('family-highlight');
                         }
                     });
                 }
@@ -5546,7 +5581,7 @@
             };
             return L.divIcon({
                 html: '<div style="background:' + (colors[type] || '#e94560') + ';width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);">' + (icons[type] || '👨‍👩‍👧') + '</div>',
-                className: '',
+                className: 'family-place-icon',
                 iconSize: [28, 28],
                 iconAnchor: [14, 14]
             });
@@ -5613,8 +5648,63 @@
             }[type] || 'Familienort';
         }
 
+        function renderFamilyPlaces(places) {
+            clearFamily();
+            familyCluster = L.markerClusterGroup({ maxClusterRadius: 40, disableClusteringAtZoom: 15 });
+            let html = '';
+            const bounds = map.getBounds();
+
+            places.forEach(function(p, i) {
+                if (!familyTypes[p.type]) return;
+                if (!bounds.contains([p.lat, p.lon])) return;
+
+                var name = p.name || getFamilyTypeLabel(p.type);
+                var marker = L.marker([p.lat, p.lon], { icon: createFamilyIcon(p.type) });
+
+                var popup = '<div style="min-width:200px"><strong>' + name + '</strong>';
+                popup += '<br><span style="color:#e94560;font-size:12px;">' + getFamilyTypeLabel(p.type) + '</span>';
+                if (p.hours) popup += '<br>🕐 ' + p.hours;
+                if (p.wheelchair) popup += '<br>♿ Rollstuhlgerecht / 👶 Kinderwagentauglich';
+                if (p.free) popup += '<br>✓ Kostenlos';
+                if (p.url) {
+                    popup += '<br>🌐 <a href="' + (p.url.startsWith('http') ? p.url : 'https://' + p.url) + '" target="_blank" style="color:#e94560;font-size:11px;">' + p.url.replace(/^https?:\/\/(www\.)?/, '').substring(0, 30) + '</a>';
+                }
+                popup += '<br><a href="https://www.google.com/maps/search/?api=1&query=' + p.lat + ',' + p.lon + '" target="_blank" style="color:#ff9800;font-size:11px;">📍 Google Maps</a>';
+                popup += '<div style="font-size:10px;color:#5a6a7a;margin-top:6px;border-top:1px solid #2a3a4a;padding-top:4px;">ℹ️ Daten: OpenStreetMap</div>';
+                popup += '</div>';
+                marker.bindPopup(popup, { maxWidth: 300 });
+                familyCluster.addLayer(marker);
+                familyMarkers.push(marker);
+
+                if (familyMarkers.length <= 80) {
+                    html += '<div class="family-card" onclick="map.setView([' + p.lat + ',' + p.lon + '], 16);familyMarkers[' + (familyMarkers.length - 1) + '].openPopup();">';
+                    html += '<div class="family-card-name">' + familyMarkers.length + '. ' + name;
+                    if (p.wheelchair) html += ' <span class="family-badge">♿ Barrierefrei</span>';
+                    html += '</div>';
+                    html += '<div class="family-card-type">' + getFamilyTypeLabel(p.type) + '</div>';
+                    var details = [];
+                    if (p.hours) details.push('🕐 ' + p.hours);
+                    if (p.free) details.push('✓ Kostenlos');
+                    if (details.length) html += '<div class="family-card-details">' + details.join(' · ') + '</div>';
+                    html += '</div>';
+                }
+            });
+
+            map.addLayer(familyCluster);
+            var count = familyMarkers.length;
+            html = '<div class="family-info">👨‍👩‍👧‍👦 ' + count + ' Familienorte gefunden</div>' + html;
+            document.getElementById('family-results').innerHTML = html;
+        }
+
         async function loadFamilyPlaces() {
             if (familyLoading) return;
+
+            // Use pre-loaded baseline data if available (instant, no zoom restriction)
+            if (familyBaselineData && familyBaselineData.length > 0) {
+                renderFamilyPlaces(familyBaselineData);
+                return;
+            }
+
             const zoom = map.getZoom();
             if (zoom < 10) {
                 document.getElementById('family-results').innerHTML = '<div class="family-info">🔍 Bitte zoome etwas rein (mind. Zoom 10) um Familienorte zu laden.</div>';
