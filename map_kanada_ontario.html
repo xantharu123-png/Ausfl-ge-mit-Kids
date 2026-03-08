@@ -2121,12 +2121,12 @@ const allPOIs = [
 
         // Google Bewertungen
         let googleApiKey = localStorage.getItem('googleApiKey') || '';
-        let ratingCache = JSON.parse(localStorage.getItem('ratingCacheIT') || '{}');
+        let ratingCache = JSON.parse(localStorage.getItem('ratingCacheCA_ON') || '{}');
         let minRatingFilter = 0;
 
         // Load baseline ratings from JSON file (survives git push)
         (function loadBaselineRatings() {
-            fetch('ratings_IT.json').then(r => r.ok ? r.json() : null).then(data => {
+            fetch('ratings_CA_ON.json').then(r => r.ok ? r.json() : null).then(data => {
                 if (data && typeof data === 'object') {
                     let merged = 0;
                     Object.keys(data).forEach(k => {
@@ -2136,7 +2136,7 @@ const allPOIs = [
                         }
                     });
                     if (merged > 0) {
-                        localStorage.setItem('ratingCacheIT', JSON.stringify(ratingCache));
+                        localStorage.setItem('ratingCacheCA_ON', JSON.stringify(ratingCache));
                         console.log('Baseline ratings loaded: ' + merged + ' new entries from JSON');
                         if (typeof filterPOIs === 'function') filterPOIs(false);
                     }
@@ -2184,11 +2184,11 @@ const allPOIs = [
                 if (data.places && data.places.length > 0) {
                     const d = { rating: data.places[0].rating || 0, count: data.places[0].userRatingCount || 0 };
                     ratingCache[poi.id] = d;
-                    localStorage.setItem('ratingCacheIT', JSON.stringify(ratingCache));
+                    localStorage.setItem('ratingCacheCA_ON', JSON.stringify(ratingCache));
                     return d;
                 } else {
                     ratingCache[poi.id] = { rating: 0, count: 0 };
-                    localStorage.setItem('ratingCacheIT', JSON.stringify(ratingCache));
+                    localStorage.setItem('ratingCacheCA_ON', JSON.stringify(ratingCache));
                     return { rating: 0, count: 0 };
                 }
             } catch(e) { return null; }
@@ -2219,7 +2219,7 @@ const allPOIs = [
         }
         function clearRatingCache() {
             ratingCache = {};
-            localStorage.removeItem('ratingCacheIT');
+            localStorage.removeItem('ratingCacheCA_ON');
             document.getElementById('rating-progress').textContent = '\U0001F5D1\uFE0F Cache gel\u00F6scht! Klicke jetzt "Bewertungen laden".';
             document.getElementById('rating-progress').style.color = '#f39c12';
             filterPOIs(false);
@@ -3201,7 +3201,7 @@ const allPOIs = [
 
         let familyBaselineData = null;
         (function loadBaselineFamilyPlaces() {
-            fetch('family_IT.json').then(function(r){ return r.ok ? r.json() : null; }).then(function(data) {
+            fetch('family_CA_ON.json').then(function(r){ return r.ok ? r.json() : null; }).then(function(data) {
                 if (data && Array.isArray(data) && data.length > 0) {
                     familyBaselineData = data;
                     console.log('Family baseline loaded: ' + data.length + ' places');
