@@ -59,8 +59,8 @@ COUNTRY_BOUNDS = {
 }
 
 # Maximum bbox area (in degrees²) before we split into tiles
-# ~4° lat x 5° lon = 20 sq degrees works well for most of Europe
-MAX_BBOX_AREA = 25.0
+# Smaller = more tiles = less timeout risk, but more API calls
+MAX_BBOX_AREA = 8.0
 
 
 def get_country_from_file(filepath):
@@ -144,7 +144,7 @@ def build_overpass_query(bounds):
   node["changing_table"="yes"]({bbox});
   node["diaper"="yes"]({bbox});
 );
-out center body;"""
+out center body 3000;"""
 
 
 def parse_overpass_results(data):
@@ -322,6 +322,15 @@ def fetch_country(country_code, bounds, force=False):
         if key not in seen:
             seen.add(key)
             unique_places.append(p)
+
+    # Limit total results per country (keep JSON files manageable for browser)
+    MAX_PER_COUNTRY = 5000
+    if len(unique_places) > MAX_PER_COUNTRY:
+        # Prioritize: zoos, theme_parks, indoor first (rarer), then pools, changing, playgrounds
+        priority = {'zoo': 0, 'theme_park': 1, 'indoor': 2, 'pool': 3, 'changing': 4, 'playground': 5}
+        unique_places.sort(key=lambda p: priority.get(p['type'], 9))
+        unique_places = unique_places[:MAX_PER_COUNTRY]
+        print(f"  📋 Auf {MAX_PER_COUNTRY} limitiert (Zoos/Parks/Pools bevorzugt)")
 
     # Sort by type
     unique_places.sort(key=lambda p: p['type'])
