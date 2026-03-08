@@ -1175,6 +1175,142 @@
             left: 22px;
             background: #4ecca3;
         }
+        /* Family Mode Toggle */
+        .family-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            border-bottom: 1px solid rgba(233,69,96,0.1);
+        }
+        .family-toggle label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #b8c5d6;
+        }
+        .family-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: #1a2332;
+            border-radius: 12px;
+            border: 2px solid #2a3a4a;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .family-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background: #5a6a7a;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        .family-switch.active {
+            background: #6b2d4a;
+            border-color: #e94560;
+        }
+        .family-switch.active::after {
+            left: 22px;
+            background: #e94560;
+        }
+        /* Family Panel */
+        .family-panel {
+            display: none;
+            padding: 12px 24px;
+            border-bottom: 1px solid rgba(233,69,96,0.1);
+        }
+        .family-panel.visible {
+            display: block;
+        }
+        .family-filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .family-filter-btn {
+            padding: 5px 10px;
+            border-radius: 6px;
+            border: 1px solid #2a3a4a;
+            background: #1a2332;
+            color: #8a9ab5;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .family-filter-btn.active {
+            background: rgba(233,69,96,0.15);
+            border-color: #e94560;
+            color: #e94560;
+        }
+        .family-card {
+            padding: 10px 12px;
+            background: rgba(233,69,96,0.05);
+            border: 1px solid rgba(233,69,96,0.1);
+            border-radius: 10px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .family-card:hover {
+            background: rgba(233,69,96,0.1);
+            border-color: rgba(233,69,96,0.3);
+        }
+        .family-card-name {
+            font-weight: 600;
+            font-size: 13px;
+            color: #e8edf3;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .family-card-type {
+            font-size: 11px;
+            color: #e94560;
+            margin-top: 2px;
+        }
+        .family-card-details {
+            font-size: 11px;
+            color: #8a9ab5;
+            margin-top: 4px;
+        }
+        .family-info {
+            padding: 12px;
+            color: #8a9ab5;
+            font-size: 13px;
+            text-align: center;
+        }
+        .family-loading {
+            padding: 20px;
+            text-align: center;
+        }
+        .family-loading-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e94560;
+            margin-bottom: 6px;
+        }
+        .family-loading-sub {
+            font-size: 12px;
+            color: #8a9ab5;
+        }
+        .family-badge {
+            display: inline-block;
+            font-size: 10px;
+            padding: 1px 6px;
+            border-radius: 4px;
+            background: rgba(233,69,96,0.15);
+            color: #e94560;
+            margin-left: 4px;
+        }
         /* Camping Panel */
         .camping-panel {
             display: none;
@@ -1817,6 +1953,26 @@
                         🏕️ Camping Modus
                         <div id="camping-switch" class="camping-switch"></div>
                     </label>
+                </div>
+                <div class="family-toggle">
+                    <label onclick="toggleFamilyMode()">
+                        👨‍👩‍👧‍👦 Family Modus
+                        <div id="family-switch" class="family-switch"></div>
+                    </label>
+                </div>
+                <div id="family-panel" class="family-panel">
+                    <div class="family-filter-row">
+                        <button id="ff-playground" class="family-filter-btn active" onclick="toggleFamilyFilter('playground')">🛝 Spielplätze</button>
+                        <button id="ff-pool" class="family-filter-btn active" onclick="toggleFamilyFilter('pool')">🏊 Schwimmbäder</button>
+                        <button id="ff-zoo" class="family-filter-btn active" onclick="toggleFamilyFilter('zoo')">🦁 Zoos & Tierparks</button>
+                        <button id="ff-theme_park" class="family-filter-btn active" onclick="toggleFamilyFilter('theme_park')">🎡 Freizeitparks</button>
+                        <button id="ff-indoor" class="family-filter-btn active" onclick="toggleFamilyFilter('indoor')">🏠 Indoor-Spielplätze</button>
+                        <button id="ff-changing" class="family-filter-btn active" onclick="toggleFamilyFilter('changing')">🍼 Wickelräume</button>
+                    </div>
+                    <div class="family-info" style="font-size:11px;color:#8a9ab5;padding:4px 0;">
+                        + Deine <strong style="color:#e94560;">137 Familie-POIs</strong> werden automatisch hervorgehoben
+                    </div>
+                    <div id="family-results"></div>
                 </div>
                 <div id="camping-panel" class="camping-panel">
                     <div class="camping-filter-row">
@@ -5303,6 +5459,248 @@
         }
         
 
+        // ===== FAMILY MODUS =====
+        let familyMode = false;
+        let familyMarkers = [];
+        let familyCluster = null;
+        let familyLoading = false;
+        let familyTypes = {
+            playground: true,
+            pool: true,
+            zoo: true,
+            theme_park: true,
+            indoor: true,
+            changing: true
+        };
+
+        function toggleFamilyMode() {
+            familyMode = !familyMode;
+            const sw = document.getElementById('family-switch');
+            const panel = document.getElementById('family-panel');
+
+            if (familyMode) {
+                sw.classList.add('active');
+                panel.classList.add('visible');
+                // Highlight existing "familie" POIs
+                highlightFamilyPOIs(true);
+                document.getElementById('family-results').innerHTML = '<div class="family-info">🗺️ Karte verschieben um familienfreundliche Orte zu laden.</div>';
+            } else {
+                sw.classList.remove('active');
+                panel.classList.remove('visible');
+                clearFamily();
+                highlightFamilyPOIs(false);
+            }
+        }
+
+        function toggleFamilyFilter(type) {
+            familyTypes[type] = !familyTypes[type];
+            document.getElementById('ff-' + type).classList.toggle('active');
+            if (familyMode) loadFamilyPlaces();
+        }
+
+        function clearFamily() {
+            familyMarkers.forEach(m => map.removeLayer(m));
+            familyMarkers = [];
+            if (familyCluster) { map.removeLayer(familyCluster); familyCluster = null; }
+            document.getElementById('family-results').innerHTML = '';
+        }
+
+        function highlightFamilyPOIs(show) {
+            // Filter existing POIs to show only "familie" category when family mode is on
+            if (show) {
+                // Add a visual indicator - we'll use the existing filter system
+                filterPOIs(false);
+            } else {
+                filterPOIs(false);
+            }
+        }
+
+        function createFamilyIcon(type) {
+            const icons = {
+                playground: '🛝', pool: '🏊', zoo: '🦁',
+                theme_park: '🎡', indoor: '🏠', changing: '🍼'
+            };
+            const colors = {
+                playground: '#e94560', pool: '#3498db', zoo: '#e67e22',
+                theme_park: '#9b59b6', indoor: '#1abc9c', changing: '#f39c12'
+            };
+            return L.divIcon({
+                html: '<div style="background:' + (colors[type] || '#e94560') + ';width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);">' + (icons[type] || '👨‍👩‍👧') + '</div>',
+                className: '',
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
+            });
+        }
+
+        function buildFamilyOverpassQuery(bounds) {
+            const s = bounds.getSouth(), w = bounds.getWest(), n = bounds.getNorth(), e = bounds.getEast();
+            const bb = s + ',' + w + ',' + n + ',' + e;
+            let parts = [];
+            if (familyTypes.playground) {
+                parts.push('node["leisure"="playground"](' + bb + ');');
+                parts.push('way["leisure"="playground"](' + bb + ');');
+            }
+            if (familyTypes.pool) {
+                parts.push('node["leisure"="swimming_pool"]["access"!="private"](' + bb + ');');
+                parts.push('way["leisure"="swimming_pool"]["access"!="private"](' + bb + ');');
+                parts.push('node["leisure"="water_park"](' + bb + ');');
+                parts.push('way["leisure"="water_park"](' + bb + ');');
+                parts.push('node["amenity"="swimming_pool"](' + bb + ');');
+            }
+            if (familyTypes.zoo) {
+                parts.push('node["tourism"="zoo"](' + bb + ');');
+                parts.push('way["tourism"="zoo"](' + bb + ');');
+                parts.push('node["zoo"~"."](' + bb + ');');
+                parts.push('way["attraction"="animal"](' + bb + ');');
+            }
+            if (familyTypes.theme_park) {
+                parts.push('node["tourism"="theme_park"](' + bb + ');');
+                parts.push('way["tourism"="theme_park"](' + bb + ');');
+                parts.push('node["leisure"="amusement_arcade"](' + bb + ');');
+                parts.push('way["attraction"~"."](' + bb + ');');
+            }
+            if (familyTypes.indoor) {
+                parts.push('node["leisure"="indoor_play"](' + bb + ');');
+                parts.push('way["leisure"="indoor_play"](' + bb + ');');
+                parts.push('node["indoor"="play"](' + bb + ');');
+                parts.push('node["playground"="indoor"](' + bb + ');');
+            }
+            if (familyTypes.changing) {
+                parts.push('node["amenity"="baby_hatch"](' + bb + ');');
+                parts.push('node["diaper"="yes"](' + bb + ');');
+                parts.push('node["changing_table"="yes"](' + bb + ');');
+                parts.push('node["amenity"="toilets"]["changing_table"="yes"](' + bb + ');');
+            }
+            if (parts.length === 0) return null;
+            return '[out:json][timeout:30];(' + parts.join('') + ');out center body;';
+        }
+
+        function classifyFamilyPlace(tags) {
+            if (tags.leisure === 'playground' || tags.playground) return 'playground';
+            if (tags.leisure === 'swimming_pool' || tags.amenity === 'swimming_pool' || tags.leisure === 'water_park') return 'pool';
+            if (tags.tourism === 'zoo' || tags.zoo) return 'zoo';
+            if (tags.tourism === 'theme_park' || tags.leisure === 'amusement_arcade') return 'theme_park';
+            if (tags.leisure === 'indoor_play' || tags.indoor === 'play' || tags.playground === 'indoor') return 'indoor';
+            if (tags.changing_table === 'yes' || tags.diaper === 'yes') return 'changing';
+            return 'playground';
+        }
+
+        function getFamilyTypeLabel(type) {
+            return {
+                playground: 'Spielplatz', pool: 'Schwimmbad / Freibad',
+                zoo: 'Zoo / Tierpark', theme_park: 'Freizeitpark',
+                indoor: 'Indoor-Spielplatz', changing: 'Wickelraum'
+            }[type] || 'Familienort';
+        }
+
+        async function loadFamilyPlaces() {
+            if (familyLoading) return;
+            const zoom = map.getZoom();
+            if (zoom < 10) {
+                document.getElementById('family-results').innerHTML = '<div class="family-info">🔍 Bitte zoome etwas rein (mind. Zoom 10) um Familienorte zu laden.</div>';
+                return;
+            }
+            familyLoading = true;
+            clearFamily();
+            document.getElementById('family-results').innerHTML = '<div class="family-loading"><div class="family-loading-text">👨‍👩‍👧‍👦 Lade Familienorte...</div><div class="family-loading-sub">Daten werden von OpenStreetMap geladen</div></div>';
+
+            const bounds = map.getBounds();
+            const query = buildFamilyOverpassQuery(bounds);
+            if (!query) {
+                document.getElementById('family-results').innerHTML = '<div class="family-info">Bitte mindestens einen Typ auswählen.</div>';
+                familyLoading = false;
+                return;
+            }
+
+            try {
+                const data = await safeFetchJSON('https://overpass-api.de/api/interpreter', {
+                    method: 'POST',
+                    body: 'data=' + encodeURIComponent(query),
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                });
+
+                if (!data || !data.elements) throw new Error('Keine Daten erhalten');
+
+                familyCluster = L.markerClusterGroup({ maxClusterRadius: 40, disableClusteringAtZoom: 15 });
+                let html = '';
+                let sites = data.elements.filter(el => {
+                    const lat = el.lat || (el.center && el.center.lat);
+                    return lat && el.tags;
+                });
+
+                // Deduplicate by position
+                const seen = new Set();
+                sites = sites.filter(el => {
+                    const lat = (el.lat || el.center.lat).toFixed(4);
+                    const lon = (el.lon || el.center.lon).toFixed(4);
+                    const key = lat + ',' + lon;
+                    if (seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                });
+
+                sites.forEach((el, i) => {
+                    const lat = el.lat || el.center.lat;
+                    const lon = el.lon || el.center.lon;
+                    const tags = el.tags || {};
+                    const name = tags.name || getFamilyTypeLabel(classifyFamilyPlace(tags));
+                    const type = classifyFamilyPlace(tags);
+                    const typeLabel = getFamilyTypeLabel(type);
+
+                    if (!familyTypes[type]) return;
+
+                    const marker = L.marker([lat, lon], { icon: createFamilyIcon(type) });
+
+                    // Build popup
+                    let popup = '<div style="min-width:200px"><strong>' + name + '</strong>';
+                    popup += '<br><span style="color:#e94560;font-size:12px;">' + typeLabel + '</span>';
+                    if (tags.opening_hours) popup += '<br>🕐 ' + tags.opening_hours;
+                    if (tags.wheelchair === 'yes') popup += '<br>♿ Rollstuhlgerecht';
+                    if (tags.stroller === 'yes' || tags.wheelchair === 'yes') popup += '<br>👶 Kinderwagentauglich';
+                    if (tags.fee === 'no' || tags.access === 'yes') popup += '<br>✓ Kostenlos';
+                    else if (tags.fee === 'yes') popup += '<br>💰 Kostenpflichtig';
+                    if (tags.surface) popup += '<br>🏗️ Boden: ' + tags.surface;
+                    if (tags.min_age || tags.max_age) popup += '<br>👧 Alter: ' + (tags.min_age || '?') + '-' + (tags.max_age || '?') + ' Jahre';
+                    if (tags.website || tags['contact:website']) {
+                        const ws = tags.website || tags['contact:website'];
+                        popup += '<br>🌐 <a href="' + (ws.startsWith('http') ? ws : 'https://' + ws) + '" target="_blank" style="color:#e94560;font-size:11px;">' + ws.replace(/^https?:\/\/(www\.)?/, '').substring(0, 30) + '</a>';
+                    }
+                    popup += '<br><a href="https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lon + '" target="_blank" style="color:#ff9800;font-size:11px;">📍 Google Maps</a>';
+                    popup += '<div style="font-size:10px;color:#5a6a7a;margin-top:6px;border-top:1px solid #2a3a4a;padding-top:4px;">ℹ️ Daten: OpenStreetMap</div>';
+                    popup += '</div>';
+                    marker.bindPopup(popup, { maxWidth: 300 });
+                    familyCluster.addLayer(marker);
+                    familyMarkers.push(marker);
+
+                    // Card in sidebar (max 80)
+                    if (i < 80) {
+                        html += '<div class="family-card" onclick="map.setView([' + lat + ',' + lon + '], 16);familyMarkers[' + i + '].openPopup();">';
+                        html += '<div class="family-card-name">' + (i + 1) + '. ' + name;
+                        if (tags.wheelchair === 'yes' || tags.stroller === 'yes') html += ' <span class="family-badge">♿ Barrierefrei</span>';
+                        html += '</div>';
+                        html += '<div class="family-card-type">' + typeLabel + '</div>';
+                        let details = [];
+                        if (tags.opening_hours) details.push('🕐 ' + tags.opening_hours);
+                        if (tags.fee === 'no') details.push('✓ Kostenlos');
+                        if (details.length) html += '<div class="family-card-details">' + details.join(' · ') + '</div>';
+                        html += '</div>';
+                    }
+                });
+
+                map.addLayer(familyCluster);
+                const count = familyMarkers.length;
+                html = '<div class="family-info">👨‍👩‍👧‍👦 ' + count + ' Familienorte gefunden</div>' + html;
+                document.getElementById('family-results').innerHTML = html;
+                familyLoading = false;
+            } catch (err) {
+                let msg = err.message;
+                if (msg.includes('504') || msg.includes('berschreitung')) msg = 'Server überlastet. Bitte in 30 Sekunden erneut versuchen.';
+                if (msg.includes('429')) msg = 'Zu viele Anfragen. Bitte 1 Minute warten.';
+                familyLoading = false;
+                document.getElementById('family-results').innerHTML = '<div class="family-info">❌ ' + msg + '<br><button onclick="loadFamilyPlaces()" style="margin-top:8px;padding:6px 16px;background:#e94560;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;">🔄 Erneut versuchen</button></div>';
+            }
+        }
+
         // Safe JSON fetch with error handling and auto-retry
         async function safeFetchJSON(url, opts, retries) {
             retries = retries || 0;
@@ -5949,6 +6347,7 @@
 
         map.on('moveend', function() {
             if (campingMode && !campingRoute) { loadCampingSites(); }
+            if (familyMode) { loadFamilyPlaces(); }
         });
 
     </script>
