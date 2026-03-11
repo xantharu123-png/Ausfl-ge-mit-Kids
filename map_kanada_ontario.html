@@ -3146,12 +3146,7 @@ const allPOIs = [
             if (campingMode) {
                 sw.classList.add('active');
                 panel.classList.add('visible');
-                if (map.getZoom() < 8) {
-                    map.setZoom(9);
-                    // loadCampingSites triggers via moveend
-                } else {
-                    loadCampingSites();
-                }
+                document.getElementById('camping-results').innerHTML = '<div class="camping-info">\u{1F5FA}\uFE0F Karte verschieben um Pl\u00E4tze zu laden, oder Route berechnen.</div>';
             } else {
                 sw.classList.remove('active');
                 panel.classList.remove('visible');
