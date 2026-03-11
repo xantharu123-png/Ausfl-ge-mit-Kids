@@ -3423,41 +3423,42 @@ const allPOIs = [
             
             document.getElementById('camping-results').innerHTML = '<div class="camping-loading"><div class="camping-loading-text">\u{1F3D5}\uFE0F Lade Campingplätze...</div><div class="camping-loading-sub">Daten werden von OpenStreetMap geladen</div><div class="camping-progress"><div class="camping-progress-bar"></div></div></div>';
             
-            // Build tourism type regex based on active filters
-            const types = [];
-            if (campingTypes.camping) types.push('camp_site');
-            if (campingTypes.caravan) types.push('caravan_site');
-            if (campingTypes.parking) types.push('camp_pitch');
-            if (!types.length) { document.getElementById('camping-results').innerHTML = '<div class="camping-info">Bitte mindestens einen Typ auswählen.</div>'; campingLoading = false; return; }
-            const typeRegex = types.join('|');
-            
-            // Split into quadrants if area is large (prevents Overpass timeout)
-            const latSpan = north - south, lngSpan = east - west;
-            const needsSplit = (latSpan * lngSpan) > 4; // ~2° x 2° threshold
-            const bboxes = [];
-            if (needsSplit) {
-                const midLat = (south + north) / 2, midLng = (west + east) / 2;
-                bboxes.push([south,west,midLat,midLng], [south,midLng,midLat,east], [midLat,west,north,midLng], [midLat,midLng,north,east]);
-            } else {
-                bboxes.push([south, west, north, east]);
-            }
+            let query = '[out:json][timeout:30];(';
+            if (campingTypes.camping) { query += 'node["tourism"="camp_site"](' + south + ',' + west + ',' + north + ',' + east + ');way["tourism"="camp_site"](' + south + ',' + west + ',' + north + ',' + east + ');'; }
+            if (campingTypes.caravan) { query += 'node["tourism"="caravan_site"](' + south + ',' + west + ',' + north + ',' + east + ');way["tourism"="caravan_site"](' + south + ',' + west + ',' + north + ',' + east + ');node["amenity"="motorhome_station"](' + south + ',' + west + ',' + north + ',' + east + ');'; }
+            if (campingTypes.parking) { query += 'node["amenity"="parking"]["camping"="yes"](' + south + ',' + west + ',' + north + ',' + east + ');node["tourism"="camp_pitch"](' + south + ',' + west + ',' + north + ',' + east + ');'; }
+            query += ');out center 500;';
 
             campingLoading = true;
-            
+
             try {
-                const data = await overpassQuery(query);
-                
+                let data;
+                const servers = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
+                for (let attempt = 0; attempt < 3; attempt++) {
+                    try {
+                        const tq = attempt >= 2 ? query.replace('timeout:30', 'timeout:45') : query;
+                        data = await safeFetchJSON(servers[attempt % servers.length], { method: 'POST', body: 'data=' + encodeURIComponent(tq) });
+                        if (data && data.elements) break;
+                    } catch(retryErr) {
+                        console.warn('[Camping] Versuch', attempt + 1, 'fehlgeschlagen:', retryErr.message);
+                        if (attempt < 2) {
+                            await new Promise(r => setTimeout(r, 3000 * (attempt + 1)));
+                        } else { throw retryErr; }
+                    }
+                }
+
                 campingCluster = L.markerClusterGroup({ maxClusterRadius: 40, disableClusteringAtZoom: 12,
                     iconCreateFunction: function(cluster) {
                         return L.divIcon({ html: '<div style="background:#2d6b4f;color:#4ecca3;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;border:2px solid #4ecca3;">' + cluster.getChildCount() + '</div>', className: '', iconSize: [36, 36] });
                     }
                 });
-                
-                const sites = allElements;
+
+                let sites = (data.elements || []).map(e => { if (!e.lat && e.center) { e.lat = e.center.lat; e.lon = e.center.lon; } return e; }).filter(e => e.lat && e.lon && e.tags);
+                if (campingOpenOnly) sites = sites.filter(s => checkOpenStatus(s.tags.opening_hours) !== 'closed');
                 let html = '';
                 if (sites.length === 0) {
                     html = '<div class="camping-info">Keine Plätze im sichtbaren Bereich. Zoome raus oder verschiebe die Karte.</div>';
-                } else {
+} else {
                     html = '<div class="camping-info">' + sites.length + ' Plätze gefunden</div>';
                     if (campingOpenOnly) sites = sites.filter(s => s.tags && checkOpenStatus(s.tags.opening_hours) !== 'closed');
                 sites.forEach((site, i) => {
