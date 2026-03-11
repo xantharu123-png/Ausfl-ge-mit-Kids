@@ -3367,6 +3367,7 @@ const allPOIs = [
                             <a href="https://www.google.com/maps/search/?api=1&query=${poi.lat},${poi.lng}" target="_blank" class="popup-btn primary">
                                 📍 Route planen
                             </a>
+                            <a href="https://www.google.com/search?q=${encodeURIComponent(poi.name + ' ' + poi.location)}" target="_blank" class="popup-btn secondary">🔍 Google</a>
                             ${poi.website ? `<a href="${poi.website}" target="_blank" class="popup-btn secondary">🔗 Website</a>` : ''}
                         </div>
                     </div>
