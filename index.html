@@ -5961,7 +5961,7 @@
                         window._campingSiteData[campKey] = { name: name, lat: site.lat, lon: site.lon, type: typeLabel, tags: site.tags };
                         if (i < 80) {
                             var cr1 = getCachedCampRating(name, site.lat, site.lon);
-                            var skipRating1 = minCampRatingFilter > 0 && (!cr1 || cr1.rating < minCampRatingFilter);
+                            var skipRating1 = minCampRatingFilter > 0 && cr1 && cr1.rating > 0 && cr1.rating < minCampRatingFilter;
                             if ((campingFavOnly && !isCampFav(campKey)) || skipRating1) { /* skip */ } else {
                             let cardDetails = [];
                             if (cr1 && cr1.rating > 0) cardDetails.push(renderStarsHTML(cr1.rating, cr1.count));
@@ -5991,10 +5991,12 @@
             if (!fromInput || !toInput) { alert('Bitte Start und Ziel eingeben'); return; }
             document.getElementById('camping-results').innerHTML = '<div class="camping-loading"><div class="camping-loading-text">\u{1F5FA}\uFE0F Berechne Route...</div><div class="camping-loading-sub">Routenplanung via BRouter</div><div class="camping-progress"><div class="camping-progress-bar"></div></div></div>';
             try {
-                const fromData = await safeFetchJSON('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(fromInput) + '&limit=1');
-                if (!fromData.length) { alert('Startort nicht gefunden'); return; }
-                const toData = await safeFetchJSON('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(toInput) + '&limit=1');
-                if (!toData.length) { alert('Zielort nicht gefunden'); return; }
+                const fromDataRaw = await safeFetchJSON('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(fromInput) + '&countrycodes=ch&limit=5');
+                if (!fromDataRaw.length) { alert('Startort nicht gefunden'); return; }
+                const fromData = [fromDataRaw.reduce((best, r) => (parseInt(r.place_rank||0) > parseInt(best.place_rank||0)) ? r : best, fromDataRaw[0])];
+                const toDataRaw = await safeFetchJSON('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(toInput) + '&countrycodes=ch&limit=5');
+                if (!toDataRaw.length) { alert('Zielort nicht gefunden'); return; }
+                const toData = [toDataRaw.reduce((best, r) => (parseInt(r.place_rank||0) > parseInt(best.place_rank||0)) ? r : best, toDataRaw[0])];
                 const fromLat = parseFloat(fromData[0].lat), fromLon = parseFloat(fromData[0].lon);
                 const toLat = parseFloat(toData[0].lat), toLon = parseFloat(toData[0].lon);
                 // Try BRouter first, then OSRM fallback, then straight line
@@ -6183,7 +6185,7 @@
                     window._campingSiteData[campKey] = { name: name, lat: site.lat, lon: site.lon, type: typeLabel, tags: site.tags };
                     if (i < 120) {
                         var cr2 = getCachedCampRating(name, site.lat, site.lon);
-                        var skipRating2 = minCampRatingFilter > 0 && (!cr2 || cr2.rating < minCampRatingFilter);
+                        var skipRating2 = minCampRatingFilter > 0 && cr2 && cr2.rating > 0 && cr2.rating < minCampRatingFilter;
                         if ((campingFavOnly && !isCampFav(campKey)) || skipRating2) { /* skip */ } else {
                         // Build card with details
                         let cardDetails = [];
