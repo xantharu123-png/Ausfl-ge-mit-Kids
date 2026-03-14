@@ -5991,9 +5991,9 @@
             if (!fromInput || !toInput) { alert('Bitte Start und Ziel eingeben'); return; }
             document.getElementById('camping-results').innerHTML = '<div class="camping-loading"><div class="camping-loading-text">\u{1F5FA}\uFE0F Berechne Route...</div><div class="camping-loading-sub">Routenplanung via BRouter</div><div class="camping-progress"><div class="camping-progress-bar"></div></div></div>';
             try {
-                const fromData = await safeFetchJSON('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(fromInput) + '&limit=1');
+                const fromData = await safeFetchJSON('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(fromInput) + '&countrycodes=ch&limit=1');
                 if (!fromData.length) { alert('Startort nicht gefunden'); return; }
-                const toData = await safeFetchJSON('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(toInput) + '&limit=1');
+                const toData = await safeFetchJSON('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(toInput) + '&countrycodes=ch&limit=1');
                 if (!toData.length) { alert('Zielort nicht gefunden'); return; }
                 const fromLat = parseFloat(fromData[0].lat), fromLon = parseFloat(fromData[0].lon);
                 const toLat = parseFloat(toData[0].lat), toLon = parseFloat(toData[0].lon);

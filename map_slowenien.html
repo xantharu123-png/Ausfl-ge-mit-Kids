@@ -5375,9 +5375,9 @@ var ck1 = getCampKey(site);
             if (!fromInput || !toInput) { alert('Bitte Start und Ziel eingeben'); return; }
             document.getElementById('camping-results').innerHTML = '<div class="camping-loading"><div class="camping-loading-text">\u{1F5FA}\uFE0F Berechne Route...</div><div class="camping-loading-sub">Routenplanung via BRouter</div><div class="camping-progress"><div class="camping-progress-bar"></div></div></div>';
             try {
-                const fromData = await safeFetchJSON('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(fromInput) + '&limit=1');
+                const fromData = await safeFetchJSON('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(fromInput) + '&countrycodes=si&limit=1');
                 if (!fromData.length) { alert('Startort nicht gefunden'); return; }
-                const toData = await safeFetchJSON('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(toInput) + '&limit=1');
+                const toData = await safeFetchJSON('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(toInput) + '&countrycodes=si&limit=1');
                 if (!toData.length) { alert('Zielort nicht gefunden'); return; }
                 const fromLat = parseFloat(fromData[0].lat), fromLon = parseFloat(fromData[0].lon);
                 const toLat = parseFloat(toData[0].lat), toLon = parseFloat(toData[0].lon);
@@ -5427,7 +5427,7 @@ var ck1 = getCampKey(site);
                     const p1 = segPts[si], p2 = segPts[si + 1];
                     const sLat = Math.min(p1[0], p2[0]) - buf, nLat = Math.max(p1[0], p2[0]) + buf;
                     const wLng = Math.min(p1[1], p2[1]) - buf, eLng = Math.max(p1[1], p2[1]) + buf;
-                    const segQ = '[out:json][timeout:25];node["tourism"~"' + rtRegex + '"](' + sLat.toFixed(3) + ',' + wLng.toFixed(3) + ',' + nLat.toFixed(3) + ',' + eLng.toFixed(3) + ');out body 150;';
+                    const segQ = '[out:json][timeout:25];(' + 'node["tourism"~"' + rtRegex + '"](' + sLat.toFixed(3) + ',' + wLng.toFixed(3) + ',' + nLat.toFixed(3) + ',' + eLng.toFixed(3) + ');' + 'way["tourism"~"' + rtRegex + '"](' + sLat.toFixed(3) + ',' + wLng.toFixed(3) + ',' + nLat.toFixed(3) + ',' + eLng.toFixed(3) + ');' + (campingTypes.caravan ? 'node["amenity"="motorhome_station"](' + sLat.toFixed(3) + ',' + wLng.toFixed(3) + ',' + nLat.toFixed(3) + ',' + eLng.toFixed(3) + ');' : '') + (campingTypes.parking ? 'node["amenity"="parking"]["camping"="yes"](' + sLat.toFixed(3) + ',' + wLng.toFixed(3) + ',' + nLat.toFixed(3) + ',' + eLng.toFixed(3) + ');' : '') + ');out center 150;';
                     try {
                         const segData = await overpassQuery(segQ);
                         allRouteElements = allRouteElements.concat(segData.elements || []);
