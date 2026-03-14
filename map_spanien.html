@@ -5390,10 +5390,12 @@ var ck1 = getCampKey(site);
             if (!fromInput || !toInput) { alert('Bitte Start und Ziel eingeben'); return; }
             document.getElementById('camping-results').innerHTML = '<div class="camping-loading"><div class="camping-loading-text">\u{1F5FA}\uFE0F Berechne Route...</div><div class="camping-loading-sub">Routenplanung via BRouter</div><div class="camping-progress"><div class="camping-progress-bar"></div></div></div>';
             try {
-                const fromData = await safeFetchJSON('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(fromInput) + '&countrycodes=es&limit=1');
-                if (!fromData.length) { alert('Startort nicht gefunden'); return; }
-                const toData = await safeFetchJSON('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(toInput) + '&countrycodes=es&limit=1');
-                if (!toData.length) { alert('Zielort nicht gefunden'); return; }
+                const fromDataRaw = await safeFetchJSON('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(fromInput) + '&countrycodes=es&limit=5');
+                if (!fromDataRaw.length) { alert('Startort nicht gefunden'); return; }
+                const fromData = [fromDataRaw.reduce((best, r) => (parseInt(r.place_rank||0) > parseInt(best.place_rank||0)) ? r : best, fromDataRaw[0])];
+                const toDataRaw = await safeFetchJSON('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(toInput) + '&countrycodes=es&limit=5');
+                if (!toDataRaw.length) { alert('Zielort nicht gefunden'); return; }
+                const toData = [toDataRaw.reduce((best, r) => (parseInt(r.place_rank||0) > parseInt(best.place_rank||0)) ? r : best, toDataRaw[0])];
                 const fromLat = parseFloat(fromData[0].lat), fromLon = parseFloat(fromData[0].lon);
                 const toLat = parseFloat(toData[0].lat), toLon = parseFloat(toData[0].lon);
                 // Try BRouter first, then OSRM fallback, then straight line
