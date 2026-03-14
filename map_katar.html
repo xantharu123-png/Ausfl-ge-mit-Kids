@@ -3666,12 +3666,12 @@ var ck1 = getCampKey(site);
                         campingCluster.addLayer(marker);
                         campingMarkers.push(marker);
                         if (i < 50) {
-                            html += '<div class="camping-card" onclick="var m=campingMarkers['+ i +']; if(m){map.setView(m.getLatLng(), 15); setTimeout(()=>m.openPopup(), 300);}">';
                             var openStatus = typeof openStatus !== 'undefined' ? openStatus : checkOpenStatus(site.tags.opening_hours);
                             var campKey = getCampKey(site);
                             var cr1 = getCachedCampRating(name, site.lat, site.lon);
                             var skipRating1 = minCampRatingFilter > 0 && (!cr1 || cr1.rating < minCampRatingFilter);
                             if ((campingFavOnly && !isCampFav(campKey)) || skipRating1) { /* skip */ } else {
+                            html += '<div class="camping-card" onclick="var m=campingMarkers['+ i +']; if(m){map.setView(m.getLatLng(), 15); setTimeout(()=>m.openPopup(), 300);}">';
                             let cardDetails = [];
                             if (cr1 && cr1.rating > 0) cardDetails.push(renderStarsHTML(cr1.rating, cr1.count));
                             if (site.tags.opening_hours) cardDetails.push('🕐 ' + site.tags.opening_hours);
@@ -3821,12 +3821,12 @@ var ck1 = getCampKey(site);
                     campingCluster.addLayer(marker);
                     campingMarkers.push(marker);
                     if (i < 80) {
-                        html += '<div class="camping-card" onclick="var m=campingMarkers['+ i +']; if(m){map.setView(m.getLatLng(), 15); setTimeout(()=>m.openPopup(), 300);}">';
                         var openStatus2 = typeof openStatus2 !== 'undefined' ? openStatus2 : checkOpenStatus(site.tags.opening_hours);
                             var campKey2 = getCampKey(site);
                             var cr2 = getCachedCampRating(name, site.lat, site.lon);
                             var skipRating2 = minCampRatingFilter > 0 && (!cr2 || cr2.rating < minCampRatingFilter);
                             if ((campingFavOnly && !isCampFav(campKey2)) || skipRating2) { /* skip */ } else {
+                            html += '<div class="camping-card" onclick="var m=campingMarkers['+ i +']; if(m){map.setView(m.getLatLng(), 15); setTimeout(()=>m.openPopup(), 300);}">';
                             let cardDetails2 = [];
                             if (cr2 && cr2.rating > 0) cardDetails2.push(renderStarsHTML(cr2.rating, cr2.count));
                             if (site.tags.opening_hours) cardDetails2.push('🕐 ' + site.tags.opening_hours);
