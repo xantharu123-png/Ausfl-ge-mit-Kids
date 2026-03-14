@@ -5441,10 +5441,12 @@ var ck1 = getCampKey(site);
                     // Small delay between segments to avoid rate limiting
                     if (si < segPts.length - 2) await new Promise(r => setTimeout(r, 1200));
                 }
+                // Normalize way elements (coords in e.center instead of e.lat/lon)
+                allRouteElements.forEach(e => { if (!e.lat && e.center) { e.lat = e.center.lat; e.lon = e.center.lon; } });
                 // Deduplicate and filter to within 50km of route
                 const seenIds = new Set();
                 const nearRoute = allRouteElements.filter(e => {
-                    if (seenIds.has(e.id)) return false;
+                    if (!e.lat || !e.lon || seenIds.has(e.id)) return false;
                     seenIds.add(e.id);
                     return isNearRoute(e.lat, e.lon, routeCoords, 50);
                 });
