@@ -5961,7 +5961,7 @@
                         window._campingSiteData[campKey] = { name: name, lat: site.lat, lon: site.lon, type: typeLabel, tags: site.tags };
                         if (i < 80) {
                             var cr1 = getCachedCampRating(name, site.lat, site.lon);
-                            var skipRating1 = minCampRatingFilter > 0 && (!cr1 || cr1.rating < minCampRatingFilter);
+                            var skipRating1 = minCampRatingFilter > 0 && cr1 && cr1.rating > 0 && cr1.rating < minCampRatingFilter;
                             if ((campingFavOnly && !isCampFav(campKey)) || skipRating1) { /* skip */ } else {
                             let cardDetails = [];
                             if (cr1 && cr1.rating > 0) cardDetails.push(renderStarsHTML(cr1.rating, cr1.count));
@@ -6183,7 +6183,7 @@
                     window._campingSiteData[campKey] = { name: name, lat: site.lat, lon: site.lon, type: typeLabel, tags: site.tags };
                     if (i < 120) {
                         var cr2 = getCachedCampRating(name, site.lat, site.lon);
-                        var skipRating2 = minCampRatingFilter > 0 && (!cr2 || cr2.rating < minCampRatingFilter);
+                        var skipRating2 = minCampRatingFilter > 0 && cr2 && cr2.rating > 0 && cr2.rating < minCampRatingFilter;
                         if ((campingFavOnly && !isCampFav(campKey)) || skipRating2) { /* skip */ } else {
                         // Build card with details
                         let cardDetails = [];
