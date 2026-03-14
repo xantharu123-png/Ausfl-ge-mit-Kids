@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jahresguide - Daten Transfer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a1628;
+            color: #e8edf3;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+        h1 { font-size: 28px; margin-bottom: 8px; }
+        .subtitle { color: #8899aa; margin-bottom: 40px; font-size: 15px; }
+        .container { max-width: 700px; width: 100%; }
+        .card {
+            background: #111d2e;
+            border: 1px solid #1e3050;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        .card h2 { font-size: 20px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+        .card p { color: #8899aa; font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-export {
+            background: linear-gradient(135deg, #4ecca3, #38b2ac);
+            color: #0a1628;
+        }
+        .btn-export:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(78,204,163,0.3); }
+        .btn-import {
+            background: linear-gradient(135deg, #e94560, #d63384);
+            color: white;
+        }
+        .btn-import:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(233,69,96,0.3); }
+        .stats {
+            background: #0d1a2a;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 16px;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .stats .label { color: #8899aa; }
+        .stats .value { color: #4ecca3; font-weight: 600; }
+        .stats .zero { color: #5a6a7a; }
+        .status {
+            margin-top: 16px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+        .status.success { display: block; background: #0d2e1a; border: 1px solid #1a5c30; color: #4ecca3; }
+        .status.error { display: block; background: #2e0d1a; border: 1px solid #5c1a30; color: #e94560; }
+        .status.info { display: block; background: #0d1a2e; border: 1px solid #1a305c; color: #6ea8fe; }
+        input[type="file"] { display: none; }
+        .divider { height: 1px; background: #1e3050; margin: 8px 0 20px 0; }
+        .arrow { font-size: 32px; text-align: center; margin: -8px 0; color: #3a5a7a; }
+        a { color: #4ecca3; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .back-link { margin-bottom: 24px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="back-link"><a href="index.html">&larr; Zurück zur Karte</a></div>
+        <h1>Daten Transfer</h1>
+        <p class="subtitle">Bewertungen, Favoriten und besuchte POIs zwischen Geräten übertragen</p>
+
+        <div class="card">
+            <h2>📤 Exportieren</h2>
+            <p>Speichert alle deine Daten (Bewertungen, Favoriten, besuchte Orte, Camping-Daten) als JSON-Datei. Öffne diese Seite auf dem <strong>alten Gerät</strong>.</p>
+            <button class="btn btn-export" onclick="exportData()">📤 Alle Daten exportieren</button>
+            <div id="export-stats" class="stats" style="display:none;"></div>
+            <div id="export-status" class="status"></div>
+        </div>
+
+        <div class="arrow">⬇</div>
+
+        <div class="card">
+            <h2>📥 Importieren</h2>
+            <p>Lade eine vorher exportierte JSON-Datei. Öffne diese Seite auf dem <strong>neuen Gerät</strong>. Vorhandene Daten werden ergänzt, nicht überschrieben.</p>
+            <button class="btn btn-import" onclick="document.getElementById('import-file').click()">📥 JSON-Datei laden</button>
+            <input type="file" id="import-file" accept=".json" onchange="importData(this)">
+            <div id="import-status" class="status"></div>
+        </div>
+    </div>
+
+    <script>
+        // All known localStorage key patterns used by Jahresguide maps
+        const KEY_PATTERNS = [
+            'googleApiKey',
+            'campRatingCache',
+            'favoriteCamping',
+            // Per-country keys with various naming patterns
+            /^ratingCache/,
+            /^favoritePOIs/,
+            /^favPOIs/,
+            /^visitedPOIs/,
+        ];
+
+        function getJahresguideKeys() {
+            const keys = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const match = KEY_PATTERNS.some(p => {
+                    if (typeof p === 'string') return key === p;
+                    return p.test(key);
+                });
+                if (match) keys.push(key);
+            }
+            return keys.sort();
+        }
+
+        function exportData() {
+            const keys = getJahresguideKeys();
+            const data = {};
+            let totalEntries = 0;
+
+            keys.forEach(key => {
+                const raw = localStorage.getItem(key);
+                data[key] = raw;
+                try {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) totalEntries += parsed.length;
+                    else if (typeof parsed === 'object' && parsed !== null) totalEntries += Object.keys(parsed).length;
+                    else totalEntries += 1;
+                } catch(e) {
+                    totalEntries += 1;
+                }
+            });
+
+            if (keys.length === 0) {
+                document.getElementById('export-status').className = 'status error';
+                document.getElementById('export-status').textContent = 'Keine Jahresguide-Daten im Browser gefunden. Bist du sicher, dass du auf dem richtigen Gerät bist?';
+                return;
+            }
+
+            // Build stats
+            let statsHTML = '<strong>Gefundene Daten:</strong><br>';
+            const campRatings = data.campRatingCache ? Object.keys(JSON.parse(data.campRatingCache || '{}')).length : 0;
+            const campFavs = data.favoriteCamping ? JSON.parse(data.favoriteCamping || '[]').length : 0;
+            const apiKey = data.googleApiKey ? 'Ja' : 'Nein';
+
+            statsHTML += '<span class="label">Google API Key:</span> <span class="' + (data.googleApiKey ? 'value' : 'zero') + '">' + apiKey + '</span><br>';
+            statsHTML += '<span class="label">Camping-Bewertungen:</span> <span class="' + (campRatings > 0 ? 'value' : 'zero') + '">' + campRatings + '</span><br>';
+            statsHTML += '<span class="label">Camping-Favoriten:</span> <span class="' + (campFavs > 0 ? 'value' : 'zero') + '">' + campFavs + '</span><br>';
+
+            // Count per-country data
+            let poiRatings = 0, poiFavs = 0, poiVisited = 0;
+            keys.forEach(key => {
+                try {
+                    const parsed = JSON.parse(data[key]);
+                    if (key.startsWith('ratingCache') && key !== 'campRatingCache') {
+                        poiRatings += typeof parsed === 'object' ? Object.keys(parsed).length : 0;
+                    }
+                    if (key.startsWith('favoritePOIs') || key.startsWith('favPOIs')) {
+                        poiFavs += Array.isArray(parsed) ? parsed.length : 0;
+                    }
+                    if (key.startsWith('visitedPOIs')) {
+                        poiVisited += Array.isArray(parsed) ? parsed.length : 0;
+                    }
+                } catch(e) {}
+            });
+
+            statsHTML += '<span class="label">POI-Bewertungen:</span> <span class="' + (poiRatings > 0 ? 'value' : 'zero') + '">' + poiRatings + '</span><br>';
+            statsHTML += '<span class="label">POI-Favoriten:</span> <span class="' + (poiFavs > 0 ? 'value' : 'zero') + '">' + poiFavs + '</span><br>';
+            statsHTML += '<span class="label">Besuchte POIs:</span> <span class="' + (poiVisited > 0 ? 'value' : 'zero') + '">' + poiVisited + '</span><br>';
+            statsHTML += '<br><span class="label">Gesamt:</span> <span class="value">' + keys.length + ' Keys, ' + totalEntries + ' Einträge</span>';
+
+            document.getElementById('export-stats').innerHTML = statsHTML;
+            document.getElementById('export-stats').style.display = 'block';
+
+            // Download
+            const exportObj = {
+                _meta: {
+                    exported: new Date().toISOString(),
+                    source: 'Jahresguide Daten Transfer',
+                    version: 1,
+                    keyCount: keys.length
+                },
+                data: data
+            };
+
+            const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'jahresguide_daten_' + new Date().toISOString().slice(0,10) + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+
+            document.getElementById('export-status').className = 'status success';
+            document.getElementById('export-status').textContent = '✅ Export erfolgreich! Datei wurde heruntergeladen. Übertrage sie auf dein neues Gerät.';
+        }
+
+        function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importObj = JSON.parse(e.target.result);
+                    const data = importObj.data || importObj; // Support both wrapped and raw format
+
+                    if (typeof data !== 'object') {
+                        throw new Error('Ungültiges Dateiformat');
+                    }
+
+                    let imported = 0;
+                    let merged = 0;
+                    let skipped = 0;
+
+                    Object.keys(data).forEach(key => {
+                        if (key === '_meta') return;
+
+                        const newValue = data[key];
+                        const existingValue = localStorage.getItem(key);
+
+                        if (!existingValue) {
+                            // No existing data - just import
+                            localStorage.setItem(key, newValue);
+                            imported++;
+                        } else {
+                            // Merge strategy: for objects merge keys, for arrays merge unique values
+                            try {
+                                const existingParsed = JSON.parse(existingValue);
+                                const newParsed = JSON.parse(newValue);
+
+                                if (Array.isArray(existingParsed) && Array.isArray(newParsed)) {
+                                    // Merge arrays (keep unique values)
+                                    const combined = [...existingParsed];
+                                    newParsed.forEach(item => {
+                                        const exists = combined.some(e =>
+                                            JSON.stringify(e) === JSON.stringify(item) ||
+                                            (typeof e === 'number' && e === item)
+                                        );
+                                        if (!exists) combined.push(item);
+                                    });
+                                    localStorage.setItem(key, JSON.stringify(combined));
+                                    merged++;
+                                } else if (typeof existingParsed === 'object' && typeof newParsed === 'object') {
+                                    // Merge objects (new values fill gaps, don't overwrite)
+                                    const combined = { ...newParsed, ...existingParsed };
+                                    localStorage.setItem(key, JSON.stringify(combined));
+                                    merged++;
+                                } else {
+                                    // Simple value - keep existing
+                                    skipped++;
+                                }
+                            } catch(mergeErr) {
+                                // If parsing fails, only import if no existing value
+                                if (!existingValue) {
+                                    localStorage.setItem(key, newValue);
+                                    imported++;
+                                } else {
+                                    skipped++;
+                                }
+                            }
+                        }
+                    });
+
+                    const meta = importObj._meta || {};
+                    let statusText = '✅ Import erfolgreich!';
+                    statusText += ' ' + imported + ' neu importiert';
+                    if (merged > 0) statusText += ', ' + merged + ' zusammengeführt';
+                    if (skipped > 0) statusText += ', ' + skipped + ' übersprungen (bereits vorhanden)';
+                    if (meta.exported) statusText += '. Export vom ' + new Date(meta.exported).toLocaleDateString('de-CH');
+                    statusText += '. Lade die Karten neu um die Daten zu sehen.';
+
+                    document.getElementById('import-status').className = 'status success';
+                    document.getElementById('import-status').textContent = statusText;
+
+                } catch(err) {
+                    document.getElementById('import-status').className = 'status error';
+                    document.getElementById('import-status').textContent = '❌ Fehler beim Import: ' + err.message;
+                }
+            };
+            reader.readAsText(file);
+            input.value = ''; // Reset for re-import
+        }
+    </script>
+</body>
+</html>
