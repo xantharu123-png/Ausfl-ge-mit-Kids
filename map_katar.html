@@ -3593,30 +3593,17 @@ const allPOIs = [
             10: 'Campingplatz', 11: 'Ver-/Entsorgung', 12: 'Tagesparkplatz', 14: 'Servicestation'
         };
 
-        let _p4nCache = null;
+        // Park4Night offline data (embedded)
+        const _p4nTypeLabelsMap = {5:'Wohnmobilstellplatz (gratis)',6:'Wohnmobilstellplatz',10:'Campingplatz',9:'Bauernhof',1:'Naturstellplatz',2:'Parkplatz Tag/Nacht',3:'Rastplatz',12:'Tagesparkplatz',14:'Servicestation',11:'Ver-/Entsorgung',4:'Picknickplatz'};
+        const _p4nRaw = [[24.31412,51.46675,"(36807) Alkwifriah - Unnamed Road",2,5,3,"/de/place/482213"],[24.767,50.75076,"(36621) Beach cerca de doha",2,5,1,"/de/place/476371"],[24.7717,50.74861,"(36620) Salwa - 6587 \u0627\u0644\u0634\u0627\u0637\u0626",5,5,3,"/de/place/545619"],[24.77664,50.74494,"(36620) Salwa - 615",2,4,1,"/de/place/391194"],[24.79358,50.74559,"(36621) Salwa - 615",2,0,0,"/de/place/645104"],[25.13655,51.61753,"() Al Wakrah -",1,0,0,"/de/place/395277"],[25.20894,50.76829,"() Umm Bab -",1,0,0,"/de/place/570074"],[25.22581,51.43699,"() Doha - Salwa Road",2,0,0,"/de/place/537280"],[25.27349,51.43789,"() Doha - Al Baaya Street",14,0,0,"/de/place/558281"],[25.32744,51.53984,"() Doha -",2,5,2,"/de/place/395201"],[25.33661,51.35163,"() Ar Rayyan - Unnamed Road",2,0,0,"/de/place/652879"],[25.36223,51.52876,"() Doha - Katara Street",2,0,0,"/de/place/658778"],[25.4604,50.8647,"() Bir Zekrit -",1,0,0,"/de/place/395639"],[25.47577,50.84629,"() Zekreet -",1,0,0,"/de/place/395646"],[25.74299,51.56011,"(00000) Al Dhakira - Unnamed Road",1,0,0,"/de/place/395414"]];
+        let _p4nCache = _p4nRaw.map(function(r) {
+            return { id: r[0]+'_'+r[1], lat: r[0], lng: r[1], type: { id: r[3], label: _p4nTypeLabelsMap[r[3]] || '' }, title_short: r[2], rating: r[4], review: r[5], url: r[6], address: {} };
+        });
         async function fetchPark4Night(lat, lng, radiusKm) {
-            try {
-                if (!_p4nCache) {
-                    const resp = await fetch('p4n_QA.json');
-                    if (!resp.ok) return [];
-                    _p4nCache = await resp.json();
-                    console.log('[Park4Night] ' + _p4nCache.length + ' Plätze aus p4n_QA.json geladen');
-                }
-                // Filter by radius from center
-                const maxDist = radiusKm / 111;
-                return _p4nCache.filter(p => {
-                    const dlat = Math.abs(p.lat - lat);
-                    const dlon = Math.abs(p.lon - lng);
-                    return dlat < maxDist && dlon < maxDist * 1.5;
-                }).map(p => ({
-                    id: p.id, lat: p.lat, lng: p.lon,
-                    type: { id: p.type_id, label: p.type },
-                    title_short: p.name,
-                    rating: p.rating, review: p.reviews,
-                    url: p.url,
-                    address: { city: p.city }
-                }));
-            } catch(e) { console.warn('[Park4Night] Fehler:', e.message); return []; }
+            var maxDist = radiusKm / 111;
+            return _p4nCache.filter(function(p) {
+                return Math.abs(p.lat - lat) < maxDist && Math.abs(p.lng - lng) < maxDist * 1.5;
+            });
         }
 
         function p4nToSite(p) {

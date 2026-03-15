@@ -4250,30 +4250,17 @@ const allPOIs = [
             10: 'Campingplatz', 11: 'Ver-/Entsorgung', 12: 'Tagesparkplatz', 14: 'Servicestation'
         };
 
-        let _p4nCache = null;
+        // Park4Night offline data (embedded)
+        const _p4nTypeLabelsMap = {5:'Wohnmobilstellplatz (gratis)',6:'Wohnmobilstellplatz',10:'Campingplatz',9:'Bauernhof',1:'Naturstellplatz',2:'Parkplatz Tag/Nacht',3:'Rastplatz',12:'Tagesparkplatz',14:'Servicestation',11:'Ver-/Entsorgung',4:'Picknickplatz'};
+        const _p4nRaw = [[24.14997,54.79814,"(4QXW+QMR) Al Wathbah - Al Wathba Cycle Track",4,0,0,"/de/place/393388"],[24.26096,54.39448,"() Abu Dhabi - Unnamed Road",12,0,0,"/de/place/644914"],[24.33631,54.52491,"(51133) Abu Dhabi - Al Wazn Street",3,0,0,"/de/place/387157"],[24.36418,54.52337,"() Abu Dhabi - 11 Al Jammalah 1 Street",14,0,0,"/de/place/489340"],[24.42909,54.37363,"(2741) Abu Dhabi - Khalifa Al Mubarak Street",2,0,0,"/de/place/656359"],[24.45566,54.66996,"() Abu Dhabi - Al Marfaa Street",2,0,0,"/de/place/222069"],[24.46536,54.33063,"() Abu Dhabi - 1st Street",2,4.5,2,"/de/place/571457"],[24.46709,54.32965,"(549) Abu Dhabi - Corniche Cycle Path",14,0,0,"/de/place/659804"],[24.47278,54.31684,"(27009) Abu Dhabi - Al Kasir Street",2,4,1,"/de/place/658936"],[24.47322,54.32089,"() Abu Dhabi - An Nahl Street",2,5,1,"/de/place/557595"],[24.54499,54.48522,"() Abu Dhabi - Unnamed Road",2,3,1,"/de/place/644844"],[24.6238,54.63907,"() Abu Dhabi - Unnamed Road",2,0,0,"/de/place/655373"],[24.80689,56.16996,"() Hatta -",1,0,0,"/de/place/577396"],[24.81316,56.129,"() Hatta - Unnamed Road",14,0,0,"/de/place/662817"],[24.84055,55.35194,"(R9R4+F5) Al Lisaili - Unnamed Road",1,0,0,"/de/place/310756"],[24.89142,55.26206,"() Dubai -",1,0,0,"/de/place/379927"],[24.89219,55.76607,"() Sharjah - Unnamed Road",8,0,0,"/de/place/171953"],[24.96485,56.14286,"() Munay - Sharjah - Kalba Road",8,0,0,"/de/place/651728"],[24.97805,55.02112,"() Dubai - Unnamed Road",2,0,0,"/de/place/558533"],[24.98569,55.0187,"() Dubai -",16,3,2,"/de/place/391781"],[25.04578,56.007,"() Al Mussili - Al Shafaq Rd",14,0,0,"/de/place/660697"],[25.11056,56.28864,"() Fujairah - Unnamed Road",14,0,0,"/de/place/167606"],[25.11306,55.17282,"(35114) Dubai - Al Na'ayem St",2,5,1,"/de/place/654221"],[25.19914,55.23187,"() Dubai - Unnamed Road",2,3.7,3,"/de/place/490763"],[25.20062,55.26636,"(PO BOX 118) Dubai - Al Albany St",2,0,0,"/de/place/655949"],[25.20263,55.27574,"() Dubai - D71",2,0,0,"/de/place/559346"],[25.20291,55.26772,"() Dubai - 140 Sheikh Zayed Road",2,0,0,"/de/place/489912"],[25.20586,55.32663,"(00000) Dubai - Unnamed Road",2,1,1,"/de/place/393915"],[25.24313,55.26357,"() Dubai - Unnamed road",12,1,1,"/de/place/225793"],[25.30196,55.2975,"() Dubai - Unnamed Road",2,5,1,"/de/place/490456"],[25.31681,55.34586,"(1234) Al Mamzar - Dubai - Al Khaleej Road",2,0,0,"/de/place/656740"],[25.32971,55.35639,"() Sharjah - Unnamed Road",2,3,1,"/de/place/166398"],[25.342,55.36443,"() Sharjah - 27 S101",2,4.5,2,"/de/place/166396"],[25.46493,55.97936,"() Adhan - Digdaga Road",14,0,0,"/de/place/661263"],[25.46619,55.95418,"() Umm Urage -",1,0,0,"/de/place/661206"],[25.4907,55.50376,"()  - Abu Baker Al Sidique Street",1,5,1,"/de/place/660918"],[25.54186,55.54071,"(1280) Umm Al Quwain - King Faisal Road",3,0,0,"/de/place/661090"],[25.57214,55.55038,"() Umm Al Quwain - Al Mualla Street",1,0,0,"/de/place/661089"],[25.62712,55.83307,"(71705) Ras Al-Khaimah -",1,0,0,"/de/place/478818"],[25.65242,55.74256,"() Al Medfeq -",1,0,0,"/de/place/560116"],[25.78671,55.96705,"(07) Ras Al Khaimah - Al Hisn Road",2,0,0,"/de/place/655736"]];
+        let _p4nCache = _p4nRaw.map(function(r) {
+            return { id: r[0]+'_'+r[1], lat: r[0], lng: r[1], type: { id: r[3], label: _p4nTypeLabelsMap[r[3]] || '' }, title_short: r[2], rating: r[4], review: r[5], url: r[6], address: {} };
+        });
         async function fetchPark4Night(lat, lng, radiusKm) {
-            try {
-                if (!_p4nCache) {
-                    const resp = await fetch('p4n_AE.json');
-                    if (!resp.ok) return [];
-                    _p4nCache = await resp.json();
-                    console.log('[Park4Night] ' + _p4nCache.length + ' Plätze aus p4n_AE.json geladen');
-                }
-                // Filter by radius from center
-                const maxDist = radiusKm / 111;
-                return _p4nCache.filter(p => {
-                    const dlat = Math.abs(p.lat - lat);
-                    const dlon = Math.abs(p.lon - lng);
-                    return dlat < maxDist && dlon < maxDist * 1.5;
-                }).map(p => ({
-                    id: p.id, lat: p.lat, lng: p.lon,
-                    type: { id: p.type_id, label: p.type },
-                    title_short: p.name,
-                    rating: p.rating, review: p.reviews,
-                    url: p.url,
-                    address: { city: p.city }
-                }));
-            } catch(e) { console.warn('[Park4Night] Fehler:', e.message); return []; }
+            var maxDist = radiusKm / 111;
+            return _p4nCache.filter(function(p) {
+                return Math.abs(p.lat - lat) < maxDist && Math.abs(p.lng - lng) < maxDist * 1.5;
+            });
         }
 
         function p4nToSite(p) {
