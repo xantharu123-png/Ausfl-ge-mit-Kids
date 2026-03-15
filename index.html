@@ -4669,6 +4669,10 @@
                 maxZoom: 19
             }).addTo(map);
             
+            // Firefox fix: force recalculation of map container size
+            map.whenReady(function() { setTimeout(function() { map.invalidateSize(); }, 200); });
+            window.addEventListener('resize', function() { map.invalidateSize(); });
+            
             addMarkers(allPOIs);
             updateCounts();
             renderPOIList(allPOIs);
@@ -5859,11 +5863,14 @@
             document.getElementById('camping-results').innerHTML = '<div class="camping-loading"><div class="camping-loading-text">\u{1F3D5}\uFE0F Lade Campingplätze...</div><div class="camping-loading-sub">Daten werden von OpenStreetMap geladen</div><div class="camping-progress"><div class="camping-progress-bar"></div></div></div>';
             
             let query = '[out:json][timeout:30];(';
-            if (campingTypes.camping) { query += 'node["tourism"="camp_site"](' + south + ',' + west + ',' + north + ',' + east + ');'; query += 'way["tourism"="camp_site"](' + south + ',' + west + ',' + north + ',' + east + ');'; }
-            if (campingTypes.caravan) { query += 'node["tourism"="caravan_site"](' + south + ',' + west + ',' + north + ',' + east + ');'; query += 'way["tourism"="caravan_site"](' + south + ',' + west + ',' + north + ',' + east + ');'; query += 'node["amenity"="motorhome_station"](' + south + ',' + west + ',' + north + ',' + east + ');'; }
+            var bb = south + ',' + west + ',' + north + ',' + east;
+            if (campingTypes.camping) { query += 'node["tourism"="camp_site"](' + bb + ');way["tourism"="camp_site"](' + bb + ');relation["tourism"="camp_site"](' + bb + ');'; }
+            if (campingTypes.caravan) { query += 'node["tourism"="caravan_site"](' + bb + ');way["tourism"="caravan_site"](' + bb + ');relation["tourism"="caravan_site"](' + bb + ');node["amenity"="motorhome_station"](' + bb + ');way["amenity"="motorhome_station"](' + bb + ');'; }
             if (campingTypes.parking) {
-                query += 'node["amenity"="parking"]["camping"="yes"](' + south + ',' + west + ',' + north + ',' + east + ');';
-                query += 'node["tourism"="camp_pitch"](' + south + ',' + west + ',' + north + ',' + east + ');';
+                query += 'node["amenity"="parking"]["camping"="yes"](' + bb + ');way["amenity"="parking"]["camping"="yes"](' + bb + ');';
+                query += 'node["amenity"="parking"]["caravan"~"yes|designated"](' + bb + ');way["amenity"="parking"]["caravan"~"yes|designated"](' + bb + ');';
+                query += 'node["amenity"="parking"]["motorhome"~"yes|designated"](' + bb + ');way["amenity"="parking"]["motorhome"~"yes|designated"](' + bb + ');';
+                query += 'node["tourism"="camp_pitch"](' + bb + ');way["tourism"="camp_pitch"](' + bb + ');';
             }
             query += ');out center 500;';
             
@@ -6027,10 +6034,8 @@
                 // Build Overpass type filter
                 const rtTypes = [];
                 if (campingTypes.camping) rtTypes.push('"tourism"="camp_site"');
-                if (campingTypes.caravan) rtTypes.push('"tourism"="caravan_site"');
-                if (campingTypes.parking) { rtTypes.push('"tourism"="camp_pitch"'); rtTypes.push('"amenity"="parking"]["camping"="yes"'); }
-                // Also search for motorhome-specific tags (common in Italy/France)
-                if (campingTypes.caravan) rtTypes.push('"amenity"="motorhome_station"');
+                if (campingTypes.caravan) { rtTypes.push('"tourism"="caravan_site"'); rtTypes.push('"amenity"="motorhome_station"'); }
+                if (campingTypes.parking) { rtTypes.push('"tourism"="camp_pitch"'); rtTypes.push('"amenity"="parking"]["camping"="yes"'); rtTypes.push('"amenity"="parking"]["caravan"~"yes|designated"'); rtTypes.push('"amenity"="parking"]["motorhome"~"yes|designated"'); }
                 if (!rtTypes.length) rtTypes.push('"tourism"="camp_site"');
                 // Sample route every ~60km for denser coverage
                 const segPts = [routeCoords[0]];

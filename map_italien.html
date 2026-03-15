@@ -4259,6 +4259,10 @@ const allPOIs = [
                 maxZoom: 19
             }).addTo(map);
             
+            // Firefox fix: force recalculation of map container size
+            map.whenReady(function() { setTimeout(function() { map.invalidateSize(); }, 200); });
+            window.addEventListener('resize', function() { map.invalidateSize(); });
+            
             addMarkers(allPOIs);
             updateCounts();
             renderPOIList(allPOIs);
@@ -5260,9 +5264,10 @@ const allPOIs = [
             document.getElementById('camping-results').innerHTML = '<div class="camping-loading"><div class="camping-loading-text">\u{1F3D5}\uFE0F Lade Campingplätze...</div><div class="camping-loading-sub">Daten werden von OpenStreetMap geladen</div><div class="camping-progress"><div class="camping-progress-bar"></div></div></div>';
             
             let query = '[out:json][timeout:30];(';
-            if (campingTypes.camping) { query += 'node["tourism"="camp_site"](' + south + ',' + west + ',' + north + ',' + east + ');way["tourism"="camp_site"](' + south + ',' + west + ',' + north + ',' + east + ');'; }
-            if (campingTypes.caravan) { query += 'node["tourism"="caravan_site"](' + south + ',' + west + ',' + north + ',' + east + ');way["tourism"="caravan_site"](' + south + ',' + west + ',' + north + ',' + east + ');node["amenity"="motorhome_station"](' + south + ',' + west + ',' + north + ',' + east + ');'; }
-            if (campingTypes.parking) { query += 'node["amenity"="parking"]["camping"="yes"](' + south + ',' + west + ',' + north + ',' + east + ');node["tourism"="camp_pitch"](' + south + ',' + west + ',' + north + ',' + east + ');'; }
+            var bb = south + ',' + west + ',' + north + ',' + east;
+            if (campingTypes.camping) { query += 'node["tourism"="camp_site"](' + bb + ');way["tourism"="camp_site"](' + bb + ');relation["tourism"="camp_site"](' + bb + ');'; }
+            if (campingTypes.caravan) { query += 'node["tourism"="caravan_site"](' + bb + ');way["tourism"="caravan_site"](' + bb + ');relation["tourism"="caravan_site"](' + bb + ');node["amenity"="motorhome_station"](' + bb + ');way["amenity"="motorhome_station"](' + bb + ');'; }
+            if (campingTypes.parking) { query += 'node["amenity"="parking"]["camping"="yes"](' + bb + ');way["amenity"="parking"]["camping"="yes"](' + bb + ');node["amenity"="parking"]["caravan"~"yes|designated"](' + bb + ');way["amenity"="parking"]["caravan"~"yes|designated"](' + bb + ');node["amenity"="parking"]["motorhome"~"yes|designated"](' + bb + ');way["amenity"="parking"]["motorhome"~"yes|designated"](' + bb + ');node["tourism"="camp_pitch"](' + bb + ');way["tourism"="camp_pitch"](' + bb + ');'; }
             query += ');out center 500;';
 
             campingLoading = true;
@@ -5427,7 +5432,8 @@ var ck1 = getCampKey(site);
                     const p1 = segPts[si], p2 = segPts[si + 1];
                     const sLat = Math.min(p1[0], p2[0]) - buf, nLat = Math.max(p1[0], p2[0]) + buf;
                     const wLng = Math.min(p1[1], p2[1]) - buf, eLng = Math.max(p1[1], p2[1]) + buf;
-                    const segQ = '[out:json][timeout:25];(' + 'node["tourism"~"' + rtRegex + '"](' + sLat.toFixed(3) + ',' + wLng.toFixed(3) + ',' + nLat.toFixed(3) + ',' + eLng.toFixed(3) + ');' + 'way["tourism"~"' + rtRegex + '"](' + sLat.toFixed(3) + ',' + wLng.toFixed(3) + ',' + nLat.toFixed(3) + ',' + eLng.toFixed(3) + ');' + (campingTypes.caravan ? 'node["amenity"="motorhome_station"](' + sLat.toFixed(3) + ',' + wLng.toFixed(3) + ',' + nLat.toFixed(3) + ',' + eLng.toFixed(3) + ');' : '') + (campingTypes.parking ? 'node["amenity"="parking"]["camping"="yes"](' + sLat.toFixed(3) + ',' + wLng.toFixed(3) + ',' + nLat.toFixed(3) + ',' + eLng.toFixed(3) + ');' : '') + ');out center 150;';
+                    var rbb = sLat.toFixed(3) + ',' + wLng.toFixed(3) + ',' + nLat.toFixed(3) + ',' + eLng.toFixed(3);
+                    const segQ = '[out:json][timeout:25];(' + 'node["tourism"~"' + rtRegex + '"](' + rbb + ');' + 'way["tourism"~"' + rtRegex + '"](' + rbb + ');' + 'relation["tourism"~"' + rtRegex + '"](' + rbb + ');' + (campingTypes.caravan ? 'node["amenity"="motorhome_station"](' + rbb + ');way["amenity"="motorhome_station"](' + rbb + ');' : '') + (campingTypes.parking ? 'node["amenity"="parking"]["camping"="yes"](' + rbb + ');way["amenity"="parking"]["camping"="yes"](' + rbb + ');node["amenity"="parking"]["caravan"~"yes|designated"](' + rbb + ');node["amenity"="parking"]["motorhome"~"yes|designated"](' + rbb + ');' : '') + ');out center 150;';
                     try {
                         const segData = await overpassQuery(segQ);
                         allRouteElements = allRouteElements.concat(segData.elements || []);
