@@ -5268,19 +5268,29 @@ const allPOIs = [
             10: 'Campingplatz', 11: 'Ver-/Entsorgung', 12: 'Tagesparkplatz', 14: 'Servicestation'
         };
 
+        let _p4nCache = null;
         async function fetchPark4Night(lat, lng, radiusKm) {
             try {
-                const resp = await fetch('https://park4night.com/api/places/around?lat=' + lat + '&lng=' + lng + '&radius=' + radiusKm + '&lang=de');
-                if (!resp.ok) return [];
-                const text = await resp.text();
-                // Response is base64 encoded
-                try {
-                    const decoded = atob(text);
-                    return JSON.parse(decoded);
-                } catch(e) {
-                    // Maybe not base64, try direct parse
-                    try { return JSON.parse(text); } catch(e2) { return []; }
+                if (!_p4nCache) {
+                    const resp = await fetch('p4n_PT.json');
+                    if (!resp.ok) return [];
+                    _p4nCache = await resp.json();
+                    console.log('[Park4Night] ' + _p4nCache.length + ' Plätze aus p4n_PT.json geladen');
                 }
+                // Filter by radius from center
+                const maxDist = radiusKm / 111;
+                return _p4nCache.filter(p => {
+                    const dlat = Math.abs(p.lat - lat);
+                    const dlon = Math.abs(p.lon - lng);
+                    return dlat < maxDist && dlon < maxDist * 1.5;
+                }).map(p => ({
+                    id: p.id, lat: p.lat, lng: p.lon,
+                    type: { id: p.type_id, label: p.type },
+                    title_short: p.name,
+                    rating: p.rating, review: p.reviews,
+                    url: p.url,
+                    address: { city: p.city }
+                }));
             } catch(e) { console.warn('[Park4Night] Fehler:', e.message); return []; }
         }
 
