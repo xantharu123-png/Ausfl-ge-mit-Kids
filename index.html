@@ -5857,12 +5857,12 @@
 
         // Park4Night API integration
         const p4nTypeMap = {
-            1: 'camping', 2: 'parking', 3: 'parking', 4: 'parking', 5: 'caravan',
-            6: 'caravan', 9: 'camping', 10: 'camping', 11: 'caravan', 12: 'parking', 14: 'caravan'
+            1: 'camping', 2: 'parking', 3: 'parking', 5: 'caravan',
+            6: 'caravan', 7: 'caravan', 8: 'camping', 9: 'camping', 10: 'camping', 16: 'parking'
         };
         const p4nTypeLabels = {
-            1: 'Naturstellplatz', 2: 'Parkplatz Tag/Nacht', 3: 'Rastplatz', 4: 'Picknickplatz',
-            5: 'Wohnmobilstellplatz (gratis)', 6: 'Wohnmobilstellplatz', 9: 'Bauernhof',
+            1: 'Naturstellplatz', 2: 'Parkplatz (Übernachtung mögl.)', 3: 'Rastplatz', 4: 'Picknickplatz',
+            5: 'Wohnmobilstellplatz (gratis)', 6: 'Wohnmobilstellplatz (kostenpfl.)', 7: 'Privater Camper-Parkplatz', 8: 'Offroad-Stellplatz', 9: 'Bauernhof/Weingut',
             10: 'Campingplatz', 11: 'Ver-/Entsorgung', 12: 'Tagesparkplatz', 14: 'Servicestation'
         };
 
@@ -6005,6 +6005,8 @@
                     sites.forEach((site, i) => {
                         const name = site.tags.name || site.tags.description || 'Unbenannter Platz';
                         const isP4N = site._p4n || site.tags.source === 'park4night';
+                        // Rating filter: skip marker + card if below minimum
+                        if (minCampRatingFilter > 0) { var _gr = getCachedCampRating(name, site.lat, site.lon); var _br = (_gr && _gr.rating > 0) ? _gr.rating : (site.tags.p4n_rating || 0); if (_br > 0 && _br < minCampRatingFilter) return; }
                         let type = 'camping';
                         if (site.tags.tourism === 'caravan_site' || site.tags.amenity === 'motorhome_station') type = 'caravan';
                         if (site.tags.amenity === 'parking' || site.tags.tourism === 'camp_pitch') type = 'parking';
@@ -6066,7 +6068,7 @@
                         window._campingSiteData[campKey] = { name: name, lat: site.lat, lon: site.lon, type: typeLabel, tags: site.tags };
                         if (i < 80) {
                             var cr1 = getCachedCampRating(name, site.lat, site.lon);
-                            var skipRating1 = minCampRatingFilter > 0 && cr1 && cr1.rating > 0 && cr1.rating < minCampRatingFilter;
+                            var bestRating1 = (cr1 && cr1.rating > 0) ? cr1.rating : (site.tags.p4n_rating || 0); var skipRating1 = minCampRatingFilter > 0 && bestRating1 > 0 && bestRating1 < minCampRatingFilter;
                             if ((campingFavOnly && !isCampFav(campKey)) || skipRating1) { /* skip */ } else {
                             let cardDetails = [];
                             if (cr1 && cr1.rating > 0) cardDetails.push(renderStarsHTML(cr1.rating, cr1.count));
@@ -6288,7 +6290,7 @@
                     window._campingSiteData[campKey] = { name: name, lat: site.lat, lon: site.lon, type: typeLabel, tags: site.tags };
                     if (i < 120) {
                         var cr2 = getCachedCampRating(name, site.lat, site.lon);
-                        var skipRating2 = minCampRatingFilter > 0 && cr2 && cr2.rating > 0 && cr2.rating < minCampRatingFilter;
+                        var bestRating2 = (cr2 && cr2.rating > 0) ? cr2.rating : (site.tags.p4n_rating || 0); var skipRating2 = minCampRatingFilter > 0 && bestRating2 > 0 && bestRating2 < minCampRatingFilter;
                         if ((campingFavOnly && !isCampFav(campKey)) || skipRating2) { /* skip */ } else {
                         // Build card with details
                         let cardDetails = [];
