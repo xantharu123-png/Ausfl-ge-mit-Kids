@@ -6050,6 +6050,7 @@
                             if ((campingFavOnly && !isCampFav(campKey)) || skipRating1) { /* skip */ } else {
                             let cardDetails = [];
                             if (!isP4N && cr1 && cr1.rating > 0) cardDetails.push(renderStarsHTML(cr1.rating, cr1.count));
+                            if (isP4N && site.tags.p4n_rating > 0) cardDetails.push('\u2B50 ' + site.tags.p4n_rating.toFixed(1) + ' <span style="color:#8899aa">(' + (site.tags.p4n_reviews || 0) + ')</span>');
                             if (site.tags.opening_hours) cardDetails.push('🕐 ' + site.tags.opening_hours);
                             if (priceStr) cardDetails.push(priceStr);
                             if (website) cardDetails.push('🌐 <a href="' + (website.startsWith('http') ? website : 'https://'+website) + '" target="_blank" onclick="event.stopPropagation();">' + website.replace(/^https?:\/\/(www\.)?/,'').substring(0,30) + '</a>');
