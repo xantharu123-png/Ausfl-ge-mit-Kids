@@ -2317,7 +2317,7 @@ const allPOIs = [
         function getOpenBadge(status) {
             if (status === 'open') return '<span class="camping-badge-open open">\u2713 Offen</span>';
             if (status === 'closed') return '<span class="camping-badge-open closed">\u2717 Geschlossen</span>';
-            return '<span class="camping-badge-open unknown">? Unbekannt</span>';
+            return '';
         }
 
         function toggleFavoriteCamping(campKey, btn) {
