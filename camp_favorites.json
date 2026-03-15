@@ -1,0 +1,187 @@
+[
+  {
+    "key": "Area Sosta Camper Parma_44.8090_10.2842",
+    "data": {
+      "name": "Area Sosta Camper Parma",
+      "lat": 44.8090357,
+      "lon": 10.2842207,
+      "type": "Wohnmobilstellplatz",
+      "tags": {
+        "addr:housenumber": "21a",
+        "addr:street": "Largo 24 Agosto 1942",
+        "bar": "yes",
+        "capacity": "27",
+        "caravan_site": "motorhome_stopover",
+        "caravan_site:type": "parking_lot",
+        "caravans": "yes",
+        "charge": "20 EUR",
+        "contact:phone": "+39 0521 710246",
+        "dog": "leashed",
+        "fee": "yes",
+        "maxstay": "72 hours",
+        "name": "Area Sosta Camper Parma",
+        "opening_hours": "07:00-23:00",
+        "power_supply": "yes",
+        "restaurant": "yes",
+        "sanitary_dump_station": "yes",
+        "shower": "yes",
+        "socket:cee_blue": "yes",
+        "supervised": "yes",
+        "toilets": "yes",
+        "tourism": "caravan_site"
+      }
+    }
+  },
+  {
+    "key": "Agriturismo Arco Antico_44.7731_10.4707",
+    "data": {
+      "name": "Agriturismo Arco Antico",
+      "lat": 44.7730988,
+      "lon": 10.4706882,
+      "type": "Wohnmobilstellplatz",
+      "tags": {
+        "addr:housenumber": "32",
+        "addr:street": "Via Massimo Tonelli",
+        "capacity": "5",
+        "caravan_site": "motorhome_stopover",
+        "caravan_site:type": "farm",
+        "contact:phone": "+39 339 2591616",
+        "drinking_water": "yes",
+        "email": "arcoantico@live.it",
+        "fee": "yes",
+        "internet_access": "yes",
+        "name": "Agriturismo Arco Antico",
+        "power_supply": "yes",
+        "sanitary_dump_station": "yes",
+        "shower": "yes",
+        "socket:cee_blue": "yes",
+        "toilets": "yes",
+        "tourism": "caravan_site",
+        "website": "https://agriturismo.emilia-romagna.it/it/agriturismo/10068-larco-antico",
+        "wheelchair": "yes"
+      }
+    }
+  },
+  {
+    "key": "Parcheggio attrezzato in via Roma_44.0609_12.5781",
+    "data": {
+      "name": "Parcheggio attrezzato in via Roma",
+      "lat": 44.0608557,
+      "lon": 12.5780665,
+      "type": "Wohnmobilstellplatz",
+      "tags": {
+        "addr:city": "Rimini",
+        "addr:housenumber": "86",
+        "addr:postcode": "47921",
+        "addr:street": "Via Roma",
+        "capacity": "150",
+        "contact:email": "riminiparking@gmail.com",
+        "contact:phone": "+39 0541 51861",
+        "contact:website": "http://www.riminiparking.it/",
+        "description": "Camper - Tariffa oraria \u20ac 2,00 - Giornaliero senza corrente \u20ac 15,00  - Giornaliero con corrente \u20ac 20,00     SU RICHIESTA: - Allaccio elettrico \u20ac 5,00  - Carico/ Scarico \u20ac 2,00",
+        "fee": "yes",
+        "name": "Parcheggio attrezzato in via Roma",
+        "opening_hours": "24/7",
+        "power_supply": "yes",
+        "ref:vatin": "IT02097780411",
+        "reservation": "no",
+        "sanitary_dump_station": "yes",
+        "tourism": "caravan_site"
+      }
+    }
+  },
+  {
+    "key": "Centro Vacanze San Marino_43.9590_12.4624",
+    "data": {
+      "name": "Centro Vacanze San Marino",
+      "lat": 43.9590303,
+      "lon": 12.4623942,
+      "type": "Campingplatz",
+      "tags": {
+        "addr:housenumber": "50",
+        "addr:street": "Strada di San Michele",
+        "caravans": "yes",
+        "drinking_water": "yes",
+        "name": "Centro Vacanze San Marino",
+        "phone": "+378 0549 903964",
+        "power_supply": "yes",
+        "sanitary_dump_station": "yes",
+        "shower": "yes",
+        "stars": "4",
+        "tents": "yes",
+        "toilets": "yes",
+        "tourism": "camp_site",
+        "website": "https://www.centrovacanzesanmarino.com/"
+      }
+    }
+  },
+  {
+    "key": "San Marino Parking Via Napoleone Bonaparte_43.9351_12.4442",
+    "data": {
+      "name": "San Marino Parking Via Napoleone Bonaparte",
+      "lat": 43.9351451,
+      "lon": 12.4441534,
+      "type": "Wohnmobilstellplatz",
+      "tags": {
+        "fee": "yes",
+        "internet_access": "no",
+        "name": "San Marino Parking Via Napoleone Bonaparte",
+        "opening_hours": "24/7",
+        "power_supply": "yes",
+        "ref": "P10",
+        "sanitary_dump_station": "no",
+        "tourism": "caravan_site"
+      }
+    }
+  },
+  {
+    "key": "Marina di Rimini_44.0750_12.5688",
+    "data": {
+      "name": "Marina di Rimini",
+      "lat": 44.0750315,
+      "lon": 12.5687767,
+      "type": "Wohnmobilstellplatz",
+      "tags": {
+        "addr:housenumber": "80",
+        "addr:postcode": "47900",
+        "addr:street": "Viale Ortigara",
+        "email": "info@marinadirimini.com",
+        "internet_access": "wlan",
+        "name": "Marina di Rimini",
+        "opening_hours": "24/7",
+        "phone": "+39054129488",
+        "tourism": "caravan_site",
+        "website": "https://marinadirimini.com/"
+      }
+    }
+  },
+  {
+    "key": "Camper Park Rimini_44.0268_12.6264",
+    "data": {
+      "name": "Camper Park Rimini",
+      "lat": 44.0267555,
+      "lon": 12.6263696,
+      "type": "Campingplatz",
+      "tags": {
+        "addr:city": "Rimini",
+        "addr:housenumber": "65",
+        "addr:postcode": "47924",
+        "addr:street": "Viale Principe di Piemonte",
+        "caravans": "yes",
+        "contact:email": "info@camperparkrimini.it",
+        "contact:whatsapp": "+39 389 198 3488",
+        "fee": "yes",
+        "motorhome": "yes",
+        "name": "Camper Park Rimini",
+        "phone": "+393891983488",
+        "power_supply": "yes",
+        "power_supply:maxcurrent": "16",
+        "reservation": "yes",
+        "static_caravans": "yes",
+        "tents": "yes",
+        "tourism": "camp_site",
+        "website": "https://www.camperparkrimini.it/"
+      }
+    }
+  }
+]
