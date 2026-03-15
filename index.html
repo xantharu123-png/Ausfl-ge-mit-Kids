@@ -6031,7 +6031,7 @@
                 } else {
                     html = '<div class="camping-info">' + sites.length + ' Plätze gefunden <span style="color:#5a6a7a;font-size:0.8em">(OSM: ' + osmSites.length + ' + P4N: ' + p4nSites.length + ')</span></div>';
                     sites.forEach((site, i) => {
-                        const name = site.tags.name || site.tags.description || 'Unbenannter Platz';
+                        const name = site.tags.name || site.tags.operator || site.tags.description || (site.tags.p4n_type_label ? site.tags.p4n_type_label : (site.tags.tourism === 'camp_site' ? 'Campingplatz' : site.tags.tourism === 'caravan_site' ? 'Wohnmobilstellplatz' : site.tags.amenity === 'motorhome_station' ? 'Wohnmobil-Servicestation' : 'Stellplatz'));
                         const isP4N = site._p4n || site.tags.source === 'park4night';
                         // Rating filter: skip marker + card if below minimum
                         if (minCampRatingFilter > 0) { var _gr = getCachedCampRating(name, site.lat, site.lon); var _br = (_gr && _gr.rating > 0) ? _gr.rating : (site.tags.p4n_rating || 0); if (_br > 0 && _br < minCampRatingFilter) return; }
@@ -6075,13 +6075,13 @@
                         popup += ' · <a href="https://www.google.com/maps/search/?api=1&query=' + site.lat + ',' + site.lon + '" target="_blank" style="color:#ff9800;font-size:11px;">📍 Maps</a>';
                         // Google Bewertung
                         var cachedR1 = getCachedCampRating(name, site.lat, site.lon);
-                        popup += '<div id="camp-mv-rating-' + i + '">' + (!isP4N && cachedR1 && cachedR1.rating > 0 ? renderStarsHTML(cachedR1.rating, cachedR1.count) : '') + '</div>';
+                        popup += '<div id="camp-mv-rating-' + i + '">' + (!isP4N && !['Campingplatz','Wohnmobilstellplatz','Wohnmobil-Servicestation','Stellplatz'].includes(name) && cachedR1 && cachedR1.rating > 0 ? renderStarsHTML(cachedR1.rating, cachedR1.count) : '') + '</div>';
                         popup += '<div style="font-size:10px;color:#5a6a7a;margin-top:6px;border-top:1px solid #2a3a4a;padding-top:4px;">ℹ️ Daten: OpenStreetMap · Angaben ohne Gewähr</div>';
                         popup += '</div>';
                         marker.bindPopup(popup, { maxWidth: 300 });
                         (function(mName, mLat, mLon, mIdx, mIsP4N) {
                             marker.on('popupopen', async function() {
-                                if (googleApiKey && !mIsP4N) {
+                                if (googleApiKey && !mIsP4N && !['Campingplatz','Wohnmobilstellplatz','Wohnmobil-Servicestation','Stellplatz'].includes(mName)) {
                                     var r = await fetchCampRating(mName, mLat, mLon);
                                     if (r && r.rating > 0) {
                                         var el = document.getElementById('camp-mv-rating-' + mIdx);
@@ -6099,7 +6099,7 @@
                             var bestRating1 = (cr1 && cr1.rating > 0) ? cr1.rating : (site.tags.p4n_rating || 0); var skipRating1 = minCampRatingFilter > 0 && bestRating1 > 0 && bestRating1 < minCampRatingFilter;
                             if ((campingFavOnly && !isCampFav(campKey)) || skipRating1) { /* skip */ } else {
                             let cardDetails = [];
-                            if (!isP4N && cr1 && cr1.rating > 0) cardDetails.push(renderStarsHTML(cr1.rating, cr1.count));
+                            if (!isP4N && !['Campingplatz','Wohnmobilstellplatz','Wohnmobil-Servicestation','Stellplatz'].includes(name) && cr1 && cr1.rating > 0) cardDetails.push(renderStarsHTML(cr1.rating, cr1.count));
                             if (isP4N && site.tags.p4n_rating > 0) cardDetails.push('\u2B50 ' + site.tags.p4n_rating.toFixed(1) + ' <span style="color:#8899aa">(' + (site.tags.p4n_reviews || 0) + ')</span>');
                             if (site.tags.opening_hours) cardDetails.push('🕐 ' + site.tags.opening_hours);
                             if (priceStr) cardDetails.push(priceStr);
@@ -6259,7 +6259,7 @@
                 const shownCount = displayList.length;
                 let html = '<div class="camping-info">🚗 ' + distance + ' km, ~' + duration + 'h Fahrt<br>🏕️ ' + shownCount + ' Plätze entlang der Route (±40km)' + (campingOpenOnly && shownCount < totalFound ? '<br><span style="font-size:11px;color:#c0a030;">(' + (totalFound - shownCount) + ' geschlossene ausgeblendet)</span>' : '') + '</div>';
                 displayList.forEach((site, i) => {
-                    const name = site.tags.name || site.tags.description || 'Unbenannter Platz';
+                    const name = site.tags.name || site.tags.operator || site.tags.description || (site.tags.p4n_type_label ? site.tags.p4n_type_label : (site.tags.tourism === 'camp_site' ? 'Campingplatz' : site.tags.tourism === 'caravan_site' ? 'Wohnmobilstellplatz' : site.tags.amenity === 'motorhome_station' ? 'Wohnmobil-Servicestation' : 'Stellplatz'));
                     let type = 'camping';
                     if (site.tags.tourism === 'caravan_site' || site.tags.amenity === 'motorhome_station') type = 'caravan';
                     if (site.tags.amenity === 'parking' || site.tags.tourism === 'camp_pitch') type = 'parking';
@@ -6302,7 +6302,7 @@
                     marker.bindPopup(popup, { maxWidth: 300 });
                     (function(mName, mLat, mLon, mIdx, mIsP4N) {
                         marker.on('popupopen', async function() {
-                            if (googleApiKey && !mIsP4N) {
+                            if (googleApiKey && !mIsP4N && !['Campingplatz','Wohnmobilstellplatz','Wohnmobil-Servicestation','Stellplatz'].includes(mName)) {
                                 var r = await fetchCampRating(mName, mLat, mLon);
                                 if (r && r.rating > 0) {
                                     var el = document.getElementById('camp-rt-rating-' + mIdx);
