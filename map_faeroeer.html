@@ -897,6 +897,35 @@
             align-items: center;
             gap: 6px;
         }
+        /* Camping Reload Button */
+        .camping-reload-btn {
+            position: absolute;
+            top: 55px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: #2d6b4f;
+            color: #4ecca3;
+            border: 2px solid #4ecca3;
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 3px 12px rgba(78, 204, 163, 0.3);
+            display: none;
+            transition: all 0.3s ease;
+            font-size: 0.82rem;
+        }
+        .camping-reload-btn:hover {
+            background: #4ecca3;
+            color: #16213e;
+            transform: translateX(-50%) scale(1.05);
+        }
+        .camping-reload-btn.visible {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
         
         /* Visited Checkbox Styles */
         .visited-toggle {
@@ -1903,6 +1932,10 @@
         <button id="clear-area-btn" class="clear-area-btn">
             <span>✕</span>
             <span>Bereichsfilter aufheben</span>
+        </button>
+        <button id="camping-reload-btn" class="camping-reload-btn" onclick="loadCampingSites();">
+            <span>🔄</span>
+            <span>Hier neu suchen</span>
         </button>
     </div>
     
@@ -4753,6 +4786,16 @@ const allPOIs = [
             // Map zoom/move events for search area button
             map.on('zoomend', updateSearchAreaButton);
             map.on('moveend', updateSearchAreaButton);
+            // Show camping reload button when map moves in camping mode
+            var _campingReloadTimer = null;
+            function showCampingReload() {
+                if (campingMode && map.getZoom() >= 8 && campingMarkers.length > 0) {
+                    var btn = document.getElementById('camping-reload-btn');
+                    if (btn) btn.classList.add('visible');
+                }
+            }
+            map.on('moveend', function() { clearTimeout(_campingReloadTimer); _campingReloadTimer = setTimeout(showCampingReload, 400); });
+            map.on('zoomend', function() { clearTimeout(_campingReloadTimer); _campingReloadTimer = setTimeout(showCampingReload, 400); });
         });
     
         // ============================================
@@ -5323,6 +5366,7 @@ const allPOIs = [
         async function loadCampingSites() {
             if (campingLoading) return;
             clearCamping();
+            var _crBtn = document.getElementById('camping-reload-btn'); if (_crBtn) _crBtn.classList.remove('visible');
             const zoom = map.getZoom();
             
             // Bei niedrigem Zoom: Meldung anzeigen statt riesige Abfrage
