@@ -1736,7 +1736,7 @@
                     <div class="camping-filter-row">
                         <button id="cf-camping" class="camping-filter-btn active" onclick="toggleCampingFilter('camping')">🏕️ Camping</button>
                         <button id="cf-caravan" class="camping-filter-btn active" onclick="toggleCampingFilter('caravan')">🚐 Wohnmobil</button>
-                        <button id="cf-parking" class="camping-filter-btn active" onclick="toggleCampingFilter('parking')">🅿️ Stellplatz</button>
+                        <button id="cf-parking" class="camping-filter-btn" onclick="toggleCampingFilter('parking')">🅿️ Stellplatz</button>
                     </div>
                     
                     <div class="poi-visibility-toggle">
@@ -4992,7 +4992,7 @@ const allPOIs = [
         let campingMarkers = [];
         let campingRoute = null;
         let campingCluster = null;
-        const campingTypes = { camping: true, caravan: true, parking: true };
+        const campingTypes = { camping: true, caravan: true, parking: false };
         
         function toggleCampingMode() {
             campingMode = !campingMode;
@@ -5261,7 +5261,7 @@ const allPOIs = [
 
         // Park4Night API integration
         const p4nTypeMap = {
-            1: 'camping', 5: 'caravan',
+            1: 'camping', 2: 'parking', 3: 'parking', 5: 'caravan',
             6: 'caravan', 7: 'caravan', 8: 'camping', 9: 'camping', 10: 'camping', 16: 'caravan'
         };
         const p4nTypeLabels = {
@@ -5379,7 +5379,7 @@ const allPOIs = [
                 let p4nSites = [];
                 try {
                     const p4nRaw = await fetchPark4Night(centerLat, centerLng, radiusKm);
-                    var _p4nExclude = {2:1, 3:1, 4:1, 11:1, 12:1, 13:1, 14:1};
+                    var _p4nExclude = {4:1, 11:1, 12:1, 13:1, 14:1};
                     p4nSites = p4nRaw.filter(p => !_p4nExclude[p.type ? p.type.id : 0]).map(p4nToSite).filter(s => {
                         // Filter by active camping type toggles
                         const t = s.tags.p4n_type;
