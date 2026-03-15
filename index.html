@@ -5191,15 +5191,20 @@
             map.on('zoomend', updateSearchAreaButton);
             map.on('moveend', updateSearchAreaButton);
             // Show camping reload button when map moves in camping mode
-            var _campingReloadTimer = null;
-            function showCampingReload() {
-                if (campingMode && map.getZoom() >= 8 && campingMarkers.length > 0) {
-                    var btn = document.getElementById('camping-reload-btn');
-                    if (btn) btn.classList.add('visible');
+            var _campingSearchCenter = null;
+            function checkCampingMoved() {
+                if (!campingMode || map.getZoom() < 8) return;
+                var c = map.getCenter();
+                if (_campingSearchCenter) {
+                    var moved = Math.abs(c.lat - _campingSearchCenter.lat) > 0.005 || Math.abs(c.lng - _campingSearchCenter.lng) > 0.005;
+                    if (moved) {
+                        var btn = document.getElementById('camping-reload-btn');
+                        if (btn) btn.classList.add('visible');
+                    }
                 }
             }
-            map.on('moveend', function() { clearTimeout(_campingReloadTimer); _campingReloadTimer = setTimeout(showCampingReload, 400); });
-            map.on('zoomend', function() { clearTimeout(_campingReloadTimer); _campingReloadTimer = setTimeout(showCampingReload, 400); });
+            map.on('moveend', checkCampingMoved);
+            map.on('zoomend', checkCampingMoved);
         });
     
         // ============================================
@@ -5965,6 +5970,7 @@
         async function loadCampingSites() {
             clearCamping();
             var _crBtn = document.getElementById('camping-reload-btn'); if (_crBtn) _crBtn.classList.remove('visible');
+            if (typeof _campingSearchCenter !== 'undefined') _campingSearchCenter = map.getCenter();
             const zoom = map.getZoom();
             
             // Bei niedrigem Zoom: Meldung anzeigen statt riesige Abfrage
