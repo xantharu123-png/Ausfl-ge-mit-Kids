@@ -4672,6 +4672,9 @@ const allPOIs = [
             document.getElementById('clear-area-btn').classList.add('visible');
             
             filterPOIs(false);
+            
+            // Also reload camping sites if camping mode is active
+            if (campingMode && !campingRoute) { loadCampingSites(); }
         }
         
         // Clear area filter
@@ -4695,6 +4698,10 @@ const allPOIs = [
                 btn.classList.add('visible');
             } else if (!areaFilterActive) {
                 btn.classList.remove('visible');
+            }
+            // In camping mode, always show the button at sufficient zoom
+            if (campingMode && map.getZoom() >= 8 && !areaFilterActive) {
+                btn.classList.add('visible');
             }
         }
         
@@ -5790,10 +5797,6 @@ var ck1 = getCampKey(site);
         document.addEventListener('DOMContentLoaded', function() {
             if (map) {
                 map.on('moveend', function() {
-                    if (campingMode && !campingRoute) {
-                        clearTimeout(campingDebounce);
-                        campingDebounce = setTimeout(loadCampingSites, 1500);
-                    }
                     if (familyMode) { loadFamilyPlaces(); }
                 });
             }
