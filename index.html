@@ -5724,7 +5724,7 @@
             }
             familyLoading = true;
             clearFamily();
-            document.getElementById('family-results').innerHTML = '<div class="family-loading"><div class="family-loading-text">👨‍👩‍👧‍👦 Lade Familienorte...</div><div class="family-loading-sub">Daten werden von OpenStreetMap geladen</div></div>';
+            document.getElementById('family-results').innerHTML = '<div class="family-loading"><div class="family-loading-text">👨‍👩‍👧‍👦 Lade Familienorte...</div><div class="family-loading-sub">Daten werden von OpenStreetMap + Park4Night geladen</div></div>';
 
             const bounds = map.getBounds();
             const query = buildFamilyOverpassQuery(bounds);
@@ -5854,6 +5854,70 @@
             }
         }
 
+
+        // Park4Night API integration
+        const p4nTypeMap = {
+            1: 'camping', 2: 'parking', 3: 'parking', 4: 'parking', 5: 'caravan',
+            6: 'caravan', 9: 'camping', 10: 'camping', 11: 'caravan', 12: 'parking', 14: 'caravan'
+        };
+        const p4nTypeLabels = {
+            1: 'Naturstellplatz', 2: 'Parkplatz Tag/Nacht', 3: 'Rastplatz', 4: 'Picknickplatz',
+            5: 'Wohnmobilstellplatz (gratis)', 6: 'Wohnmobilstellplatz', 9: 'Bauernhof',
+            10: 'Campingplatz', 11: 'Ver-/Entsorgung', 12: 'Tagesparkplatz', 14: 'Servicestation'
+        };
+
+        async function fetchPark4Night(lat, lng, radiusKm) {
+            try {
+                const resp = await fetch('https://park4night.com/api/places/around?lat=' + lat + '&lng=' + lng + '&radius=' + radiusKm + '&lang=de');
+                if (!resp.ok) return [];
+                const text = await resp.text();
+                // Response is base64 encoded
+                try {
+                    const decoded = atob(text);
+                    return JSON.parse(decoded);
+                } catch(e) {
+                    // Maybe not base64, try direct parse
+                    try { return JSON.parse(text); } catch(e2) { return []; }
+                }
+            } catch(e) { console.warn('[Park4Night] Fehler:', e.message); return []; }
+        }
+
+        function p4nToSite(p) {
+            const typeId = p.type ? p.type.id : 0;
+            const type = p4nTypeMap[typeId] || 'parking';
+            return {
+                lat: p.lat, lon: p.lng,
+                tags: {
+                    name: p.title_short ? p.title_short.replace(/<[^>]*>/g, '').trim() : (p.address ? p.address.city : 'Park4Night'),
+                    source: 'park4night',
+                    p4n_id: p.id,
+                    p4n_type: type,
+                    p4n_type_label: p4nTypeLabels[typeId] || (p.type ? p.type.label : ''),
+                    p4n_rating: p.rating || 0,
+                    p4n_reviews: p.review || 0,
+                    p4n_url: 'https://park4night.com' + (p.url || ''),
+                    tourism: type === 'camping' ? 'camp_site' : type === 'caravan' ? 'caravan_site' : 'camp_pitch',
+                    fee: p.type && (p.type.id === 6) ? 'yes' : p.type && (p.type.id === 5) ? 'no' : undefined
+                },
+                _p4n: true
+            };
+        }
+
+        function deduplicateSites(osmSites, p4nSites) {
+            const merged = [...osmSites];
+            const osmCoords = osmSites.map(s => [s.lat, s.lon || s.lng]);
+            p4nSites.forEach(p => {
+                // Check if any OSM site is within ~150m
+                const dominated = osmCoords.some(([lat, lon]) => {
+                    const dlat = (lat - p.lat) * 111000;
+                    const dlon = (lon - (p.lon || p.lng)) * 111000 * Math.cos(lat * Math.PI / 180);
+                    return Math.sqrt(dlat * dlat + dlon * dlon) < 150;
+                });
+                if (!dominated) merged.push(p);
+            });
+            return merged;
+        }
+
         async function loadCampingSites() {
             clearCamping();
             const zoom = map.getZoom();
@@ -5906,20 +5970,40 @@
                     }
                 });
                 
-                let sites = (data.elements || []).map(e => {
+                let osmSites = (data.elements || []).map(e => {
                     // Normalize way center coords
                     if (!e.lat && e.center) { e.lat = e.center.lat; e.lon = e.center.lon; }
                     return e;
                 }).filter(e => e.lat && e.lon && e.tags);
+
+                // Fetch Park4Night data
+                const centerLat = (south + north) / 2;
+                const centerLng = (west + east) / 2;
+                const radiusKm = Math.min(Math.round(Math.max(north - south, east - west) * 55), 50);
+                let p4nSites = [];
+                try {
+                    const p4nRaw = await fetchPark4Night(centerLat, centerLng, radiusKm);
+                    p4nSites = p4nRaw.map(p4nToSite).filter(s => {
+                        const t = s.tags.p4n_type;
+                        if (t === 'camping' && !campingTypes.camping) return false;
+                        if (t === 'caravan' && !campingTypes.caravan) return false;
+                        if (t === 'parking' && !campingTypes.parking) return false;
+                        return s.lat >= south && s.lat <= north && (s.lon || s.lng) >= west && (s.lon || s.lng) <= east;
+                    });
+                    console.log('[Park4Night] ' + p4nSites.length + ' Plätze geladen (von ' + p4nRaw.length + ' total)');
+                } catch(p4nErr) { console.warn('[Park4Night] Fehler:', p4nErr.message); }
+
+                let sites = deduplicateSites(osmSites, p4nSites);
                 // Filter by open status if checkbox is checked
                 if (campingOpenOnly) sites = sites.filter(s => checkOpenStatus(s.tags.opening_hours) !== 'closed');
                 let html = '';
                 if (sites.length === 0) {
                     html = '<div class="camping-info">Keine Plätze im sichtbaren Bereich.' + (campingOpenOnly ? ' Versuche ohne "Nur geöffnete" Filter.' : ' Zoome raus oder verschiebe die Karte.') + '</div>';
                 } else {
-                    html = '<div class="camping-info">' + sites.length + ' Plätze gefunden</div>';
+                    html = '<div class="camping-info">' + sites.length + ' Plätze gefunden <span style="color:#5a6a7a;font-size:0.8em">(OSM: ' + osmSites.length + ' + P4N: ' + p4nSites.length + ')</span></div>';
                     sites.forEach((site, i) => {
                         const name = site.tags.name || site.tags.description || 'Unbenannter Platz';
+                        const isP4N = site._p4n || site.tags.source === 'park4night';
                         let type = 'camping';
                         if (site.tags.tourism === 'caravan_site' || site.tags.amenity === 'motorhome_station') type = 'caravan';
                         if (site.tags.amenity === 'parking' || site.tags.tourism === 'camp_pitch') type = 'parking';
