@@ -4371,39 +4371,54 @@
             return getCategoryFallback(poi.category);
         }
 
+        // Erkennt Karten, Wappen, Flags, SVGs — keine echten Fotos
+        function _isMapOrBadImage(url) {
+            const lc = url.toLowerCase();
+            return /karte|wappen|flag|coat_of_arms|logo|map|locator|location|positionskarte|relief|verwaltungsgliederung|blank/i.test(lc)
+                || lc.endsWith('.svg') || lc.includes('.svg/');
+        }
+
+        // Extrahiert gute Foto-URL aus Wikipedia-Antwort (filtert Karten)
+        function _extractPhotoUrl(data) {
+            if (!data || !data.thumbnail || !data.thumbnail.source) return null;
+            const src = data.thumbnail.source;
+            if (_isMapOrBadImage(src)) return null;
+            // Disambiguation-Seiten haben type === 'disambiguation'
+            if (data.type === 'disambiguation') return null;
+            return src.replace(/\/\d+px-/, '/400px-');
+        }
+
         async function fetchWikiPhoto(poi, imgElements) {
             if (poi.image || _photoCache[poi.id] || _photoLoading[poi.id]) return;
             _photoLoading[poi.id] = true;
 
-            // Suchbegriffe: Name + Ort für bessere Treffer
-            const queries = [
-                poi.name,
-                poi.name + ' ' + poi.location,
-                poi.name.replace(/[-–]/g, ' ')
-            ];
+            // Suchbegriffe: spezifisch → allgemein, mit Region/Ort für Disambiguation
+            const name = poi.name.replace(/[-–]/g, ' ');
+            const region = poi.region || '';
+            const loc = poi.location || '';
+            const queries = [];
 
+            // Wikipedia-Titel-Varianten (Underscores statt Leerzeichen)
+            const nameU = name.replace(/ /g, '_');
+            const locU = loc.replace(/ /g, '_');
+            const regU = region.replace(/ /g, '_');
+
+            // Spezifische Suchen zuerst (z.B. "Baden_AG", "Aarau_(Stadt)")
+            if (region.length <= 3 && region.length > 0) queries.push(nameU + '_' + regU);
+            queries.push(nameU);
+            if (loc && loc !== name) queries.push(nameU + '_(' + locU + ')');
+            if (loc && loc !== name) queries.push(nameU + '_' + locU);
+            // Englische Varianten
+            const enQueries = [nameU];
+            if (loc) enQueries.push(nameU + ',_' + locU);
+
+            // Deutsche Wikipedia zuerst
             for (const q of queries) {
                 try {
-                    const encoded = encodeURIComponent(q);
-                    const resp = await fetch('https://de.wikipedia.org/api/rest_v1/page/summary/' + encoded);
+                    const resp = await fetch('https://de.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(q));
                     if (resp.ok) {
-                        const data = await resp.json();
-                        if (data.thumbnail && data.thumbnail.source) {
-                            // Höhere Auflösung anfordern (Standard ist klein)
-                            const url = data.thumbnail.source.replace(/\/\d+px-/, '/400px-');
-                            _photoCache[poi.id] = url;
-                            _savePhotoCache();
-                            _updatePhotoElements(poi.id, url, imgElements);
-                            _photoLoading[poi.id] = false;
-                            return;
-                        }
-                    }
-                    // Fallback: englische Wikipedia
-                    const respEn = await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(queries[0]));
-                    if (respEn.ok) {
-                        const dataEn = await respEn.json();
-                        if (dataEn.thumbnail && dataEn.thumbnail.source) {
-                            const url = dataEn.thumbnail.source.replace(/\/\d+px-/, '/400px-');
+                        const url = _extractPhotoUrl(await resp.json());
+                        if (url) {
                             _photoCache[poi.id] = url;
                             _savePhotoCache();
                             _updatePhotoElements(poi.id, url, imgElements);
@@ -4413,7 +4428,25 @@
                     }
                 } catch(e) { /* weiter */ }
             }
-            // Kein Wiki-Foto gefunden → Kategorie-Fallback als Cache speichern
+
+            // Englische Wikipedia als Fallback
+            for (const q of enQueries) {
+                try {
+                    const resp = await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(q));
+                    if (resp.ok) {
+                        const url = _extractPhotoUrl(await resp.json());
+                        if (url) {
+                            _photoCache[poi.id] = url;
+                            _savePhotoCache();
+                            _updatePhotoElements(poi.id, url, imgElements);
+                            _photoLoading[poi.id] = false;
+                            return;
+                        }
+                    }
+                } catch(e) { /* weiter */ }
+            }
+
+            // Kein gutes Foto gefunden → Kategorie-Fallback
             _photoCache[poi.id] = getCategoryFallback(poi.category);
             _savePhotoCache();
             _photoLoading[poi.id] = false;
