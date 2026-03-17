@@ -4347,6 +4347,97 @@
             return ratingCache[poiId] || null;
         }
 
+        // ===== Wikipedia/Wikimedia Foto-System (gratis, kein API-Key) =====
+        const _photoCache = JSON.parse(localStorage.getItem('photoCacheCH') || '{}');
+        const _photoLoading = {};
+        const _categoryFallbacks = {
+            sehenswuerdigkeit: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80',
+            kultur: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=400&q=80',
+            familie: 'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=400&q=80',
+            sport: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=400&q=80',
+            festival: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400&q=80',
+            volksfest: 'https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?w=400&q=80',
+            weihnachten: 'https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=400&q=80'
+        };
+        const _defaultFallback = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80';
+
+        function getCategoryFallback(category) {
+            return _categoryFallbacks[category] || _defaultFallback;
+        }
+
+        function getPoiPhoto(poi) {
+            if (poi.image) return poi.image;
+            if (_photoCache[poi.id]) return _photoCache[poi.id];
+            return getCategoryFallback(poi.category);
+        }
+
+        async function fetchWikiPhoto(poi, imgElements) {
+            if (poi.image || _photoCache[poi.id] || _photoLoading[poi.id]) return;
+            _photoLoading[poi.id] = true;
+
+            // Suchbegriffe: Name + Ort für bessere Treffer
+            const queries = [
+                poi.name,
+                poi.name + ' ' + poi.location,
+                poi.name.replace(/[-–]/g, ' ')
+            ];
+
+            for (const q of queries) {
+                try {
+                    const encoded = encodeURIComponent(q);
+                    const resp = await fetch('https://de.wikipedia.org/api/rest_v1/page/summary/' + encoded);
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        if (data.thumbnail && data.thumbnail.source) {
+                            // Höhere Auflösung anfordern (Standard ist klein)
+                            const url = data.thumbnail.source.replace(/\/\d+px-/, '/400px-');
+                            _photoCache[poi.id] = url;
+                            _savePhotoCache();
+                            _updatePhotoElements(poi.id, url, imgElements);
+                            _photoLoading[poi.id] = false;
+                            return;
+                        }
+                    }
+                    // Fallback: englische Wikipedia
+                    const respEn = await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(queries[0]));
+                    if (respEn.ok) {
+                        const dataEn = await respEn.json();
+                        if (dataEn.thumbnail && dataEn.thumbnail.source) {
+                            const url = dataEn.thumbnail.source.replace(/\/\d+px-/, '/400px-');
+                            _photoCache[poi.id] = url;
+                            _savePhotoCache();
+                            _updatePhotoElements(poi.id, url, imgElements);
+                            _photoLoading[poi.id] = false;
+                            return;
+                        }
+                    }
+                } catch(e) { /* weiter */ }
+            }
+            // Kein Wiki-Foto gefunden → Kategorie-Fallback als Cache speichern
+            _photoCache[poi.id] = getCategoryFallback(poi.category);
+            _savePhotoCache();
+            _photoLoading[poi.id] = false;
+        }
+
+        function _updatePhotoElements(poiId, url, imgElements) {
+            // Alle img-Tags für diesen POI updaten (Sidebar + Popup)
+            if (imgElements) {
+                imgElements.forEach(el => { if (el) el.src = url; });
+            }
+            // Auch per data-Attribut suchen
+            document.querySelectorAll('img[data-poi-photo="' + poiId + '"]').forEach(el => {
+                el.src = url;
+            });
+        }
+
+        let _photoCacheSaveTimer = null;
+        function _savePhotoCache() {
+            clearTimeout(_photoCacheSaveTimer);
+            _photoCacheSaveTimer = setTimeout(() => {
+                try { localStorage.setItem('photoCacheCH', JSON.stringify(_photoCache)); } catch(e) {}
+            }, 2000);
+        }
+
         let _lastPlacesError = '';
         async function fetchSingleRating(poi) {
             const cached = ratingCache[poi.id];
@@ -4769,6 +4860,10 @@
                 
                 const popupContent = createPopupContent(poi);
                 marker.on('popupopen', async function() {
+                    // Wiki-Foto laden falls noch nicht vorhanden
+                    if (!poi.image && !_photoCache[poi.id]) {
+                        fetchWikiPhoto(poi);
+                    }
                     if (googleApiKey && !ratingCache[poi.id]) {
                         const rating = await fetchSingleRating(poi);
                         if (rating && rating.rating > 0) {
@@ -4800,7 +4895,7 @@
             
             return `
                 <div class="popup-content">
-                    <img src="${poi.image}" alt="${poi.name}" class="popup-image" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80'">
+                    <img src="${getPoiPhoto(poi)}" alt="${poi.name}" class="popup-image" data-poi-photo="${poi.id}" onerror="this.src=getCategoryFallback('${poi.category}')">
                     <div class="popup-body">
                         <div class="popup-category">${categoryIcons[poi.category]} ${poi.category}</div>
                         <h3 class="popup-title">${poi.name}</h3>
@@ -4878,7 +4973,7 @@
                     html += `
                         <div class="poi-card ${isVisited ? 'visited' : ''}" data-id="${poi.id}" style="--cat-color: ${categoryColors[poi.category]}">
                             <div class="poi-header">
-                                <img src="${poi.image}" alt="${poi.name}" class="poi-image" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80'">
+                                <img src="${getPoiPhoto(poi)}" alt="${poi.name}" class="poi-image" data-poi-photo="${poi.id}" onerror="this.src=getCategoryFallback('${poi.category}')">
                                 <div class="poi-info">
                                     <div class="poi-title"><button class="fav-btn${favoritePOIs.includes(poi.id) ? ' active' : ''}" data-poi-id="${poi.id}" onclick="event.stopPropagation();toggleFavoritePOI(${poi.id}, this);">${favoritePOIs.includes(poi.id) ? '❤️' : '🤍'}</button> ${poi.name}</div>
                                     <div class="poi-location">📍 ${poi.location}</div>
@@ -4898,7 +4993,7 @@
             });
             
             container.innerHTML = html;
-            
+
             // Add click listeners
             container.querySelectorAll('.poi-card').forEach(card => {
                 card.addEventListener('click', () => {
@@ -4911,6 +5006,23 @@
                     }
                 });
             });
+
+            // Wiki-Fotos für sichtbare POIs lazy laden
+            _lazyLoadPhotos(pois);
+        }
+
+        function _lazyLoadPhotos(pois) {
+            // Lade Fotos in Batches von 5, mit 300ms Pause dazwischen
+            const needPhoto = pois.filter(p => !p.image && !_photoCache[p.id] && !_photoLoading[p.id]);
+            let idx = 0;
+            function loadBatch() {
+                const batch = needPhoto.slice(idx, idx + 5);
+                if (batch.length === 0) return;
+                batch.forEach(poi => fetchWikiPhoto(poi));
+                idx += 5;
+                setTimeout(loadBatch, 300);
+            }
+            loadBatch();
         }
         
         function highlightPOICard(id) {
