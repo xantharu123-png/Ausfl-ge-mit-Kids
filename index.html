@@ -4371,11 +4371,19 @@
             return getCategoryFallback(poi.category);
         }
 
-        // Erkennt Karten, Wappen, Flags, SVGs — keine echten Fotos
+        const _photoCacheVersion = 2; // Erhöhen um alten Cache zu invalidieren
+        if (parseInt(localStorage.getItem('photoCacheVersionCH') || '0') < _photoCacheVersion) {
+            localStorage.removeItem('photoCacheCH');
+            localStorage.setItem('photoCacheVersionCH', String(_photoCacheVersion));
+            Object.keys(_photoCache).forEach(k => delete _photoCache[k]);
+        }
+
+        // Erkennt Karten, Wappen, Flags, SVGs, Logos — keine echten Fotos
         function _isMapOrBadImage(url) {
             const lc = url.toLowerCase();
-            return /karte|wappen|flag|coat_of_arms|logo|map|locator|location|positionskarte|relief|verwaltungsgliederung|blank/i.test(lc)
-                || lc.endsWith('.svg') || lc.includes('.svg/');
+            return /karte|wappen|flag|coat_of_arms|logo|map[_\.]|locator|location_in|positionskarte|relief_|verwaltung|blank|icon|symbol|blason|escudo|stemma|banner/i.test(lc)
+                || lc.endsWith('.svg') || lc.includes('.svg/')
+                || lc.endsWith('.tif') || lc.includes('.tif/');
         }
 
         // Extrahiert gute Foto-URL aus Wikipedia-Antwort (filtert Karten)
@@ -4406,11 +4414,14 @@
             // Spezifische Suchen zuerst (z.B. "Baden_AG", "Aarau_(Stadt)")
             if (region.length <= 3 && region.length > 0) queries.push(nameU + '_' + regU);
             queries.push(nameU);
+            queries.push(nameU + '_(Ort)');
+            queries.push(nameU + '_(Stadt)');
             if (loc && loc !== name) queries.push(nameU + '_(' + locU + ')');
-            if (loc && loc !== name) queries.push(nameU + '_' + locU);
+            if (loc && loc !== name) queries.push(locU + '_' + nameU);
             // Englische Varianten
             const enQueries = [nameU];
             if (loc) enQueries.push(nameU + ',_' + locU);
+            if (loc && loc !== name) enQueries.push(locU);
 
             // Deutsche Wikipedia zuerst
             for (const q of queries) {
@@ -4429,7 +4440,7 @@
                 } catch(e) { /* weiter */ }
             }
 
-            // Englische Wikipedia als Fallback
+            // Englische Wikipedia Summary als Fallback
             for (const q of enQueries) {
                 try {
                     const resp = await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(q));
@@ -4446,7 +4457,33 @@
                 } catch(e) { /* weiter */ }
             }
 
-            // Kein gutes Foto gefunden → Kategorie-Fallback
+            // Letzter Fallback: media-list API — durchsucht ALLE Bilder des Artikels
+            for (const q of [queries[0], ...enQueries]) {
+                const lang = q === queries[0] ? 'de' : 'en';
+                try {
+                    const resp = await fetch('https://' + lang + '.wikipedia.org/api/rest_v1/page/media-list/' + encodeURIComponent(q));
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        const items = (data.items || []);
+                        for (const item of items) {
+                            if (item.type !== 'image' || !item.srcset || !item.srcset.length) continue;
+                            const src = item.srcset[0].src || '';
+                            const fullSrc = src.startsWith('//') ? 'https:' + src : src;
+                            if (_isMapOrBadImage(fullSrc)) continue;
+                            // Nur JPG/JPEG/PNG — keine TIF, SVG etc.
+                            if (!/\.(jpg|jpeg|png)/i.test(fullSrc)) continue;
+                            const url = fullSrc.replace(/\/\d+px-/, '/400px-');
+                            _photoCache[poi.id] = url;
+                            _savePhotoCache();
+                            _updatePhotoElements(poi.id, url, imgElements);
+                            _photoLoading[poi.id] = false;
+                            return;
+                        }
+                    }
+                } catch(e) { /* weiter */ }
+            }
+
+            // Wirklich kein Foto gefunden → Kategorie-Fallback
             _photoCache[poi.id] = getCategoryFallback(poi.category);
             _savePhotoCache();
             _photoLoading[poi.id] = false;
