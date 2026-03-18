@@ -2531,15 +2531,15 @@ const allPOIs = [
         }
         function getPoiRating(poiId) { return ratingCache[poiId] || null; }
         // ===== Wikipedia/Wikimedia Foto-System (gratis, kein API-Key) =====
-        const _photoCache = JSON.parse(localStorage.getItem('photoCacheCA_W') || '{{}}');
-        const _photoLoading = {{}};
+        const _photoCache = JSON.parse(localStorage.getItem('photoCacheCA_W') || '{}');
+        const _photoLoading = {};
         const _photoCacheVersion = 2;
-        if (parseInt(localStorage.getItem('photoCacheVersionCA_W') || '0') < _photoCacheVersion) {{
+        if (parseInt(localStorage.getItem('photoCacheVersionCA_W') || '0') < _photoCacheVersion) {
             localStorage.removeItem('photoCacheCA_W');
             localStorage.setItem('photoCacheVersionCA_W', String(_photoCacheVersion));
             Object.keys(_photoCache).forEach(k => delete _photoCache[k]);
         }}
-        const _categoryFallbacks = {{
+        const _categoryFallbacks = {
             sehenswuerdigkeit: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80',
             kultur: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=400&q=80',
             familie: 'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=400&q=80',
@@ -2549,26 +2549,26 @@ const allPOIs = [
             weihnachten: 'https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=400&q=80'
         }};
         const _defaultFallback = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80';
-        function getCategoryFallback(category) {{ return _categoryFallbacks[category] || _defaultFallback; }}
-        function getPoiPhoto(poi) {{
+        function getCategoryFallback(category) { return _categoryFallbacks[category] || _defaultFallback; }
+        function getPoiPhoto(poi) {
             if (poi.image) return poi.image;
             if (_photoCache[poi.id]) return _photoCache[poi.id];
             return getCategoryFallback(poi.category);
         }}
-        function _isMapOrBadImage(url) {{
+        function _isMapOrBadImage(url) {
             const lc = url.toLowerCase();
             return /karte|wappen|flag|coat_of_arms|logo|map[_.]|locator|location_in|positionskarte|relief_|verwaltung|blank|icon|symbol|blason|escudo|stemma|banner/i.test(lc)
                 || lc.endsWith('.svg') || lc.includes('.svg/')
                 || lc.endsWith('.tif') || lc.includes('.tif/');
         }}
-        function _extractPhotoUrl(data) {{
+        function _extractPhotoUrl(data) {
             if (!data || !data.thumbnail || !data.thumbnail.source) return null;
             const src = data.thumbnail.source;
             if (_isMapOrBadImage(src)) return null;
             if (data.type === 'disambiguation') return null;
             return src.replace(/\/\d+px-/, '/400px-');
         }}
-        async function fetchWikiPhoto(poi, imgElements) {{
+        async function fetchWikiPhoto(poi, imgElements) {
             if (poi.image || _photoCache[poi.id] || _photoLoading[poi.id]) return;
             _photoLoading[poi.id] = true;
             const name = poi.name.replace(/[-\u2013]/g, ' ');
@@ -2587,25 +2587,25 @@ const allPOIs = [
             const enQueries = [nameU];
             if (loc) enQueries.push(nameU + ',_' + locU);
             if (loc && loc !== name) enQueries.push(locU);
-            for (const q of queries) {{
-                try {{
+            for (const q of queries) {
+                try {
                     const resp = await fetch('https://de.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(q));
-                    if (resp.ok) {{ const url = _extractPhotoUrl(await resp.json()); if (url) {{ _photoCache[poi.id] = url; _savePhotoCache(); _updatePhotoElements(poi.id, url, imgElements); _photoLoading[poi.id] = false; return; }} }}
-                }} catch(e) {{}}
+                    if (resp.ok) { const url = _extractPhotoUrl(await resp.json()); if (url) { _photoCache[poi.id] = url; _savePhotoCache(); _updatePhotoElements(poi.id, url, imgElements); _photoLoading[poi.id] = false; return; } }
+                } catch(e) {}
             }}
-            for (const q of enQueries) {{
-                try {{
+            for (const q of enQueries) {
+                try {
                     const resp = await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(q));
-                    if (resp.ok) {{ const url = _extractPhotoUrl(await resp.json()); if (url) {{ _photoCache[poi.id] = url; _savePhotoCache(); _updatePhotoElements(poi.id, url, imgElements); _photoLoading[poi.id] = false; return; }} }}
-                }} catch(e) {{}}
+                    if (resp.ok) { const url = _extractPhotoUrl(await resp.json()); if (url) { _photoCache[poi.id] = url; _savePhotoCache(); _updatePhotoElements(poi.id, url, imgElements); _photoLoading[poi.id] = false; return; } }
+                } catch(e) {}
             }}
-            for (const q of [queries[0], ...enQueries]) {{
+            for (const q of [queries[0], ...enQueries]) {
                 const lang = q === queries[0] ? 'de' : 'en';
-                try {{
+                try {
                     const resp = await fetch('https://' + lang + '.wikipedia.org/api/rest_v1/page/media-list/' + encodeURIComponent(q));
-                    if (resp.ok) {{
+                    if (resp.ok) {
                         const data = await resp.json();
-                        for (const item of (data.items || [])) {{
+                        for (const item of (data.items || [])) {
                             if (item.type !== 'image' || !item.srcset || !item.srcset.length) continue;
                             const src = item.srcset[0].src || '';
                             const fullSrc = src.startsWith('//') ? 'https:' + src : src;
@@ -2615,27 +2615,27 @@ const allPOIs = [
                             _photoCache[poi.id] = url; _savePhotoCache(); _updatePhotoElements(poi.id, url, imgElements); _photoLoading[poi.id] = false; return;
                         }}
                     }}
-                }} catch(e) {{}}
+                } catch(e) {}
             }}
             _photoCache[poi.id] = getCategoryFallback(poi.category);
             _savePhotoCache();
             _photoLoading[poi.id] = false;
         }}
-        function _updatePhotoElements(poiId, url, imgElements) {{
-            if (imgElements) imgElements.forEach(el => {{ if (el) el.src = url; }});
-            document.querySelectorAll('img[data-poi-photo="' + poiId + '"]').forEach(el => {{ el.src = url; }});
+        function _updatePhotoElements(poiId, url, imgElements) {
+            if (imgElements) imgElements.forEach(el => { if (el) el.src = url; });
+            document.querySelectorAll('img[data-poi-photo="' + poiId + '"]').forEach(el => { el.src = url; });
         }}
         let _photoCacheSaveTimer = null;
-        function _savePhotoCache() {{
+        function _savePhotoCache() {
             clearTimeout(_photoCacheSaveTimer);
-            _photoCacheSaveTimer = setTimeout(() => {{
-                try {{ localStorage.setItem('photoCacheCA_W', JSON.stringify(_photoCache)); }} catch(e) {{}}
+            _photoCacheSaveTimer = setTimeout(() => {
+                try { localStorage.setItem('photoCacheCA_W', JSON.stringify(_photoCache)); } catch(e) {}
             }}, 2000);
         }}
-        function _lazyLoadPhotos(pois) {{
+        function _lazyLoadPhotos(pois) {
             const needPhoto = pois.filter(p => !p.image && !_photoCache[p.id] && !_photoLoading[p.id]);
             let idx = 0;
-            function loadBatch() {{
+            function loadBatch() {
                 const batch = needPhoto.slice(idx, idx + 5);
                 if (batch.length === 0) return;
                 batch.forEach(poi => fetchWikiPhoto(poi));
