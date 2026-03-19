@@ -2538,7 +2538,7 @@ const allPOIs = [
             localStorage.removeItem('photoCacheCA_W');
             localStorage.setItem('photoCacheVersionCA_W', String(_photoCacheVersion));
             Object.keys(_photoCache).forEach(k => delete _photoCache[k]);
-        }}
+        }
         const _categoryFallbacks = {
             sehenswuerdigkeit: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80',
             kultur: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=400&q=80',
@@ -2547,101 +2547,112 @@ const allPOIs = [
             festival: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400&q=80',
             volksfest: 'https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?w=400&q=80',
             weihnachten: 'https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=400&q=80'
-        }};
+        };
         const _defaultFallback = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80';
         function getCategoryFallback(category) { return _categoryFallbacks[category] || _defaultFallback; }
         function getPoiPhoto(poi) {
             if (poi.image) return poi.image;
             if (_photoCache[poi.id]) return _photoCache[poi.id];
             return getCategoryFallback(poi.category);
-        }}
+        }
         function _isMapOrBadImage(url) {
-            const lc = url.toLowerCase();
+            var lc = url.toLowerCase();
             return /karte|wappen|flag|coat_of_arms|logo|map[_.]|locator|location_in|positionskarte|relief_|verwaltung|blank|icon|symbol|blason|escudo|stemma|banner/i.test(lc)
-                || lc.endsWith('.svg') || lc.includes('.svg/')
-                || lc.endsWith('.tif') || lc.includes('.tif/');
-        }}
+                || lc.endsWith('.svg') || lc.indexOf('.svg/') > -1
+                || lc.endsWith('.tif') || lc.indexOf('.tif/') > -1;
+        }
         function _extractPhotoUrl(data) {
             if (!data || !data.thumbnail || !data.thumbnail.source) return null;
-            const src = data.thumbnail.source;
+            var src = data.thumbnail.source;
             if (_isMapOrBadImage(src)) return null;
             if (data.type === 'disambiguation') return null;
             return src.replace(/\/\d+px-/, '/400px-');
-        }}
+        }
         async function fetchWikiPhoto(poi, imgElements) {
             if (poi.image || _photoCache[poi.id] || _photoLoading[poi.id]) return;
             _photoLoading[poi.id] = true;
-            const name = poi.name.replace(/[-\u2013]/g, ' ');
-            const region = poi.region || '';
-            const loc = poi.location || '';
-            const nameU = name.replace(/ /g, '_');
-            const locU = loc.replace(/ /g, '_');
-            const regU = region.replace(/ /g, '_');
-            const queries = [];
+            var name = poi.name.replace(/[-\u2013]/g, ' ');
+            var region = poi.region || '';
+            var loc = poi.location || '';
+            var nameU = name.replace(/ /g, '_');
+            var locU = loc.replace(/ /g, '_');
+            var regU = region.replace(/ /g, '_');
+            var queries = [];
             if (region.length <= 3 && region.length > 0) queries.push(nameU + '_' + regU);
             queries.push(nameU);
             queries.push(nameU + '_(Ort)');
             queries.push(nameU + '_(Stadt)');
             if (loc && loc !== name) queries.push(nameU + '_(' + locU + ')');
             if (loc && loc !== name) queries.push(locU + '_' + nameU);
-            const enQueries = [nameU];
+            var enQueries = [nameU];
             if (loc) enQueries.push(nameU + ',_' + locU);
             if (loc && loc !== name) enQueries.push(locU);
-            for (const q of queries) {
+            var i, q, resp, url, data, item, items, src, fullSrc, lang;
+            for (i = 0; i < queries.length; i++) {
+                q = queries[i];
                 try {
-                    const resp = await fetch('https://de.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(q));
-                    if (resp.ok) { const url = _extractPhotoUrl(await resp.json()); if (url) { _photoCache[poi.id] = url; _savePhotoCache(); _updatePhotoElements(poi.id, url, imgElements); _photoLoading[poi.id] = false; return; } }
+                    resp = await fetch('https://de.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(q));
+                    if (resp.ok) { url = _extractPhotoUrl(await resp.json()); if (url) { _photoCache[poi.id] = url; _savePhotoCache(); _updatePhotoElements(poi.id, url, imgElements); _photoLoading[poi.id] = false; return; } }
                 } catch(e) {}
-            }}
-            for (const q of enQueries) {
+            }
+            for (i = 0; i < enQueries.length; i++) {
+                q = enQueries[i];
                 try {
-                    const resp = await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(q));
-                    if (resp.ok) { const url = _extractPhotoUrl(await resp.json()); if (url) { _photoCache[poi.id] = url; _savePhotoCache(); _updatePhotoElements(poi.id, url, imgElements); _photoLoading[poi.id] = false; return; } }
+                    resp = await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(q));
+                    if (resp.ok) { url = _extractPhotoUrl(await resp.json()); if (url) { _photoCache[poi.id] = url; _savePhotoCache(); _updatePhotoElements(poi.id, url, imgElements); _photoLoading[poi.id] = false; return; } }
                 } catch(e) {}
-            }}
-            for (const q of [queries[0], ...enQueries]) {
-                const lang = q === queries[0] ? 'de' : 'en';
+            }
+            var mlQueries = [queries[0]].concat(enQueries);
+            for (i = 0; i < mlQueries.length; i++) {
+                q = mlQueries[i];
+                lang = (i === 0) ? 'de' : 'en';
                 try {
-                    const resp = await fetch('https://' + lang + '.wikipedia.org/api/rest_v1/page/media-list/' + encodeURIComponent(q));
+                    resp = await fetch('https://' + lang + '.wikipedia.org/api/rest_v1/page/media-list/' + encodeURIComponent(q));
                     if (resp.ok) {
-                        const data = await resp.json();
-                        for (const item of (data.items || [])) {
+                        data = await resp.json();
+                        items = data.items || [];
+                        for (var j = 0; j < items.length; j++) {
+                            item = items[j];
                             if (item.type !== 'image' || !item.srcset || !item.srcset.length) continue;
-                            const src = item.srcset[0].src || '';
-                            const fullSrc = src.startsWith('//') ? 'https:' + src : src;
+                            src = item.srcset[0].src || '';
+                            fullSrc = src.indexOf('//') === 0 ? 'https:' + src : src;
                             if (_isMapOrBadImage(fullSrc)) continue;
                             if (!/\.(jpg|jpeg|png)/i.test(fullSrc)) continue;
-                            const url = fullSrc.replace(/\/\d+px-/, '/400px-');
+                            url = fullSrc.replace(/\/\d+px-/, '/400px-');
                             _photoCache[poi.id] = url; _savePhotoCache(); _updatePhotoElements(poi.id, url, imgElements); _photoLoading[poi.id] = false; return;
-                        }}
-                    }}
+                        }
+                    }
                 } catch(e) {}
-            }}
+            }
             _photoCache[poi.id] = getCategoryFallback(poi.category);
             _savePhotoCache();
             _photoLoading[poi.id] = false;
-        }}
+        }
         function _updatePhotoElements(poiId, url, imgElements) {
-            if (imgElements) imgElements.forEach(el => { if (el) el.src = url; });
-            document.querySelectorAll('img[data-poi-photo="' + poiId + '"]').forEach(el => { el.src = url; });
-        }}
-        let _photoCacheSaveTimer = null;
+            if (imgElements) { for (var k = 0; k < imgElements.length; k++) { if (imgElements[k]) imgElements[k].src = url; } }
+            var els = document.querySelectorAll('img[data-poi-photo="' + poiId + '"]');
+            for (var k = 0; k < els.length; k++) { els[k].src = url; }
+        }
+        var _photoCacheSaveTimer = null;
         function _savePhotoCache() {
             clearTimeout(_photoCacheSaveTimer);
-            _photoCacheSaveTimer = setTimeout(() => {
+            _photoCacheSaveTimer = setTimeout(function() {
                 try { localStorage.setItem('photoCacheCA_W', JSON.stringify(_photoCache)); } catch(e) {}
-            }}, 2000);
-        }}
+            }, 2000);
+        }
         function _lazyLoadPhotos(pois) {
-            const needPhoto = pois.filter(p => !p.image && !_photoCache[p.id] && !_photoLoading[p.id]);
-            let idx = 0;
+            var needPhoto = pois.filter(function(p) { return !p.image && !_photoCache[p.id] && !_photoLoading[p.id]; });
+            var idx = 0;
             function loadBatch() {
-                const batch = needPhoto.slice(idx, idx + 5);
+                var batch = needPhoto.slice(idx, idx + 5);
                 if (batch.length === 0) return;
-                batch.forEach(poi => fetchWikiPhoto(poi));
+                batch.forEach(function(poi) { fetchWikiPhoto(poi); });
                 idx += 5;
                 setTimeout(loadBatch, 300);
-            }}
+            }
+            loadBatch();
+        }
+
             loadBatch();
         }}
         async function fetchSingleRating(poi) {
@@ -2965,7 +2976,6 @@ const allPOIs = [
                 
                 const popupContent = createPopupContent(poi);
                 marker.on('popupopen', async function() {
-                    // Wiki-Foto laden
                     if (!poi.image && !_photoCache[poi.id]) fetchWikiPhoto(poi);
                     if (googleApiKey && !ratingCache[poi.id]) {
                         const rating = await fetchSingleRating(poi);
@@ -2998,7 +3008,7 @@ const allPOIs = [
             
             return `
                 <div class="popup-content">
-                    <img src="${getPoiPhoto(poi)}" alt="${poi.name}" class="popup-image" data-poi-photo="${poi.id}" onerror="this.src=getCategoryFallback('${poi.category}')">
+                    <img src="${getPoiPhoto(poi)}" alt="${poi.name}" class="popup-image" data-poi-photo="${poi.id}" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80'">
                     <div class="popup-body">
                         <div class="popup-category">${categoryIcons[poi.category]} ${poi.category}</div>
                         <h3 class="popup-title">${poi.name}</h3>
@@ -3076,7 +3086,7 @@ const allPOIs = [
                     html += `
                         <div class="poi-card ${isVisited ? 'visited' : ''}" data-id="${poi.id}" style="--cat-color: ${categoryColors[poi.category]}">
                             <div class="poi-header">
-                                <img src="${getPoiPhoto(poi)}" alt="${poi.name}" class="poi-image" data-poi-photo="${poi.id}" onerror="this.src=getCategoryFallback('${poi.category}')">
+                                <img src="${getPoiPhoto(poi)}" alt="${poi.name}" class="poi-image" data-poi-photo="${poi.id}" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80'">
                                 <div class="poi-info">
                                     <div class="poi-title"><button class="fav-btn${favoritePOIs.includes(poi.id) ? ' active' : ''}" data-poi-id="${poi.id}" onclick="event.stopPropagation();toggleFavoritePOI(${poi.id}, this);">${favoritePOIs.includes(poi.id) ? '\u2764\uFE0F' : '\uD83E\uDD0D'}</button> ${poi.name}</div>
                                     <div class="poi-location">📍 ${poi.location}</div>
@@ -3109,9 +3119,6 @@ const allPOIs = [
                                 window._cluster.zoomToShowLayer(markers[id], () => {
                                     markers[id].openPopup();
                                 });
-
-            // Wiki-Fotos lazy laden
-            _lazyLoadPhotos(pois);
                             } else {
                                 markers[id].openPopup();
                             }
@@ -3120,6 +3127,9 @@ const allPOIs = [
                     }
                 });
             });
+
+            // Wiki-Fotos lazy laden
+            _lazyLoadPhotos(pois);
         }
         
         function highlightPOICard(id) {
