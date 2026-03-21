@@ -3117,19 +3117,7 @@ const allPOIs = [
             // Map zoom/move events for search area button
             map.on('zoomend', updateSearchAreaButton);
             map.on('moveend', updateSearchAreaButton);
-            // Show camping reload button when map moves in camping mode
-            var _campingSearchCenter = null;
-            function checkCampingMoved() {
-                if (!campingMode || map.getZoom() < 8) return;
-                var c = map.getCenter();
-                if (_campingSearchCenter) {
-                    var moved = Math.abs(c.lat - _campingSearchCenter.lat) > 0.005 || Math.abs(c.lng - _campingSearchCenter.lng) > 0.005;
-                    if (moved) {
-                        var btn = document.getElementById('camping-reload-btn');
-                        if (btn) btn.classList.add('visible');
-                    }
-                }
-            }
+            // checkCampingMoved is in outer scope, register events here where map exists
             map.on('moveend', checkCampingMoved);
             map.on('zoomend', checkCampingMoved);
         });
@@ -3699,6 +3687,18 @@ const allPOIs = [
             return merged;
         }
 
+        var _campingSearchCenter = null;
+        function checkCampingMoved() {
+            if (!campingMode || map.getZoom() < 8) return;
+            var c = map.getCenter();
+            if (_campingSearchCenter) {
+                var moved = Math.abs(c.lat - _campingSearchCenter.lat) > 0.005 || Math.abs(c.lng - _campingSearchCenter.lng) > 0.005;
+                if (moved) {
+                    var btn = document.getElementById('camping-reload-btn');
+                    if (btn) btn.classList.add('visible');
+                }
+            }
+        }
         var _campingLoadId = 0;
         var _campingLastSearch = 0;
         async function loadCampingSites() {
@@ -3712,7 +3712,7 @@ const allPOIs = [
             _campingLastSearch = Date.now();
             clearCamping();
             var _crBtn = document.getElementById('camping-reload-btn'); if (_crBtn) _crBtn.classList.remove('visible');
-            if (typeof _campingSearchCenter !== 'undefined') _campingSearchCenter = map.getCenter();
+            _campingSearchCenter = map.getCenter();
             const zoom = map.getZoom();
             
             // Bei niedrigem Zoom: Meldung anzeigen statt riesige Abfrage
