@@ -5440,6 +5440,8 @@
             map.on('moveend', updateSearchAreaButton);
             // Show camping reload button when map moves in camping mode
             var _campingSearchCenter = null;
+            var _campingLoadId = 0;
+            var _campingLastSearch = 0;
             function checkCampingMoved() {
                 if (!campingMode || map.getZoom() < 8) return;
                 var c = map.getCenter();
@@ -6216,20 +6218,35 @@
         }
 
         async function loadCampingSites() {
+            // Concurrency guard: cancel any previous in-flight search
+            var myLoadId = ++_campingLoadId;
+
+            // Rate-limit: min 3s between Overpass API searches
+            var now = Date.now();
+            var elapsed = now - _campingLastSearch;
+            if (elapsed < 3000 && _campingLastSearch > 0) {
+                await new Promise(function(r) { setTimeout(r, 3000 - elapsed); });
+                if (myLoadId !== _campingLoadId) return; // cancelled while waiting
+            }
+            _campingLastSearch = Date.now();
+
             clearCamping();
             var _crBtn = document.getElementById('camping-reload-btn'); if (_crBtn) _crBtn.classList.remove('visible');
             if (typeof _campingSearchCenter !== 'undefined') _campingSearchCenter = map.getCenter();
             const zoom = map.getZoom();
-            
+
             // Bei niedrigem Zoom: Meldung anzeigen statt riesige Abfrage
             if (zoom < 8) {
                 document.getElementById('camping-results').innerHTML = '<div class="camping-info">🔍 Bitte zoome etwas rein (mind. Zoom 8) um Campingplätze zu laden.</div>';
                 return;
             }
-            
+
+            // Loading indicator
+            document.getElementById('camping-results').innerHTML = '<div class="camping-info">🔄 Campingplätze werden geladen...</div>';
+
             const bounds = map.getBounds();
             const south = bounds.getSouth(), west = bounds.getWest(), north = bounds.getNorth(), east = bounds.getEast();
-            
+
             // Phase 1: P4N sofort laden (lokal, kein Netzwerk nötig)
             const centerLat = (south + north) / 2;
             const centerLng = (west + east) / 2;
@@ -6248,8 +6265,12 @@
                     console.log('[Park4Night] ' + p4nSites.length + ' Plätze geladen (von ' + p4nRaw.length + ' total)');
                 } catch(p4nErr) { console.warn('[Park4Night] Fehler:', p4nErr.message); }
 
+            // Check if this search was cancelled by a newer one
+            if (myLoadId !== _campingLoadId) { console.log('[Camping] Suche abgebrochen (neuere Suche gestartet)'); return; }
+
             // Phase 2: OSM laden (kann fehlschlagen)
             let osmSites = [];
+            var osmFailed = false;
             campingCluster = L.markerClusterGroup({ maxClusterRadius: 40, disableClusteringAtZoom: 12,
                 iconCreateFunction: function(cluster) {
                     return L.divIcon({ html: '<div style="background:#2d6b4f;color:#4ecca3;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;border:2px solid #4ecca3;">' + cluster.getChildCount() + '</div>', className: '', iconSize: [36, 36] });
@@ -6263,11 +6284,15 @@
             query += ');out center 300;';
             try {
                 const data = await safeFetchJSON('https://overpass-api.de/api/interpreter', { method: 'POST', body: 'data=' + encodeURIComponent(query) });
+                if (myLoadId !== _campingLoadId) { console.log('[Camping] Suche abgebrochen (neuere Suche gestartet)'); return; }
                 if (data && data.elements) {
                     osmSites = (data.elements || []).map(e => { if (!e.lat && e.center) { e.lat = e.center.lat; e.lon = e.center.lon; } return e; }).filter(e => e.lat && e.lon && e.tags);
                     console.log('[OSM] ' + osmSites.length + ' Plätze nachgeladen');
                 }
-            } catch(osmErr) { console.warn('[OSM] Nicht verfügbar:', osmErr.message); }
+            } catch(osmErr) { osmFailed = true; console.warn('[OSM] Nicht verfügbar:', osmErr.message); }
+
+            // Check again if cancelled
+            if (myLoadId !== _campingLoadId) { console.log('[Camping] Suche abgebrochen (neuere Suche gestartet)'); return; }
 
             try {
                 let sites = deduplicateSites(osmSites, p4nSites);
@@ -6277,7 +6302,7 @@
                 if (sites.length === 0) {
                     html = '<div class="camping-info">Keine Plätze im sichtbaren Bereich.' + (campingOpenOnly ? ' Versuche ohne "Nur geöffnete" Filter.' : ' Zoome raus oder verschiebe die Karte.') + '</div>';
                 } else {
-                    html = '<div class="camping-info">' + sites.length + ' Plätze gefunden <span style="color:#5a6a7a;font-size:0.8em">(OSM: ' + osmSites.length + ' + P4N: ' + p4nSites.length + ')</span></div>';
+                    html = '<div class="camping-info">' + sites.length + ' Plätze gefunden <span style="color:#5a6a7a;font-size:0.8em">(OSM: ' + osmSites.length + ' + P4N: ' + p4nSites.length + ')' + (osmFailed ? ' <span style="color:#e94560">⚠️ OSM-Server überlastet</span>' : '') + '</span></div>';
                     sites.forEach((site, i) => {
                         const name = site.tags.name || site.tags.operator || site.tags.description || (site.tags.p4n_type_label ? site.tags.p4n_type_label : (site.tags.tourism === 'camp_site' ? 'Campingplatz' : site.tags.tourism === 'caravan_site' ? 'Wohnmobilstellplatz' : site.tags.amenity === 'motorhome_station' ? 'Wohnmobil-Servicestation' : 'Stellplatz'));
                         const isP4N = site._p4n || site.tags.source === 'park4night';

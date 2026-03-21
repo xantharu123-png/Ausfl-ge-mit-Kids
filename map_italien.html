@@ -5062,6 +5062,8 @@ const allPOIs = [
             map.on('moveend', updateSearchAreaButton);
             // Show camping reload button when map moves in camping mode
             var _campingSearchCenter = null;
+            var _campingLoadId = 0;
+            var _campingLastSearch = 0;
             function checkCampingMoved() {
                 if (!campingMode || map.getZoom() < 8) return;
                 var c = map.getCenter();
@@ -5643,7 +5645,14 @@ const allPOIs = [
         }
 
         async function loadCampingSites() {
-            if (campingLoading) return;
+            var myLoadId = ++_campingLoadId;
+            var now = Date.now();
+            var elapsed = now - _campingLastSearch;
+            if (elapsed < 3000 && _campingLastSearch > 0) {
+                await new Promise(function(r) { setTimeout(r, 3000 - elapsed); });
+                if (myLoadId !== _campingLoadId) return;
+            }
+            _campingLastSearch = Date.now();
             clearCamping();
             var _crBtn = document.getElementById('camping-reload-btn'); if (_crBtn) _crBtn.classList.remove('visible');
             if (typeof _campingSearchCenter !== 'undefined') _campingSearchCenter = map.getCenter();
@@ -5678,6 +5687,7 @@ const allPOIs = [
 
             // Phase 2: OSM im Hintergrund laden (kann fehlschlagen)
             let osmSites = [];
+            var osmFailed = false;
             let query = '[out:json][timeout:15];(';
             var bb = south + ',' + west + ',' + north + ',' + east;
             if (campingTypes.camping) { query += 'node["tourism"="camp_site"](' + bb + ');way["tourism"="camp_site"](' + bb + ');relation["tourism"="camp_site"](' + bb + ');'; }
@@ -5685,7 +5695,7 @@ const allPOIs = [
             if (campingTypes.parking) { query += 'node["amenity"="parking"]["caravan"~"yes|designated"](' + bb + ');node["amenity"="parking"]["motorhome"~"yes|designated"](' + bb + ');'; }
             query += ');out center 300;';
 
-            campingLoading = true;
+            if (myLoadId !== _campingLoadId) return;
             document.getElementById('camping-results').innerHTML = '<div class="camping-info">🔄 Lade Campingplätze... (' + p4nSites.length + ' P4N lokal geladen)</div>';
             campingCluster = L.markerClusterGroup({ maxClusterRadius: 40, disableClusteringAtZoom: 12,
                 iconCreateFunction: function(cluster) {
@@ -5700,7 +5710,7 @@ const allPOIs = [
                     osmSites = (data.elements || []).map(e => { if (!e.lat && e.center) { e.lat = e.center.lat; e.lon = e.center.lon; } return e; }).filter(e => e.lat && e.lon && e.tags);
                     console.log('[OSM] ' + osmSites.length + ' Plätze nachgeladen');
                 }
-            } catch(osmErr) { console.warn('[OSM] Nicht verfügbar:', osmErr.message); }
+            } catch(osmErr) { osmFailed = true; console.warn('[OSM] Nicht verfügbar:', osmErr.message); }
 
             try {
             let sites = deduplicateSites(osmSites, p4nSites);
@@ -5709,7 +5719,7 @@ const allPOIs = [
                 if (sites.length === 0) {
                     html = '<div class="camping-info">Keine Plätze im sichtbaren Bereich. Zoome raus oder verschiebe die Karte.</div>';
 } else {
-                    html = '<div class="camping-info">' + sites.length + ' Plätze gefunden <span style="color:#5a6a7a;font-size:0.8em">(OSM: ' + osmSites.length + ' + P4N: ' + p4nSites.length + ')</span></div>';
+                    html = '<div class="camping-info">' + sites.length + ' Plätze gefunden <span style="color:#5a6a7a;font-size:0.8em">(OSM: ' + osmSites.length + ' + P4N: ' + p4nSites.length + ')' + (osmFailed ? ' <span style="color:#e94560">\u26a0\ufe0f OSM-Server \u00fcberlastet</span>' : '') + '</span></div>';
                     if (campingOpenOnly) sites = sites.filter(s => s.tags && checkOpenStatus(s.tags.opening_hours) !== 'closed');
                 sites.forEach((site, i) => {
                         const name = site.tags.name || site.tags.operator || site.tags.description || (site.tags.p4n_type_label ? site.tags.p4n_type_label : (site.tags.tourism === 'camp_site' ? 'Campingplatz' : site.tags.tourism === 'caravan_site' ? 'Wohnmobilstellplatz' : site.tags.amenity === 'motorhome_station' ? 'Wohnmobil-Servicestation' : 'Stellplatz'));
@@ -5783,7 +5793,7 @@ var ck1 = getCampKey(site);
                 }
                 map.addLayer(campingCluster);
                 document.getElementById('camping-results').innerHTML = html;
-            } finally { campingLoading = false; }
+            }
         }
         
         async function searchCampingRoute() {
