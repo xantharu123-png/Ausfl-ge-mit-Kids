@@ -6215,6 +6215,8 @@
             return merged;
         }
 
+        var _campingLoadId = 0;
+        var _campingLastSearch = 0;
         async function loadCampingSites() {
             // Concurrency guard: cancel any previous in-flight search
             var myLoadId = ++_campingLoadId;
