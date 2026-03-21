@@ -5691,7 +5691,7 @@ var ck1 = getCampKey(site);
                 }
                 map.addLayer(campingCluster);
                 document.getElementById('camping-results').innerHTML = html;
-            }
+            } catch(renderErr) { console.warn('[Render] Fehler:', renderErr.message); }
         }
         
         async function searchCampingRoute() {
