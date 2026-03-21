@@ -1895,6 +1895,10 @@
                         <button class="visited-filter-btn" data-filter="unvisited">○ Offen</button>
                         <button class="visited-filter-btn" data-filter="favorites" style="color:#e94560;">❤️ Favoriten <span id="poi-fav-count" class="fav-count-badge" style="display:none;">0</span></button>
                     </div>
+                    <div style="display:flex;gap:6px;margin-top:6px;">
+                        <button onclick="exportFavorites()" style="font-size:0.7rem;padding:3px 8px;background:rgba(78,204,163,0.15);color:#4ecca3;border:1px solid rgba(78,204,163,0.3);border-radius:6px;cursor:pointer;">💾 Backup</button>
+                        <label style="font-size:0.7rem;padding:3px 8px;background:rgba(78,204,163,0.15);color:#4ecca3;border:1px solid rgba(78,204,163,0.3);border-radius:6px;cursor:pointer;">📂 Import<input type="file" accept=".json" onchange="importFavorites(this)" style="display:none;"></label>
+                    </div>
                 </div>
             </div>
             
@@ -4234,6 +4238,24 @@
         let favoriteCamping = JSON.parse(localStorage.getItem('favoriteCamping') || '[]');
         let campingFavOnly = false;
 
+        // Lade Favoriten aus JSON-Dateien falls localStorage leer (Backup/Restore)
+        (function loadBaselineFavorites() {
+            fetch('poi_favorites_SI.json').then(function(r) { return r.ok ? r.json() : null; }).then(function(data) {
+                if (data && Array.isArray(data) && data.length > 0 && favoritePOIs.length === 0) {
+                    favoritePOIs = data;
+                    localStorage.setItem('favPOIsSI', JSON.stringify(favoritePOIs));
+                    updateFavCounts();
+                }
+            }).catch(function() {});
+            fetch('camp_favorites.json').then(function(r) { return r.ok ? r.json() : null; }).then(function(data) {
+                if (data && Array.isArray(data) && data.length > 0 && favoriteCamping.length === 0) {
+                    favoriteCamping = data;
+                    localStorage.setItem('favoriteCamping', JSON.stringify(favoriteCamping));
+                    updateFavCounts();
+                }
+            }).catch(function() {});
+        })();
+
         // Camping Google Bewertungen
         let campRatingCache = JSON.parse(localStorage.getItem('campRatingCache') || '{}');
         let minCampRatingFilter = 0;
@@ -4355,6 +4377,28 @@
                 if (favoriteCamping.length > 0) { campCountEl.textContent = favoriteCamping.length; campCountEl.style.display = 'inline'; }
                 else { campCountEl.style.display = 'none'; }
             }
+        }
+
+        function exportFavorites() {
+            var allFavs = { poiFavorites: favoritePOIs, campingFavorites: favoriteCamping, exportDate: new Date().toISOString(), country: 'SI' };
+            var blob = new Blob([JSON.stringify(allFavs, null, 2)], {type: 'application/json'});
+            var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+            a.download = 'favoriten_SI_' + new Date().toISOString().split('T')[0] + '.json';
+            a.click(); URL.revokeObjectURL(a.href);
+        }
+        function importFavorites(inputEl) {
+            var file = inputEl.files[0]; if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    var data = JSON.parse(e.target.result);
+                    if (data.poiFavorites) { favoritePOIs = data.poiFavorites; localStorage.setItem('favPOIsSI', JSON.stringify(favoritePOIs)); }
+                    if (data.campingFavorites) { favoriteCamping = data.campingFavorites; localStorage.setItem('favoriteCamping', JSON.stringify(favoriteCamping)); }
+                    updateFavCounts(); filterPOIs(false);
+                    alert('Favoriten importiert!');
+                } catch(err) { alert('Fehler: ' + err.message); }
+            };
+            reader.readAsText(file);
         }
         if (googleApiKey) { setTimeout(() => {
             const kf = document.getElementById('google-api-key-modal');
