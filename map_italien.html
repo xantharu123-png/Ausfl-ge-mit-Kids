@@ -5617,15 +5617,28 @@ const allPOIs = [
 
         function deduplicateSites(osmSites, p4nSites) {
             const merged = [...osmSites];
-            const osmCoords = osmSites.map(s => [s.lat, s.lon || s.lng]);
             p4nSites.forEach(p => {
-                // Check if any OSM site is within ~150m
-                const dominated = osmCoords.some(([lat, lon]) => {
-                    const dlat = (lat - p.lat) * 111000;
-                    const dlon = (lon - (p.lon || p.lng)) * 111000 * Math.cos(lat * Math.PI / 180);
-                    return Math.sqrt(dlat * dlat + dlon * dlon) < 150;
+                let bestDist = 999999, bestIdx = -1;
+                merged.forEach((s, idx) => {
+                    const dlat = (s.lat - p.lat) * 111000;
+                    const dlon = ((s.lon || s.lng) - (p.lon || p.lng)) * 111000 * Math.cos(s.lat * Math.PI / 180);
+                    const dist = Math.sqrt(dlat * dlat + dlon * dlon);
+                    if (dist < bestDist) { bestDist = dist; bestIdx = idx; }
                 });
-                if (!dominated) merged.push(p);
+                if (bestDist < 150 && bestIdx >= 0) {
+                    // OSM-Platz existiert: P4N-Rating übertragen
+                    const osm = merged[bestIdx];
+                    if (!osm.tags) osm.tags = {};
+                    const pRating = p.tags ? p.tags.p4n_rating : (p.rating || 0);
+                    const pReviews = p.tags ? p.tags.p4n_reviews : (p.review || 0);
+                    if (pRating > 0 && !(osm.tags.p4n_rating > 0)) {
+                        osm.tags.p4n_rating = pRating;
+                        osm.tags.p4n_reviews = pReviews;
+                        osm.tags.p4n_url = p.tags ? p.tags.p4n_url : "";
+                    }
+                } else {
+                    merged.push(p);
+                }
             });
             return merged;
         }
@@ -5748,7 +5761,7 @@ const allPOIs = [
                         if (isP4N && site.tags.p4n_url) popup += '<br><a href="' + site.tags.p4n_url + '" target="_blank" style="color:#6ea8fe;">\u{1F17F}\uFE0F Park4Night</a>';
                         if (isP4N && site.tags.p4n_image) popup += '<br><img src="' + site.tags.p4n_image + '" style="max-width:180px;max-height:120px;border-radius:6px;margin:4px 0" loading="lazy" onerror="this.style.display=\'none\'">';
                         if (isP4N && site.tags.p4n_city) popup += '<br><span style="color:#8899aa;font-size:11px">\u{1F4CD} ' + site.tags.p4n_city + '</span>';
-                        if (isP4N && site.tags.p4n_rating > 0) popup += '<br>\u{2B50} ' + site.tags.p4n_rating.toFixed(1) + ' (' + site.tags.p4n_reviews + ' Bewertungen)';
+                        if (site.tags.p4n_rating > 0) popup += '<br>\u{2B50} ' + site.tags.p4n_rating.toFixed(1) + ' (' + site.tags.p4n_reviews + ' Bewertungen)';
                         if (isP4N && site.tags.p4n_services) { var sv = site.tags.p4n_services; var si = ''; if(sv&1) si+='\u26A1'; if(sv&2) si+='\u{1F4A7}'; if(sv&4) si+='\u{1F6BF}'; if(sv&8) si+='\u{1F4F6}'; if(sv&16) si+='\u{1F6BD}'; if(sv&32) si+='\u{267B}\uFE0F'; if(sv&128) si+='\u{1F5D1}'; if(sv&256) si+='\u{1F436}'; if(sv&512) si+='\u{1F9FA}'; if(si) popup += '<br><span style="font-size:13px;letter-spacing:2px" title="Strom|Wasser|Dusche|WiFi|WC|Entsorgung|Müll|Haustiere|Wäsche">' + si + '</span>'; }
                         if (isP4N && site.tags.p4n_desc) popup += '<br><span style="color:#c0c8d4;font-size:11px;display:block;max-width:220px;max-height:80px;overflow:hidden;margin-top:3px">' + site.tags.p4n_desc.substring(0,200) + (site.tags.p4n_desc.length > 200 ? '...' : '') + '</span>';
                         popup += ' · <a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(name) + '+' + site.lat + ',' + site.lon + '" target="_blank" style="color:#ff9800;">\u{1F4CD} Maps</a>';
@@ -5782,7 +5795,7 @@ var ck1 = getCampKey(site);
                             html += '<div class="camping-card" onclick="var m=campingMarkers['+ i +']; if(m){map.setView(m.getLatLng(), 15); setTimeout(()=>m.openPopup(), 300);}">';
                             let cardDetails = [];
                             if (!isP4N && !['Campingplatz','Wohnmobilstellplatz','Wohnmobil-Servicestation','Stellplatz'].includes(name) && cr1 && cr1.rating > 0) cardDetails.push(renderStarsHTML(cr1.rating, cr1.count));
-                            if (isP4N && site.tags.p4n_rating > 0) cardDetails.push('\u2B50 ' + site.tags.p4n_rating.toFixed(1) + ' <span style="color:#8899aa">(' + (site.tags.p4n_reviews || 0) + ')</span>');
+                            if (site.tags.p4n_rating > 0) cardDetails.push('\u2B50 ' + site.tags.p4n_rating.toFixed(1) + ' <span style="color:#8899aa">(' + (site.tags.p4n_reviews || 0) + ')</span>');
                             if (site.tags.opening_hours) cardDetails.push('🕐 ' + site.tags.opening_hours);
                             html += '<div class="camping-card-name"><button class="fav-btn' + (isCampFav(campKey) ? ' active' : '') + '" data-camp-key="' + campKey + '" onclick="event.stopPropagation();toggleFavoriteCamping(\'' + campKey.replace(/'/g,"\\'") + '\',this);">' + (isCampFav(campKey) ? '❤️' : '🤍') + '</button> ' + (i+1) + '. ' + name + ' ' + getOpenBadge(openStatus) + '</div>';
                             if (cardDetails.length) html += '<div class="camping-card-details">' + cardDetails.join('<br>') + '</div>';
