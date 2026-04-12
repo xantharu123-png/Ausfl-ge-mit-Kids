@@ -3734,56 +3734,51 @@ const allPOIs = [
             };
         }
 
-        function _normName(n) {
-            return (n || '').toLowerCase().replace(/[^a-z0-9äöüéèàùâêîôûç]/g, ' ').replace(/\s+/g, ' ').trim();
-        }
-        function _nameSimilar(a, b) {
-            a = _normName(a); b = _normName(b);
-            if (!a || !b || a.length < 3 || b.length < 3) return 0;
-            if (a === b) return 1;
-            if (a.includes(b) || b.includes(a)) return 0.9;
-            var wa = a.split(' ').filter(w => w.length > 2);
-            var wb = b.split(' ').filter(w => w.length > 2);
-            if (!wa.length || !wb.length) return 0;
-            var common = wa.filter(w => wb.some(w2 => w2 === w || (w.length > 4 && w2.length > 4 && (w2.startsWith(w.substring(0,4)) || w.startsWith(w2.substring(0,4)))))).length;
-            return common / Math.max(wa.length, wb.length);
-        }
         function deduplicateSites(osmSites, p4nSites) {
-            const merged = [...osmSites];
-            p4nSites.forEach(p => {
-                const pName = p.tags ? (p.tags.name || '') : (p.title_short || p.name || '');
-                let bestScore = -1, bestIdx = -1;
-                merged.forEach((s, idx) => {
-                    const dlat = (s.lat - p.lat) * 111000;
-                    const dlon = ((s.lon || s.lng) - (p.lon || p.lng)) * 111000 * Math.cos(s.lat * Math.PI / 180);
-                    const dist = Math.sqrt(dlat * dlat + dlon * dlon);
-                    if (dist > 2000) return;
-                    const sName = s.tags ? (s.tags.name || '') : '';
-                    const sim = _nameSimilar(sName, pName);
-                    var score = 0;
-                    if (dist < 100) score = 3;
-                    else if (dist < 300) score = 2;
-                    else if (dist < 500) score = 1;
-                    else if (dist < 2000 && sim > 0.4) score = 0.5 + sim;
-                    else return;
-                    if (score > bestScore) { bestScore = score; bestIdx = idx; }
-                });
-                if (bestScore > 0 && bestIdx >= 0) {
-                    const osm = merged[bestIdx];
+            var merged = osmSites.slice();
+            // Grid: 0.005° ≈ 500m cells for fast spatial lookup
+            var grid = {}, cellSize = 0.005;
+            function gKey(lat, lon) { return (Math.floor(lat/cellSize)) + ',' + (Math.floor(lon/cellSize)); }
+            function addToGrid(idx, lat, lon) {
+                var k = gKey(lat, lon); if (!grid[k]) grid[k] = []; grid[k].push(idx);
+            }
+            for (var i = 0; i < merged.length; i++) addToGrid(i, merged[i].lat, merged[i].lon || merged[i].lng);
+            function nearby(lat, lon) {
+                var cx = Math.floor(lat/cellSize), cy = Math.floor(lon/cellSize), out = [];
+                for (var dx = -1; dx <= 1; dx++) for (var dy = -1; dy <= 1; dy++) {
+                    var k = (cx+dx)+','+(cy+dy); if (grid[k]) out = out.concat(grid[k]);
+                }
+                return out;
+            }
+            p4nSites.forEach(function(p) {
+                var candidates = nearby(p.lat, p.lon || p.lng);
+                var bestDist = 501, bestIdx = -1;
+                for (var ci = 0; ci < candidates.length; ci++) {
+                    var s = merged[candidates[ci]];
+                    var dlat = (s.lat - p.lat) * 111000;
+                    var dlon = ((s.lon||s.lng) - (p.lon||p.lng)) * 111000 * Math.cos(s.lat * Math.PI / 180);
+                    var dist = Math.sqrt(dlat*dlat + dlon*dlon);
+                    if (dist < bestDist) { bestDist = dist; bestIdx = candidates[ci]; }
+                }
+                if (bestDist < 500 && bestIdx >= 0) {
+                    var osm = merged[bestIdx];
                     if (!osm.tags) osm.tags = {};
-                    const pRating = p.tags ? p.tags.p4n_rating : (p.rating || 0);
-                    const pReviews = p.tags ? p.tags.p4n_reviews : (p.review || 0);
-                    if (pRating > 0 && !(osm.tags.p4n_rating > 0)) {
-                        osm.tags.p4n_rating = pRating;
-                        osm.tags.p4n_reviews = pReviews;
+                    var pR = p.tags ? p.tags.p4n_rating : (p.rating||0);
+                    var pC = p.tags ? p.tags.p4n_reviews : (p.review||0);
+                    if (pR > 0 && !(osm.tags.p4n_rating > 0)) {
+                        osm.tags.p4n_rating = pR; osm.tags.p4n_reviews = pC;
                         osm.tags.p4n_url = p.tags ? p.tags.p4n_url : '';
                     }
-                    if (p.tags && p.tags.p4n_services && !osm.tags.p4n_services) osm.tags.p4n_services = p.tags.p4n_services;
-                    if (p.tags && p.tags.p4n_desc && !osm.tags.p4n_desc) osm.tags.p4n_desc = p.tags.p4n_desc;
-                    if (p.tags && p.tags.p4n_url && !osm.tags.p4n_url) osm.tags.p4n_url = p.tags.p4n_url;
-                    if (p.tags && p.tags.p4n_image && !osm.tags.p4n_image) osm.tags.p4n_image = p.tags.p4n_image;
+                    if (p.tags) {
+                        if (p.tags.p4n_services && !osm.tags.p4n_services) osm.tags.p4n_services = p.tags.p4n_services;
+                        if (p.tags.p4n_desc && !osm.tags.p4n_desc) osm.tags.p4n_desc = p.tags.p4n_desc;
+                        if (p.tags.p4n_url && !osm.tags.p4n_url) osm.tags.p4n_url = p.tags.p4n_url;
+                        if (p.tags.p4n_image && !osm.tags.p4n_image) osm.tags.p4n_image = p.tags.p4n_image;
+                    }
                 } else {
+                    var newIdx = merged.length;
                     merged.push(p);
+                    addToGrid(newIdx, p.lat, p.lon || p.lng);
                 }
             });
             return merged;
@@ -3882,16 +3877,16 @@ const allPOIs = [
             try {
             let sites = deduplicateSites(osmSites, p4nSites);
                 if (campingOpenOnly) sites = sites.filter(s => checkOpenStatus(s.tags.opening_hours) !== 'closed');
+                sites.forEach(function(s) {
+                    var r = (s.tags && s.tags.p4n_rating > 0) ? s.tags.p4n_rating : 0;
+                    var c = getCachedCampRating(s.tags ? s.tags.name : '', s.lat, s.lon || s.lng);
+                    if (c && c.rating > 0) r = Math.max(r, c.rating);
+                    s._sortRating = r;
+                });
                 sites.sort(function(a, b) {
-                    var rA = (a.tags && a.tags.p4n_rating > 0) ? a.tags.p4n_rating : 0;
-                    var rB = (b.tags && b.tags.p4n_rating > 0) ? b.tags.p4n_rating : 0;
-                    var cA = getCachedCampRating(a.tags ? a.tags.name : '', a.lat, a.lon || a.lng);
-                    var cB = getCachedCampRating(b.tags ? b.tags.name : '', b.lat, b.lon || b.lng);
-                    if (cA && cA.rating > 0) rA = Math.max(rA, cA.rating);
-                    if (cB && cB.rating > 0) rB = Math.max(rB, cB.rating);
-                    if (rA > 0 && rB === 0) return -1;
-                    if (rB > 0 && rA === 0) return 1;
-                    return rB - rA;
+                    if (a._sortRating > 0 && b._sortRating === 0) return -1;
+                    if (b._sortRating > 0 && a._sortRating === 0) return 1;
+                    return b._sortRating - a._sortRating;
                 });
                 let html = '';
                 if (sites.length === 0) {
