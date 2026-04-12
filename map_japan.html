@@ -6625,6 +6625,72 @@ const allPOIs = [
         }
         var _campingLoadId = 0;
         var _campingLastSearch = 0;
+        
+        function _renderCampingSites(sites, osmCount, p4nCount, osmFailed, loadId, isPreview) {
+            if (loadId !== _campingLoadId) return;
+            campingMarkers.forEach(function(m) { map.removeLayer(m); });
+            campingMarkers = [];
+            if (campingCluster) map.removeLayer(campingCluster);
+            campingCluster = L.markerClusterGroup({ maxClusterRadius: 40, disableClusteringAtZoom: 12,
+                iconCreateFunction: function(cluster) {
+                    return L.divIcon({ html: '<div style="background:#2d6b4f;color:#4ecca3;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;border:2px solid #4ecca3;">' + cluster.getChildCount() + '</div>', className: '', iconSize: [36, 36] });
+                }
+            });
+            if (campingOpenOnly) sites = sites.filter(function(s) { return checkOpenStatus(s.tags.opening_hours) !== 'closed'; });
+            sites.forEach(function(s) {
+                var r = (s.tags && s.tags.p4n_rating > 0) ? s.tags.p4n_rating : 0;
+                s._sortRating = r;
+            });
+            sites.sort(function(a, b) {
+                if (a._sortRating > 0 && b._sortRating === 0) return -1;
+                if (b._sortRating > 0 && a._sortRating === 0) return 1;
+                return b._sortRating - a._sortRating;
+            });
+            var ratedN = sites.filter(function(s){return s.tags&&s.tags.p4n_rating>0;}).length;
+            var html = '';
+            if (sites.length === 0) {
+                html = '<div class="camping-info">' + (isPreview ? '🔄 Lade Campingplätze...' : 'Keine Plätze gefunden. Zoome raus oder verschiebe die Karte.') + '</div>';
+            } else {
+                html = '<div class="camping-info">' + sites.length + ' Plätze · <span style="color:#4ecca3">' + ratedN + ' bewertet</span>' + (isPreview ? ' · <span style="color:#ff9800">🔄 OSM wird geladen...</span>' : ' gefunden') + '</div>';
+            }
+            sites.forEach(function(site, i) {
+                var name = site.tags.name || site.tags.operator || site.tags.description || (site.tags.p4n_type_label || (site.tags.tourism === 'camp_site' ? 'Campingplatz' : site.tags.tourism === 'caravan_site' ? 'Wohnmobilstellplatz' : site.tags.amenity === 'motorhome_station' ? 'Wohnmobil-Servicestation' : 'Stellplatz'));
+                var isP4N = site._p4n || (site.tags && site.tags.source === 'park4night');
+                if (minCampRatingFilter > 0) { var _br = site.tags.p4n_rating || 0; if (_br > 0 && _br < minCampRatingFilter) return; }
+                var type = site.tags.p4n_type || 'camping';
+                if (!site._p4n) {
+                    if (site.tags.tourism === 'caravan_site') type = 'caravan';
+                    if (site.tags.amenity === 'parking' || site.tags.tourism === 'camp_pitch') type = 'parking';
+                }
+                var marker = L.marker([site.lat, site.lon || site.lng], { icon: createCampingIcon(type) });
+                var typeLabel = isP4N ? (site.tags.p4n_type_label || {camping:'Campingplatz',caravan:'Wohnmobilstellplatz',parking:'Stellplatz/Parking'}[type]) : {camping:'Campingplatz',caravan:'Wohnmobilstellplatz',parking:'Stellplatz/Parking'}[type];
+                var popup = '<div style="min-width:200px"><strong>' + name + '</strong><br><span style="color:#4ecca3;font-size:12px">' + (typeLabel||'') + '</span>';
+                if (site.tags.p4n_rating > 0) popup += '<br>⭐ ' + site.tags.p4n_rating.toFixed(1) + ' (' + (site.tags.p4n_reviews||0) + ' Bewertungen)';
+                if (site.tags.opening_hours) popup += '<br>🕒 ' + site.tags.opening_hours;
+                if (site.tags.capacity) popup += '<br>📊 Kapazität: ' + site.tags.capacity;
+                if (site.tags.fee) popup += '<br>💰 ' + (site.tags.fee === 'yes' ? 'Kostenpflichtig' : site.tags.fee === 'no' ? 'Kostenlos' : site.tags.fee);
+                if (isP4N && site.tags.p4n_services) { var sv = site.tags.p4n_services; var si = ''; if(sv&1) si+='⚡'; if(sv&2) si+='💧'; if(sv&4) si+='🚿'; if(sv&8) si+='📶'; if(sv&16) si+='🚽'; if(sv&32) si+='♻️'; if(si) popup += '<br><span style="font-size:13px;letter-spacing:2px">' + si + '</span>'; }
+                if (isP4N && site.tags.p4n_url) popup += '<br><a href="' + site.tags.p4n_url + '" target="_blank" style="color:#6ea8fe">🅿️ Park4Night</a>';
+                popup += ' · <a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(name) + '+' + site.lat + ',' + (site.lon||site.lng) + '" target="_blank" style="color:#ff9800">📍 Maps</a>';
+                var ck = getCampKey(site);
+                popup += '<br><button class="fav-btn' + (isCampFav(ck) ? ' active' : '') + '" data-camp-key="' + ck + '" onclick="toggleFavoriteCamping(\'' + ck.replace(/'/g,"\\'") + '\',this);">' + (isCampFav(ck) ? '❤️' : '🤍') + '</button> <span style="font-size:11px;color:#b8c5d6">' + (isCampFav(ck) ? 'Favorit' : 'Favorit speichern') + '</span>';
+                popup += '</div>';
+                marker.bindPopup(popup, { maxWidth: 280 });
+                window._campingSiteData[ck] = { name: name, lat: site.lat, lon: site.lon||site.lng, type: typeLabel, tags: site.tags };
+                campingCluster.addLayer(marker);
+                campingMarkers.push(marker);
+                if (i < 50) {
+                    var campKey = ck;
+                    if (campingFavOnly && !isCampFav(campKey)) return;
+                    html += '<div class="camping-card" onclick="var m=campingMarkers[' + i + ']; if(m){map.setView(m.getLatLng(), 15); setTimeout(function(){m.openPopup()}, 300);}"><div class="camping-card-name"><button class="fav-btn' + (isCampFav(campKey) ? ' active' : '') + '" data-camp-key="' + campKey + '" onclick="event.stopPropagation();toggleFavoriteCamping(\'' + campKey.replace(/'/g,"\\'") + '\',this);">' + (isCampFav(campKey) ? '❤️' : '🤍') + '</button> ' + (i+1) + '. ' + name + '</div>';
+                    if (site.tags.p4n_rating > 0) html += '<div class="camping-card-details">⭐ ' + site.tags.p4n_rating.toFixed(1) + ' <span style="color:#8899aa">(' + (site.tags.p4n_reviews||0) + ')</span></div>';
+                    html += '</div>';
+                }
+            });
+            map.addLayer(campingCluster);
+            document.getElementById('camping-results').innerHTML = html;
+        }
+
         async function loadCampingSites() {
             var myLoadId = ++_campingLoadId;
             var now = Date.now();
@@ -6666,10 +6732,15 @@ const allPOIs = [
                 console.log('[P4N] ' + p4nSites.length + ' Plätze sofort geladen');
             } catch(p4nErr) { console.warn('[P4N] Fehler:', p4nErr.message); }
 
+            // === P4N sofort anzeigen ===
+            if (p4nSites.length > 0 && myLoadId === _campingLoadId) {
+                _renderCampingSites(p4nSites, 0, p4nSites.length, false, myLoadId, true);
+            }
+
             // Phase 2: OSM im Hintergrund laden (kann fehlschlagen)
             let osmSites = [];
             var osmFailed = false;
-            let query = '[out:json][timeout:15];(';
+            let query = '[out:json][timeout:10];(';
             var bb = south + ',' + west + ',' + north + ',' + east;
             if (campingTypes.camping) { query += 'node["tourism"="camp_site"](' + bb + ');way["tourism"="camp_site"](' + bb + ');relation["tourism"="camp_site"](' + bb + ');'; }
             if (campingTypes.caravan) { query += 'node["tourism"="caravan_site"](' + bb + ');way["tourism"="caravan_site"](' + bb + ');relation["tourism"="caravan_site"](' + bb + ');node["amenity"="motorhome_station"](' + bb + ');way["amenity"="motorhome_station"](' + bb + ');'; }
@@ -6677,7 +6748,6 @@ const allPOIs = [
             query += ');out center 300;';
 
             if (myLoadId !== _campingLoadId) return;
-            document.getElementById('camping-results').innerHTML = '<div class="camping-info">🔄 Lade Campingplätze... (' + p4nSites.length + ' P4N lokal geladen)</div>';
             campingCluster = L.markerClusterGroup({ maxClusterRadius: 40, disableClusteringAtZoom: 12,
                 iconCreateFunction: function(cluster) {
                     return L.divIcon({ html: '<div style="background:#2d6b4f;color:#4ecca3;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;border:2px solid #4ecca3;">' + cluster.getChildCount() + '</div>', className: '', iconSize: [36, 36] });
@@ -6686,7 +6756,11 @@ const allPOIs = [
 
             try {
                 const servers = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
-                const data = await safeFetchJSON(servers[0], { method: 'POST', body: 'data=' + encodeURIComponent(query) });
+                var _osmBody = 'data=' + encodeURIComponent(query);
+                const data = await Promise.any([
+                    safeFetchJSON(servers[0], { method: 'POST', body: _osmBody }),
+                    new Promise(function(res) { setTimeout(function() { safeFetchJSON(servers[1], { method: 'POST', body: _osmBody }).then(res).catch(function(){res(null);}); }, 2000); })
+                ]).catch(function() { return null; });
                 if (data && data.elements) {
                     osmSites = (data.elements || []).map(e => { if (!e.lat && e.center) { e.lat = e.center.lat; e.lon = e.center.lon; } return e; }).filter(e => e.lat && e.lon && e.tags);
                     console.log('[OSM] ' + osmSites.length + ' Plätze nachgeladen');
@@ -6694,6 +6768,7 @@ const allPOIs = [
             } catch(osmErr) { osmFailed = true; console.warn('[OSM] Nicht verfügbar:', osmErr.message); }
 
             try {
+            if (myLoadId !== _campingLoadId) return;
             let sites = deduplicateSites(osmSites, p4nSites);
                 if (campingOpenOnly) sites = sites.filter(s => checkOpenStatus(s.tags.opening_hours) !== 'closed');
                 sites.forEach(function(s) {
