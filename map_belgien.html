@@ -4257,6 +4257,56 @@ const allPOIs = [
         // Camping Google Bewertungen
         let campRatingCache = JSON.parse(localStorage.getItem('campRatingCache') || '{}');
         let minCampRatingFilter = 0;
+        // === Camping Bewertungen: Export/Import/Baseline ===
+        function exportCampRatings() {
+            var data = JSON.parse(localStorage.getItem('campRatingCache') || '{}');
+            var count = Object.keys(data).length;
+            if (count === 0) { alert('Keine Camping-Bewertungen im Cache.'); return; }
+            var blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'camp_ratings_BE.json';
+            a.click();
+            URL.revokeObjectURL(a.href);
+            alert(count + ' Camping-Bewertungen exportiert!');
+        }
+        function importCampRatings(input) {
+            var file = input.files[0]; if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    var data = JSON.parse(e.target.result);
+                    var count = 0;
+                    Object.keys(data).forEach(function(k) {
+                        if (data[k] && data[k].rating > 0 && !(campRatingCache[k] && campRatingCache[k].rating > 0)) {
+                            campRatingCache[k] = data[k];
+                            count++;
+                        }
+                    });
+                    localStorage.setItem('campRatingCache', JSON.stringify(campRatingCache));
+                    alert(count + ' neue Camping-Bewertungen importiert!');
+                    if (campingMode) loadCampingSites();
+                } catch(err) { alert('Fehler beim Import: ' + err.message); }
+            };
+            reader.readAsText(file);
+        }
+        (function loadBaselineCampRatings() {
+            fetch('camp_ratings_BE.json').then(function(r) { return r.ok ? r.json() : null; }).then(function(data) {
+                if (!data || typeof data !== 'object') return;
+                var merged = 0;
+                Object.keys(data).forEach(function(k) {
+                    if (data[k] && data[k].rating > 0 && !(campRatingCache[k] && campRatingCache[k].rating > 0)) {
+                        campRatingCache[k] = data[k];
+                        merged++;
+                    }
+                });
+                if (merged > 0) {
+                    localStorage.setItem('campRatingCache', JSON.stringify(campRatingCache));
+                    console.log('[Camp Ratings] ' + merged + ' Baseline-Bewertungen aus JSON geladen');
+                }
+            }).catch(function() {});
+        })();
+
 
         function getCampRatingCacheKey(name, lat, lon) {
             return name.substring(0,40).replace(/[^a-zA-Z0-9]/g,'_') + '_' + parseFloat(lat).toFixed(3) + '_' + parseFloat(lon).toFixed(3);
@@ -6212,6 +6262,12 @@ var ck1 = getCampKey(site);
                 <button class="settings-load-btn" id="rating-load-btn" onclick="loadAllRatings()">⭐ Google Bewertungen für alle POIs laden</button>
                 <button class="settings-load-btn" style="background:#e94560;margin-top:6px;" onclick="clearRatingCache()">🗑️ Bewertungs-Cache löschen &amp; neu laden</button>
                 <div class="settings-status" id="rating-progress"></div>
+            </div>
+            <div class="settings-group">
+                <label>🏕️ Camping-Bewertungen</label>
+                <button class="settings-load-btn" style="background:#2d6b4f;margin-top:4px;" onclick="exportCampRatings()">📥 Camping-Bewertungen exportieren (JSON)</button>
+                <label class="settings-load-btn" style="background:#1a4a6e;margin-top:6px;cursor:pointer;text-align:center;display:block;">📤 Camping-Bewertungen importieren<input type="file" accept=".json" style="display:none" onchange="importCampRatings(this)"></label>
+                <div class="settings-hint">Exportiere Camping-Bewertungen aus dem Browser-Cache als JSON-Datei. So gehen sie beim Gerätewechsel nicht verloren.</div>
             </div>
         </div>
     </div>
