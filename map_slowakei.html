@@ -5545,14 +5545,22 @@ const allPOIs = [
         }
 
         var _campingSearchCenter = null;
+        var _campingReloadTimer = null;
         function checkCampingMoved() {
             if (!campingMode || map.getZoom() < 8) return;
             var c = map.getCenter();
             if (_campingSearchCenter) {
-                var moved = Math.abs(c.lat - _campingSearchCenter.lat) > 0.005 || Math.abs(c.lng - _campingSearchCenter.lng) > 0.005;
-                if (moved) {
+                var dLat = Math.abs(c.lat - _campingSearchCenter.lat);
+                var dLng = Math.abs(c.lng - _campingSearchCenter.lng);
+                var movedSmall = dLat > 0.005 || dLng > 0.005;
+                var movedBig = dLat > 0.05 || dLng > 0.05;
+                if (movedSmall) {
                     var btn = document.getElementById('camping-reload-btn');
                     if (btn) btn.classList.add('visible');
+                }
+                if (movedBig) {
+                    if (_campingReloadTimer) clearTimeout(_campingReloadTimer);
+                    _campingReloadTimer = setTimeout(function() { loadCampingSites(); }, 1500);
                 }
             }
         }
