@@ -2430,22 +2430,32 @@ const allPOIs = [
             };
             reader.readAsText(file);
         }
+        var _campBaselineRatings = [];
         (function loadBaselineCampRatings() {
             fetch('camp_ratings_CA_Z.json').then(function(r) { return r.ok ? r.json() : null; }).then(function(data) {
-                if (!data || typeof data !== 'object') return;
-                var merged = 0;
-                Object.keys(data).forEach(function(k) {
-                    if (data[k] && data[k].rating > 0 && !(campRatingCache[k] && campRatingCache[k].rating > 0)) {
-                        campRatingCache[k] = data[k];
-                        merged++;
-                    }
-                });
-                if (merged > 0) {
-                    localStorage.setItem('campRatingCache', JSON.stringify(campRatingCache));
-                    console.log('[Camp Ratings] ' + merged + ' Baseline-Bewertungen aus JSON geladen');
-                }
+                if (!data || !Array.isArray(data)) return;
+                _campBaselineRatings = data;
+                console.log('[Camp Ratings] ' + data.length + ' P4N-Bewertungen geladen');
             }).catch(function() {});
         })();
+        function findNearestCampRating(lat, lon, maxDistM) {
+            if (!_campBaselineRatings.length) return null;
+            maxDistM = maxDistM || 500;
+            var best = null, bestDist = maxDistM + 1;
+            var latDeg = maxDistM / 111000;
+            // Binary search for lat range
+            var lo = 0, hi = _campBaselineRatings.length - 1;
+            while (lo < hi) { var mid = (lo + hi) >> 1; if (_campBaselineRatings[mid][0] < lat - latDeg) lo = mid + 1; else hi = mid; }
+            for (var i = lo; i < _campBaselineRatings.length; i++) {
+                var e = _campBaselineRatings[i];
+                if (e[0] > lat + latDeg) break;
+                var dlat = (e[0] - lat) * 111000;
+                var dlon = (e[1] - lon) * 111000 * Math.cos(lat * Math.PI / 180);
+                var dist = Math.sqrt(dlat * dlat + dlon * dlon);
+                if (dist < bestDist) { bestDist = dist; best = e; }
+            }
+            return best ? { rating: best[2], count: best[3], dist: Math.round(bestDist) } : null;
+        }
 
 
         function getCampRatingCacheKey(name, lat, lon) {
@@ -2483,7 +2493,9 @@ const allPOIs = [
 
         function getCachedCampRating(name, lat, lon) {
             const ckey = getCampRatingCacheKey(name, lat, lon);
-            return campRatingCache[ckey] || null;
+            var cached = campRatingCache[ckey];
+            if (cached && cached.rating > 0) return cached;
+            return findNearestCampRating(parseFloat(lat), parseFloat(lon), 500);
         }
 
         function setCampRatingFilter(min, btn) {
