@@ -4061,6 +4061,26 @@ const allPOIs = [
             weihnachten: 'https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=400&q=80'
         };
         const _defaultFallback = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80';
+
+        // Baseline-Fotos aus JSON laden (vorab von Wikipedia geholt)
+        (function loadBaselinePhotos() {
+            fetch('photos_FR.json').then(function(r) { return r.ok ? r.json() : null; }).then(function(data) {
+                if (!data || typeof data !== 'object') return;
+                var loaded = 0;
+                Object.keys(data).forEach(function(k) {
+                    if (!_photoCache[k]) { _photoCache[k] = data[k]; loaded++; }
+                });
+                if (loaded > 0) {
+                    try { localStorage.setItem('photoCacheFR', JSON.stringify(_photoCache)); } catch(e) {}
+                    console.log('[Photos] ' + loaded + ' Baseline-Fotos geladen');
+                    // Update already visible images
+                    document.querySelectorAll('img[data-poi-photo]').forEach(function(img) {
+                        var pid = img.getAttribute('data-poi-photo');
+                        if (_photoCache[pid] && img.src.includes('unsplash.com')) { img.src = _photoCache[pid]; }
+                    });
+                }
+            }).catch(function() {});
+        })();
         function getCategoryFallback(category) { return _categoryFallbacks[category] || _defaultFallback; }
         function getPoiPhoto(poi) {
             if (poi.image) return poi.image;
