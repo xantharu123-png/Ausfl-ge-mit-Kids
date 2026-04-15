@@ -6468,11 +6468,6 @@
             // Phase 2: OSM laden (kann fehlschlagen)
             let osmSites = [];
             var osmFailed = false;
-            campingCluster = L.markerClusterGroup({ maxClusterRadius: 40, disableClusteringAtZoom: 12,
-                iconCreateFunction: function(cluster) {
-                    return L.divIcon({ html: '<div style="background:#2d6b4f;color:#4ecca3;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;border:2px solid #4ecca3;">' + cluster.getChildCount() + '</div>', className: '', iconSize: [36, 36] });
-                }
-            });
             let query = '[out:json][timeout:15];(';
             var bb = south + ',' + west + ',' + north + ',' + east;
             if (campingTypes.camping) { query += 'node["tourism"="camp_site"](' + bb + ');way["tourism"="camp_site"](' + bb + ');relation["tourism"="camp_site"](' + bb + ');'; }
