@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Familienguide">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="description" content="Interaktiver Familienreiseführer 2026 — 30+ Länder, Top-Sehenswürdigkeiten, Camping, Routenplaner">
+    <link rel="manifest" href="manifest.json">
+    <title>Familienguide 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #1a1a2e;
+            --bg-card: #16213e;
+            --bg-hover: #1f2b47;
+            --primary: #e94560;
+            --accent: #4ecca3;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #7f8c8d;
+            --border: rgba(255,255,255,0.1);
+        }
+        html, body {
+            min-height: 100vh;
+            background: var(--bg-dark);
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text-primary);
+        }
+
+        /* ========== AUTH OVERLAY ========== */
+        .auth-overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .auth-overlay.hidden { display: none; }
+        .auth-card {
+            background: rgba(22,33,62,0.95);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px 32px;
+            max-width: 420px;
+            width: 100%;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+        }
+        .auth-logo { text-align: center; margin-bottom: 32px; }
+        .auth-logo-icon {
+            width: 80px; height: 80px;
+            background: linear-gradient(135deg, #e94560, #9b59b6);
+            border-radius: 22px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 40px; margin-bottom: 16px;
+            box-shadow: 0 10px 30px rgba(233,69,96,0.3);
+        }
+        .auth-logo h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            background: linear-gradient(135deg, #fff, #94a3b8);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .auth-logo p { color: var(--text-muted); font-size: 0.9rem; margin-top: 6px; }
+        .auth-input {
+            width: 100%; padding: 14px 16px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px; color: white;
+            font-size: 0.95rem; font-family: inherit;
+            margin-bottom: 12px; transition: border-color 0.2s;
+        }
+        .auth-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(233,69,96,0.15); }
+        .auth-input::placeholder { color: #5a6a7a; }
+        .auth-btn {
+            width: 100%; padding: 14px; border: none; border-radius: 12px;
+            font-size: 1rem; font-weight: 600; font-family: inherit;
+            cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .auth-btn-primary { background: linear-gradient(135deg, #e94560, #d63651); color: white; margin-bottom: 10px; }
+        .auth-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(233,69,96,0.3); }
+        .auth-btn-google { background: white; color: #333; margin-bottom: 10px; }
+        .auth-btn-google:hover { background: #f5f5f5; }
+        .auth-btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); margin-bottom: 10px; }
+        .auth-btn-ghost:hover { background: rgba(255,255,255,0.05); }
+        .auth-divider { display: flex; align-items: center; gap: 12px; margin: 16px 0; color: var(--text-muted); font-size: 0.8rem; }
+        .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+        .auth-error { color: #e94560; font-size: 0.82rem; margin-bottom: 8px; min-height: 20px; }
+        .auth-switch { text-align: center; margin-top: 16px; font-size: 0.85rem; color: var(--text-muted); }
+        .auth-switch a { color: var(--accent); cursor: pointer; text-decoration: none; }
+
+        /* ========== DASHBOARD ========== */
+        .dashboard { display: none; min-height: 100vh; }
+        .dashboard.visible { display: block; }
+        .dash-header {
+            padding: 24px 24px 0;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 100;
+            background: var(--bg-dark);
+            padding-bottom: 16px;
+        }
+        .dash-logo { display: flex; align-items: center; gap: 12px; }
+        .dash-logo-icon {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, #e94560, #9b59b6);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 22px;
+        }
+        .dash-logo h1 {
+            font-family: 'Playfair Display', serif; font-size: 1.3rem;
+            background: linear-gradient(135deg, #fff, #94a3b8);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .dash-logo p { font-size: 0.7rem; color: var(--text-muted); }
+        .dash-user { display: flex; align-items: center; gap: 10px; position: relative; }
+        .plan-badge {
+            padding: 4px 12px; border-radius: 12px;
+            font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .plan-badge.free { background: rgba(255,255,255,0.1); color: var(--text-muted); }
+        .plan-badge.premium { background: linear-gradient(135deg, #f1c40f, #f39c12); color: #1a1a2e; }
+        .user-avatar {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: linear-gradient(135deg, #e94560, #9b59b6);
+            color: white; border: none; font-size: 0.9rem; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+        .user-menu {
+            position: absolute; top: 100%; right: 0; margin-top: 8px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 8px; min-width: 220px;
+            display: none; z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        .user-menu.open { display: block; }
+        .user-menu-item {
+            padding: 10px 14px; border-radius: 8px; cursor: pointer;
+            font-size: 0.85rem; color: var(--text-secondary);
+            display: flex; align-items: center; gap: 8px; transition: background 0.15s;
+        }
+        .user-menu-item:hover { background: var(--bg-hover); color: white; }
+
+        /* Upgrade Banner */
+        .upgrade-strip {
+            margin: 0 24px 16px;
+            background: linear-gradient(135deg, rgba(233,69,96,0.12), rgba(155,89,182,0.12));
+            border: 1px solid rgba(233,69,96,0.25);
+            border-radius: 16px; padding: 16px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .upgrade-strip:hover { background: linear-gradient(135deg, rgba(233,69,96,0.2), rgba(155,89,182,0.2)); transform: translateY(-1px); }
+        .upgrade-strip-text h3 { font-size: 0.95rem; margin-bottom: 2px; }
+        .upgrade-strip-text p { font-size: 0.78rem; color: var(--text-secondary); }
+        .upgrade-strip-btn {
+            padding: 8px 18px; background: var(--primary); color: white;
+            border: none; border-radius: 10px; font-weight: 600; font-size: 0.82rem;
+            cursor: pointer; white-space: nowrap;
+        }
+        .upgrade-strip.hidden { display: none; }
+
+        /* Install Banner */
+        .install-strip {
+            margin: 0 24px 16px;
+            background: rgba(99,102,241,0.12);
+            border: 1px solid rgba(99,102,241,0.25);
+            border-radius: 16px; padding: 14px 20px;
+            display: none; align-items: center; justify-content: space-between;
+            cursor: pointer;
+        }
+        .install-strip.visible { display: flex; }
+        .install-strip p { font-size: 0.85rem; }
+        .install-strip-btn {
+            padding: 8px 18px; background: #6366f1; color: white;
+            border: none; border-radius: 10px; font-weight: 600; font-size: 0.82rem;
+            cursor: pointer; white-space: nowrap;
+        }
+
+        /* Search */
+        .dash-search {
+            margin: 0 24px 20px; position: relative;
+        }
+        .dash-search input {
+            width: 100%; padding: 14px 16px 14px 44px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 14px; color: white; font-size: 0.95rem; font-family: inherit;
+        }
+        .dash-search input:focus { outline: none; border-color: var(--primary); }
+        .dash-search input::placeholder { color: var(--text-muted); }
+        .dash-search::before { content: "🔍"; position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 1rem; }
+
+        /* Country Grid */
+        .section-title {
+            font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.8px;
+            padding: 0 24px; margin-bottom: 12px;
+        }
+        .country-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px; padding: 0 24px 24px;
+        }
+        .country-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+        }
+        .country-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 24px rgba(233,69,96,0.15);
+        }
+        .country-card-flag {
+            width: 48px; height: 36px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .country-card-name {
+            font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;
+        }
+        .country-card-count {
+            font-size: 0.72rem; color: var(--accent);
+        }
+        .country-card-lock {
+            position: absolute; top: 10px; right: 10px;
+            font-size: 0.85rem; opacity: 0.6;
+        }
+        .country-card.locked {
+            opacity: 0.55;
+        }
+        .country-card.locked:hover {
+            border-color: rgba(255,255,255,0.2);
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* Premium Modal */
+        .premium-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+            z-index: 99998; display: none; align-items: center; justify-content: center; padding: 20px;
+        }
+        .premium-modal.open { display: flex; }
+        .pm-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 24px; padding: 36px 28px; max-width: 400px; width: 100%; text-align: center;
+        }
+        .pm-card h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 6px; }
+        .pm-card .subtitle { color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 20px; }
+        .pm-features { text-align: left; margin: 0 0 20px; }
+        .pm-feat { display: flex; align-items: center; gap: 10px; padding: 7px 0; font-size: 0.88rem; color: var(--text-secondary); }
+        .pm-feat .ck { color: var(--accent); font-weight: 700; }
+        .pm-price { font-size: 2.2rem; font-weight: 700; color: white; }
+        .pm-price span { font-size: 0.88rem; font-weight: 400; color: var(--text-muted); }
+        .pm-period { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 20px; }
+
+        /* Stats */
+        .dash-stats {
+            display: flex; gap: 12px; padding: 0 24px 20px; flex-wrap: wrap;
+        }
+        .dash-stat {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 14px 18px; flex: 1; min-width: 100px;
+        }
+        .dash-stat-value { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+        .dash-stat-label { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+
+        /* Mobile */
+        @media (max-width: 640px) {
+            .dash-header { padding: 16px 16px 12px; }
+            .dash-logo-icon { width: 36px; height: 36px; font-size: 18px; border-radius: 10px; }
+            .dash-logo h1 { font-size: 1.1rem; }
+            .country-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 0 16px 16px; }
+            .country-card { padding: 16px 12px; }
+            .section-title { padding: 0 16px; }
+            .dash-search { margin: 0 16px 16px; }
+            .upgrade-strip { margin: 0 16px 12px; }
+            .install-strip { margin: 0 16px 12px; }
+            .dash-stats { padding: 0 16px 16px; }
+            .auth-card { padding: 28px 20px; }
+            .auth-logo-icon { width: 64px; height: 64px; font-size: 32px; }
+            .auth-logo h1 { font-size: 1.5rem; }
+        }
+        @media (max-width: 380px) {
+            .country-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            .country-card-flag { width: 40px; height: 30px; }
+            .country-card-name { font-size: 0.82rem; }
+        }
+        @supports(padding: max(0px)) {
+            .dash-header { padding-top: max(16px, env(safe-area-inset-top)); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== AUTH OVERLAY ===== -->
+<div class="auth-overlay" id="auth-overlay">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <div class="auth-logo-icon">🗺️</div>
+            <h1>Familienguide 2026</h1>
+            <p>30+ Länder — interaktiv — für die ganze Familie</p>
+        </div>
+        <div id="login-form">
+            <button class="auth-btn auth-btn-google" onclick="loginWithGoogle()">
+                <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                Mit Google anmelden
+            </button>
+            <div class="auth-divider">oder mit E-Mail</div>
+            <input type="email" class="auth-input" id="login-email" placeholder="E-Mail-Adresse" autocomplete="email">
+            <input type="password" class="auth-input" id="login-password" placeholder="Passwort" autocomplete="current-password">
+            <div class="auth-error" id="login-error"></div>
+            <button class="auth-btn auth-btn-primary" onclick="loginWithEmail()">Anmelden</button>
+            <button class="auth-btn auth-btn-ghost" onclick="skipLogin()">👀 Ohne Konto weitermachen</button>
+            <div class="auth-switch">Noch kein Konto? <a onclick="showSignupForm()">Registrieren</a></div>
+        </div>
+        <div id="signup-form" style="display:none;">
+            <input type="text" class="auth-input" id="signup-name" placeholder="Dein Name" autocomplete="name">
+            <input type="email" class="auth-input" id="signup-email" placeholder="E-Mail-Adresse" autocomplete="email">
+            <input type="password" class="auth-input" id="signup-password" placeholder="Passwort (mind. 6 Zeichen)" autocomplete="new-password">
+            <div class="auth-error" id="signup-error"></div>
+            <button class="auth-btn auth-btn-primary" onclick="signupWithEmail()">Konto erstellen</button>
+            <div class="auth-switch">Schon registriert? <a onclick="showLoginForm()">Anmelden</a></div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== PREMIUM MODAL ===== -->
+<div class="premium-modal" id="premium-modal" onclick="if(event.target===this)closePremiumModal()">
+    <div class="pm-card">
+        <h2 id="premium-title">⭐ Premium</h2>
+        <p class="subtitle" id="premium-subtitle">Alle Laender. Offline. Unbegrenzt.</p>
+        <div class="pm-features">
+            <div class="pm-feat"><span class="ck">✓</span> Alle 30+ Länder-Guides freigeschaltet</div>
+            <div class="pm-feat"><span class="ck">✓</span> Tausende POIs mit Fotos & Beschreibungen</div>
+            <div class="pm-feat"><span class="ck">✓</span> Offline-Karten & Cloud-Sync</div>
+            <div class="pm-feat"><span class="ck">✓</span> Camping-Suche & Routenplaner</div>
+            <div class="pm-feat"><span class="ck">✓</span> Kein Limit, keine Werbung</div>
+        </div>
+        <div class="pm-price">4,99€ <span>/ Monat</span></div>
+        <p class="pm-period">oder 39,99€ / Jahr (spar 33%)</p>
+        <button class="auth-btn auth-btn-primary" id="checkout-btn" onclick="startCheckout()">Jetzt Premium werden</button>
+        <button class="auth-btn auth-btn-ghost" onclick="closePremiumModal()" style="margin-top:6px;">Vielleicht später</button>
+    </div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div class="dashboard" id="dashboard">
+    <div class="dash-header">
+        <div class="dash-logo">
+            <div class="dash-logo-icon">🗺️</div>
+            <div>
+                <h1>Familienguide 2026</h1>
+                <p>Interaktiver Reiseführer für Familien</p>
+            </div>
+        </div>
+        <div class="dash-user">
+            <span class="plan-badge free" id="plan-badge">Free</span>
+            <button class="user-avatar" id="user-avatar" onclick="document.getElementById('user-menu').classList.toggle('open')">M</button>
+            <div class="user-menu" id="user-menu">
+                <div class="user-menu-item" id="user-email-display" style="font-size:0.78rem;color:var(--text-muted);pointer-events:none;"></div>
+                <div class="user-menu-item" onclick="openPremiumModal()">⭐ Premium upgraden</div>
+                <div class="user-menu-item" id="install-menu" style="display:none;" onclick="installPWA()">📲 App installieren</div>
+                <div class="user-menu-item" onclick="logout()" style="color:#e94560;">🚪 Abmelden</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upgrade Banner -->
+    <div class="upgrade-strip" id="upgrade-strip" onclick="openPremiumModal()">
+        <div class="upgrade-strip-text">
+            <h3>⭐ Alle Länder freischalten</h3>
+            <p>Premium: Offline, Cloud-Sync, keine Limits</p>
+        </div>
+        <button class="upgrade-strip-btn">Upgraden</button>
+    </div>
+
+    <!-- Install Banner -->
+    <div class="install-strip" id="install-strip" onclick="installPWA()">
+        <p>📲 <strong>Als App installieren</strong> — schneller Zugriff vom Homescreen</p>
+        <button class="install-strip-btn">Installieren</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="dash-stats">
+        <div class="dash-stat">
+            <div class="dash-stat-value" id="stat-countries">32</div>
+            <div class="dash-stat-label">Länder</div>
+        </div>
+        <div class="dash-stat">
+            <div class="dash-stat-value" id="stat-pois">10.000+</div>
+            <div class="dash-stat-label">Sehenswürdigkeiten</div>
+        </div>
+        <div class="dash-stat">
+            <div class="dash-stat-value" id="stat-camping">∞</div>
+            <div class="dash-stat-label">Campingplätze</div>
+        </div>
+    </div>
+
+    <!-- Search -->
+    <div class="dash-search">
+        <input type="text" id="country-search" placeholder="Land suchen..." oninput="filterCountries(this.value)">
+    </div>
+
+    <!-- Europa -->
+    <div class="section-title">🌍 Europa</div>
+    <div class="country-grid" id="grid-europa"></div>
+
+    <!-- Naher Osten & Asien -->
+    <div class="section-title">🌏 Naher Osten & Asien</div>
+    <div class="country-grid" id="grid-asia"></div>
+
+    <!-- Nordamerika -->
+    <div class="section-title">🌎 Nordamerika</div>
+    <div class="country-grid" id="grid-america"></div>
+</div>
+
+<script src="guide-config.js"></script>
+<script>
+// ===== COUNTRY DATA =====
+const COUNTRIES = [
+    // Europa
+    { name: "Schweiz", code: "ch", file: "index.html", pois: "2.400+", region: "europa", free: true },
+    { name: "Deutschland", code: "de", file: "map_deutschland.html", pois: "3.000+", region: "europa", free: true },
+    { name: "Frankreich", code: "fr", file: "map_frankreich.html", pois: "897", region: "europa", free: true },
+    { name: "Österreich", code: "at", file: "map_oesterreich.html", pois: "1.500+", region: "europa", free: true },
+    { name: "Italien", code: "it", file: "map_italien.html", pois: "2.000+", region: "europa", free: false },
+    { name: "Spanien", code: "es", file: "map_spanien.html", pois: "1.800+", region: "europa", free: false },
+    { name: "Portugal", code: "pt", file: "map_portugal.html", pois: "800+", region: "europa", free: false },
+    { name: "Niederlande", code: "nl", file: "map_niederlande.html", pois: "600+", region: "europa", free: false },
+    { name: "Belgien", code: "be", file: "map_belgien.html", pois: "400+", region: "europa", free: false },
+    { name: "Luxemburg", code: "lu", file: "map_luxemburg.html", pois: "200+", region: "europa", free: false },
+    { name: "Norwegen", code: "no", file: "map_norwegen.html", pois: "600+", region: "europa", free: false },
+    { name: "Schweden", code: "se", file: "map_schweden.html", pois: "500+", region: "europa", free: false },
+    { name: "Finnland", code: "fi", file: "map_finnland.html", pois: "400+", region: "europa", free: false },
+    { name: "Island", code: "is", file: "map_island.html", pois: "350+", region: "europa", free: false },
+    { name: "Färöer", code: "fo", file: "map_faeroeer.html", pois: "100+", region: "europa", free: false },
+    { name: "Polen", code: "pl", file: "map_polen.html", pois: "800+", region: "europa", free: false },
+    { name: "Tschechien", code: "cz", file: "map_tschechien.html", pois: "500+", region: "europa", free: false },
+    { name: "Slowakei", code: "sk", file: "map_slowakei.html", pois: "300+", region: "europa", free: false },
+    { name: "Slowenien", code: "si", file: "map_slowenien.html", pois: "400+", region: "europa", free: false },
+    { name: "Kroatien", code: "hr", file: "map_kroatien.html", pois: "600+", region: "europa", free: false },
+    { name: "Bosnien", code: "ba", file: "map_bosnien.html", pois: "200+", region: "europa", free: false },
+    { name: "Griechenland", code: "gr", file: "map_griechenland.html", pois: "800+", region: "europa", free: false },
+    { name: "Zypern", code: "cy", file: "map_zypern.html", pois: "200+", region: "europa", free: false },
+    // Naher Osten & Asien
+    { name: "VAE", code: "ae", file: "map_vae.html", pois: "300+", region: "asia", free: false },
+    { name: "Katar", code: "qa", file: "map_katar.html", pois: "150+", region: "asia", free: false },
+    { name: "Japan", code: "jp", file: "map_japan.html", pois: "800+", region: "asia", free: false },
+    // Nordamerika
+    { name: "Kanada West", code: "ca", file: "map_kanada_west.html", pois: "500+", region: "america", free: false },
+    { name: "Kanada Zentral", code: "ca", file: "map_kanada_zentral.html", pois: "300+", region: "america", free: false },
+    { name: "Kanada Ontario", code: "ca", file: "map_kanada_ontario.html", pois: "400+", region: "america", free: false },
+    { name: "Kanada Ost", code: "ca", file: "map_kanada_ost.html", pois: "350+", region: "america", free: false },
+];
+
+const GUIDE_CONFIG = window.GuideConfig || {
+    PREMIUM_PLAN: 'premium',
+    COUNTRY_COUNT: 30,
+    FREE_COUNTRY_FILES: ['index.html', 'map_deutschland.html', 'map_frankreich.html', 'map_oesterreich.html'],
+    normalizeFileName(value) {
+        if (!value) return '';
+        return String(value).split(/[?#]/)[0].split('/').pop();
+    },
+    getCountryLabel() {
+        return '';
+    },
+    isLockedCountryFile(fileName, userPlan) {
+        if (userPlan === 'premium') return false;
+        const normalized = this.normalizeFileName(fileName);
+        return !!normalized && this.FREE_COUNTRY_FILES.indexOf(normalized) === -1;
+    },
+    getUpgradeUrl(fileName) {
+        const params = new URLSearchParams();
+        params.set('upgrade', '1');
+        const normalized = this.normalizeFileName(fileName);
+        if (normalized) params.set('from', normalized);
+        return 'app.html?' + params.toString();
+    }
+};
+
+// ===== SUPABASE CONFIG =====
+const SUPABASE_URL = localStorage.getItem('fg_supabase_url') || '';
+const SUPABASE_ANON_KEY = localStorage.getItem('fg_supabase_key') || '';
+let sb = null, currentUser = null, userPlan = 'free';
+
+// ===== AUTH =====
+async function initApp() {
+    if (SUPABASE_URL && SUPABASE_ANON_KEY && typeof window.supabase !== 'undefined') {
+        try {
+            sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            const { data: { session } } = await sb.auth.getSession();
+            if (session) { currentUser = session.user; await loadPlan(); showDashboard(); return; }
+            sb.auth.onAuthStateChange(async (ev, session) => {
+                if (ev === 'SIGNED_IN' && session) { currentUser = session.user; await loadPlan(); showDashboard(); }
+                else if (ev === 'SIGNED_OUT') { currentUser = null; userPlan = 'free'; showAuth(); }
+            });
+        } catch(e) { console.warn('Supabase init:', e); }
+    }
+    const local = localStorage.getItem('fg_user');
+    if (local) {
+        try {
+            currentUser = JSON.parse(local);
+            userPlan = localStorage.getItem('fg_plan') || 'free';
+            showDashboard();
+            return;
+        } catch(e) {
+            localStorage.removeItem('fg_user');
+            localStorage.removeItem('fg_plan');
+        }
+    }
+    showAuth();
+}
+
+async function loadPlan() {
+    if (!sb || !currentUser) return;
+    try {
+        const { data } = await sb.from('user_profiles').select('plan').eq('user_id', currentUser.id).single();
+        if (data) userPlan = data.plan || 'free';
+    } catch(e) { userPlan = localStorage.getItem('fg_plan') || 'free'; }
+}
+
+function showAuth() {
+    document.getElementById('auth-overlay').classList.remove('hidden');
+    document.getElementById('dashboard').classList.remove('visible');
+}
+function showDashboard() {
+    // Persist user + plan to localStorage so map pages can read it via auth-guard.js
+    if (currentUser) localStorage.setItem('fg_user', JSON.stringify(currentUser));
+    if (userPlan) localStorage.setItem('fg_plan', userPlan);
+    document.getElementById('auth-overlay').classList.add('hidden');
+    document.getElementById('dashboard').classList.add('visible');
+    renderDashboard();
+    // Auto-open premium modal if redirected from map with ?upgrade=1
+    if (new URLSearchParams(location.search).get('upgrade') === '1') {
+        openPremiumModal();
+        history.replaceState(null, '', location.pathname);
+    }
+}
+
+async function loginWithEmail() {
+    const email = document.getElementById('login-email').value.trim();
+    const pw = document.getElementById('login-password').value;
+    const err = document.getElementById('login-error');
+    if (!email || !pw) { err.textContent = 'Bitte E-Mail und Passwort eingeben'; return; }
+    if (sb) {
+        const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+        if (error) { err.textContent = error.message.includes('Invalid') ? 'E-Mail oder Passwort falsch' : error.message; return; }
+    } else {
+        currentUser = { email, user_metadata: { full_name: email.split('@')[0] } };
+        localStorage.setItem('fg_user', JSON.stringify(currentUser));
+        userPlan = localStorage.getItem('fg_plan') || 'free';
+        showDashboard();
+    }
+}
+
+async function signupWithEmail() {
+    const name = document.getElementById('signup-name').value.trim();
+    const email = document.getElementById('signup-email').value.trim();
+    const pw = document.getElementById('signup-password').value;
+    const err = document.getElementById('signup-error');
+    if (!email || !pw) { err.textContent = 'Bitte alle Felder ausfüllen'; return; }
+    if (pw.length < 6) { err.textContent = 'Mind. 6 Zeichen'; return; }
+    if (sb) {
+        const { error } = await sb.auth.signUp({ email, password: pw, options: { data: { full_name: name } } });
+        if (error) { err.textContent = error.message; return; }
+        err.style.color = '#4ecca3';
+        err.textContent = '✓ Bestätigungsmail gesendet!';
+    } else {
+        currentUser = { email, user_metadata: { full_name: name } };
+        localStorage.setItem('fg_user', JSON.stringify(currentUser));
+        userPlan = 'free'; localStorage.setItem('fg_plan', 'free');
+        showDashboard();
+    }
+}
+
+async function loginWithGoogle() {
+    if (!sb) { document.getElementById('login-error').textContent = 'Supabase nicht konfiguriert'; return; }
+    await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + '/app.html' } });
+}
+
+function skipLogin() {
+    currentUser = { email: 'guest', user_metadata: { full_name: 'Gast' } };
+    userPlan = 'free';
+    showDashboard();
+}
+
+function logout() {
+    if (sb) sb.auth.signOut();
+    localStorage.removeItem('fg_user');
+    localStorage.removeItem('fg_plan');
+    currentUser = null; userPlan = 'free';
+    document.getElementById('user-menu').classList.remove('open');
+    showAuth();
+}
+
+function showSignupForm() { document.getElementById('login-form').style.display='none'; document.getElementById('signup-form').style.display='block'; }
+function showLoginForm() { document.getElementById('login-form').style.display='block'; document.getElementById('signup-form').style.display='none'; }
+
+// ===== DASHBOARD RENDER =====
+function renderDashboard() {
+    // User info
+    const name = currentUser?.user_metadata?.full_name || currentUser?.email?.split('@')[0] || 'G';
+    document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+    document.getElementById('user-email-display').textContent = currentUser?.email || '';
+    document.getElementById('stat-countries').textContent = GUIDE_CONFIG.COUNTRY_COUNT || COUNTRIES.length;
+
+    const badge = document.getElementById('plan-badge');
+    if (userPlan === 'premium') {
+        badge.textContent = '⭐ Premium'; badge.className = 'plan-badge premium';
+        document.getElementById('upgrade-strip').classList.add('hidden');
+    } else {
+        badge.textContent = 'Free'; badge.className = 'plan-badge free';
+        document.getElementById('upgrade-strip').classList.remove('hidden');
+    }
+
+    // Render country grids
+    renderGrid('grid-europa', COUNTRIES.filter(c => c.region === 'europa'));
+    renderGrid('grid-asia', COUNTRIES.filter(c => c.region === 'asia'));
+    renderGrid('grid-america', COUNTRIES.filter(c => c.region === 'america'));
+}
+
+function renderGrid(containerId, countries) {
+    const el = document.getElementById(containerId);
+    el.innerHTML = countries.map(c => {
+        const locked = GUIDE_CONFIG.isLockedCountryFile(c.file, userPlan);
+        return `<a class="country-card${locked ? ' locked' : ''}" href="${locked ? '#' : c.file}" ${locked ? 'onclick="event.preventDefault();openPremiumModal();"' : ''}>
+            ${locked ? '<span class="country-card-lock">🔒</span>' : ''}
+            <img class="country-card-flag" src="https://flagcdn.com/w80/${c.code}.png" alt="${c.name}" loading="lazy">
+            <div class="country-card-name">${c.name}</div>
+            <div class="country-card-count">${c.pois} Sehenswürdigkeiten</div>
+        </a>`;
+    }).join('');
+}
+
+function filterCountries(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('.country-card').forEach(card => {
+        const name = card.querySelector('.country-card-name').textContent.toLowerCase();
+        card.style.display = name.includes(q) ? '' : 'none';
+    });
+}
+
+function updatePremiumContext() {
+    const params = new URLSearchParams(location.search);
+    const fromFile = GUIDE_CONFIG.normalizeFileName(params.get('from'));
+    const blockedCountry = GUIDE_CONFIG.getCountryLabel(fromFile);
+    const title = document.getElementById('premium-title');
+    const subtitle = document.getElementById('premium-subtitle');
+    const checkout = document.getElementById('checkout-btn');
+
+    if (blockedCountry) {
+        title.textContent = blockedCountry + ' ist Premium';
+        subtitle.textContent = blockedCountry + ' und alle weiteren Laender. Offline. Unbegrenzt.';
+        if (checkout) checkout.textContent = blockedCountry + ' freischalten';
+        return;
+    }
+
+    title.textContent = '⭐ Premium';
+    subtitle.textContent = 'Alle Laender. Offline. Unbegrenzt.';
+    if (checkout) checkout.textContent = 'Jetzt Premium werden';
+}
+
+// ===== PREMIUM MODAL =====
+function openPremiumModal() {
+    updatePremiumContext();
+    document.getElementById('premium-modal').classList.add('open');
+    document.getElementById('user-menu').classList.remove('open');
+}
+function closePremiumModal() { document.getElementById('premium-modal').classList.remove('open'); }
+
+async function startCheckout() {
+    if (sb && currentUser && currentUser.email !== 'guest') {
+        // TODO: Call Supabase Edge Function to create Stripe checkout session
+        alert('Stripe Checkout wird eingerichtet.\n\nDu brauchst:\n1. Supabase Edge Function\n2. Stripe Account\n3. Webhook für plan-Update\n\nSiehe SETUP_APP.md für Details.');
+    } else {
+        alert('Bitte erstelle zuerst ein Konto, um Premium zu nutzen.');
+        closePremiumModal();
+    }
+}
+
+// ===== PWA INSTALL =====
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault(); deferredPrompt = e;
+    document.getElementById('install-strip').classList.add('visible');
+    document.getElementById('install-menu').style.display = '';
+});
+async function installPWA() {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    document.getElementById('install-strip').classList.remove('visible');
+}
+
+// ===== SERVICE WORKER =====
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW:', e));
+}
+
+// ===== CLOSE MENUS =====
+document.addEventListener('click', e => {
+    const m = document.getElementById('user-menu'), b = document.getElementById('user-avatar');
+    if (m && b && !m.contains(e.target) && !b.contains(e.target)) m.classList.remove('open');
+});
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', initApp);
+</script>
+</body>
+</html>

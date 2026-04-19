@@ -1,10 +1,6 @@
 node_modules/
 
-# Audit + dedupe backups
-*.bak_dedupe_all
-*.bak_orphans
-*.bak_reuse
-*.bak_poi_restore
-*.bak_pre_merge
-*.bak_before_dedupe
-POI_Audit_BEFORE.json
+# Local audit snapshots and generated backup files
+*.bak_*
+POI_Audit*.json
+POI_Audit*.md
