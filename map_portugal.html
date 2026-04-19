@@ -2,7 +2,13 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Familienguide">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
     <title>Familienguide 2026 | Portugal</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
@@ -773,29 +779,6 @@
             color: var(--text-muted);
             cursor: pointer;
             font-size: 1.2rem;
-        }
-        
-        /* Mobile */
-        @media (max-width: 900px) {
-            .app-container {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-                height: 50%;
-                order: 2;
-            }
-            
-            #map {
-                height: 50%;
-            }
-            
-            .route-panel {
-                bottom: 52%;
-                width: calc(100% - 32px);
-                flex-wrap: wrap;
-            }
         }
         
         /* Loading state */
@@ -1648,6 +1631,209 @@
             width: 22px;
             height: 22px;
         }
+    
+        /* ========================================
+           PLAN BADGE + USER MENU
+           ======================================== */
+        .plan-badge {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .plan-badge.free {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-muted);
+        }
+        .plan-badge.premium {
+            background: linear-gradient(135deg, #f1c40f, #f39c12);
+            color: #1a1a2e;
+        }
+        .user-menu-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e94560, #9b59b6);
+            color: white;
+            border: none;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .user-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 8px;
+            min-width: 200px;
+            display: none;
+            z-index: 10000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        .user-menu.open { display: block; }
+        .user-menu-item {
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.15s;
+        }
+        .user-menu-item:hover { background: var(--bg-hover); color: white; }
+        .user-header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        /* ========================================
+           UPGRADE BANNER
+           ======================================== */
+        .upgrade-banner {
+            display: none;
+            background: linear-gradient(135deg, rgba(233,69,96,0.15), rgba(155,89,182,0.15));
+            border: 1px solid rgba(233,69,96,0.3);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin: 8px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .upgrade-banner:hover {
+            background: linear-gradient(135deg, rgba(233,69,96,0.25), rgba(155,89,182,0.25));
+            transform: translateY(-1px);
+        }
+        .upgrade-banner-text {
+            font-size: 0.82rem;
+            color: white;
+            font-weight: 600;
+        }
+        .upgrade-banner-sub {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* ========================================
+           INSTALL APP BUTTON
+           ======================================== */
+        .install-btn {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: var(--primary, #6366f1);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 8px 0;
+            font-family: inherit;
+        }
+        .install-btn:hover { background: var(--primary-dark, #4f46e5); }
+
+        /* ========================================
+           MOBILE RESPONSIVE
+           ======================================== */
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column-reverse !important;
+            }
+            .sidebar {
+                width: 100% !important;
+                height: 45vh !important;
+                max-height: 45vh !important;
+                border-right: none !important;
+                border-top: 1px solid var(--border);
+                position: relative;
+                z-index: 1000;
+                order: unset !important;
+            }
+            #map {
+                height: 55vh !important;
+                width: 100% !important;
+            }
+            .sidebar-header {
+                padding: 12px 16px;
+            }
+            .sidebar-header .logo-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+                border-radius: 10px;
+            }
+            .logo-text h1 { font-size: 1.1rem; }
+            .logo-text p { font-size: 0.65rem; }
+            .stats-bar { gap: 10px; margin-top: 10px; }
+            .stat-item { font-size: 0.7rem; }
+            .filters-section { padding: 10px 12px; }
+            .search-box input { padding: 10px 12px 10px 38px; font-size: 0.82rem; }
+            .filter-tab { padding: 5px 8px; font-size: 0.68rem; }
+            .poi-list { padding: 0 8px; }
+            .poi-card { padding: 10px; }
+            .poi-card-content h3 { font-size: 0.82rem; }
+            .poi-card-location { font-size: 0.68rem; }
+            .poi-card-desc { font-size: 0.72rem; }
+            .route-panel { bottom: 45vh; left: 10px; right: 10px; width: auto !important; }
+            .search-area-btn, .clear-area-btn { font-size: 0.78rem; padding: 8px 14px; top: 10px; }
+
+            /* Mobile drag handle for sidebar */
+            .sidebar::before {
+                content: '';
+                display: block;
+                width: 40px;
+                height: 4px;
+                background: rgba(255,255,255,0.3);
+                border-radius: 2px;
+                margin: 8px auto 4px;
+            }
+
+            /* Country dropdown on mobile */
+            .country-dropdown-wrapper { padding: 8px 12px; }
+            .country-dropdown-btn { padding: 8px 10px; font-size: 0.82rem; }
+
+            /* Region filter scroll */
+            .region-buttons {
+                flex-wrap: nowrap !important;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+            .region-buttons::-webkit-scrollbar { display: none; }
+
+            /* Camping panel */
+            .camping-toggle-wrapper { padding: 6px 12px; }
+            .camping-panel { padding: 8px; }
+        }
+
+        @media (max-width: 380px) {
+            .sidebar { height: 40vh !important; max-height: 40vh !important; }
+            #map { height: 60vh !important; }
+            .sidebar-header { padding: 8px 12px; }
+            .logo-text h1 { font-size: 1rem; }
+            .filter-tab { padding: 4px 6px; font-size: 0.62rem; }
+        }
+
+        /* Safe area for notch phones */
+        @supports(padding: max(0px)) {
+            .sidebar-header { padding-top: max(12px, env(safe-area-inset-top)); }
+        }
+
     </style>
 </head>
 <body>
@@ -4047,12 +4233,32 @@ const allPOIs = [
         // ===== Wikipedia/Wikimedia Foto-System (gratis, kein API-Key) =====
         const _photoCache = JSON.parse(localStorage.getItem('photoCachePT') || '{}');
         const _photoLoading = {};
-        const _photoCacheVersion = 2;
+        const _photoCacheVersion = 3;
         if (parseInt(localStorage.getItem('photoCacheVersionPT') || '0') < _photoCacheVersion) {
             localStorage.removeItem('photoCachePT');
             localStorage.setItem('photoCacheVersionPT', String(_photoCacheVersion));
             Object.keys(_photoCache).forEach(k => delete _photoCache[k]);
         }
+
+                // Baseline-Fotos aus JSON laden (vorab von Wikipedia geholt)
+        (function loadBaselinePhotos() {
+            fetch('photos_PT.json').then(function(r) { return r.ok ? r.json() : null; }).then(function(data) {
+                if (!data || typeof data !== 'object') return;
+                var loaded = 0;
+                Object.keys(data).forEach(function(k) {
+                    if (!_photoCache[k]) { _photoCache[k] = data[k]; loaded++; }
+                });
+                if (loaded > 0) {
+                    try { localStorage.setItem('photoCachePT', JSON.stringify(_photoCache)); } catch(e) {}
+                    console.log('[Photos] ' + loaded + ' Baseline-Fotos geladen');
+                    document.querySelectorAll('img[data-poi-photo]').forEach(function(img) {
+                        var pid = img.getAttribute('data-poi-photo');
+                        if (_photoCache[pid] && img.src.indexOf('unsplash.com') > -1) { img.src = _photoCache[pid]; }
+                    });
+                }
+            }).catch(function() {});
+        })();
+
         const _categoryFallbacks = {
             sehenswuerdigkeit: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80',
             kultur: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=400&q=80',
@@ -4069,11 +4275,39 @@ const allPOIs = [
             if (_photoCache[poi.id]) return _photoCache[poi.id];
             return getCategoryFallback(poi.category);
         }
+        // Bekannte Generika/Fremd-Landmarks — nicht als POI-Foto cachen.
+        var _GENERIC_IMAGE_BLACKLIST = [
+            // Kreuz-Kontamination: berühmte Landmarks dürfen nicht Fremd-POIs zieren
+            'matterhorn_from_domh', 'bern_luftaufnahme', 'sphinx_et_jungfrau',
+            'la_tour_eiffel_vue_de_la_tour_saint-jacques',
+            'arc_de_triomphe%2c_paris', 'arc_de_triomphe_paris',
+            'big_ben', 'london_panorama', 'tower_bridge_london',
+            'colosseum_in_rome', 'piazza_san_marco',
+            'brandenburger_tor_abends',
+            // Aerial-Overviews (zu oft Disambig-Fallback)
+            'altstadt_z%c3%bcrich_2015', 'altstadt_zurich_2015',
+            'interlaken_aer', 'appenzell_2022', 'lugano_from_sighignola',
+            's%c3%a4ntis_mountain_by_sunset', 'santis_mountain_by_sunset',
+            'thun_be', 'solothurn_2023', 'luftbild_davos2',
+            'place_stanislas_et_ses_grilles',
+            'bordeaux_place_de_la_bourse_de_nuit',
+            'sub%c3%a9_fountain%2c_reims', 'sube_fountain_reims',
+            'grande_place%2c_bourse_du_travail_et_beffroi_lille_2',
+            'grande_place_bourse_du_travail_et_beffroi_lille_2',
+            'rouen_%2837903223574%29', 'rouen_37903223574',
+            'montpellier_place_de_la_com%c3%a9die', 'montpellier_place_de_la_comedie',
+            'montage_toulouse_3', 'montage_toulouse_2',
+            'mont-saint-michel_vu_du_ciel'
+        ];
         function _isMapOrBadImage(url) {
             var lc = url.toLowerCase();
-            return /karte|wappen|flag|coat_of_arms|logo|map[_.]|locator|location_in|positionskarte|relief_|verwaltung|blank|icon|symbol|blason|escudo|stemma|banner/i.test(lc)
-                || lc.endsWith('.svg') || lc.indexOf('.svg/') > -1
-                || lc.endsWith('.tif') || lc.indexOf('.tif/') > -1;
+            if (/karte|wappen|flag|coat_of_arms|logo|map[_.]|locator|location_in|positionskarte|relief_|verwaltung|blank|icon|symbol|blason|escudo|stemma|banner/i.test(lc)) return true;
+            if (lc.endsWith('.svg') || lc.indexOf('.svg/') > -1) return true;
+            if (lc.endsWith('.tif') || lc.indexOf('.tif/') > -1) return true;
+            for (var i = 0; i < _GENERIC_IMAGE_BLACKLIST.length; i++) {
+                if (lc.indexOf(_GENERIC_IMAGE_BLACKLIST[i]) > -1) return true;
+            }
+            return false;
         }
         function _extractPhotoUrl(data) {
             if (!data || !data.thumbnail || !data.thumbnail.source) return null;
@@ -6351,5 +6585,49 @@ var ck1 = getCampKey(site);
         </div>
     </div>
 
+
+<!-- Auth Guard + PWA -->
+<script src="auth-guard.js"></script>
+<script>
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').then(function(reg) {
+        console.log('SW registered:', reg.scope);
+    }).catch(function(err) { console.warn('SW failed:', err); });
+}
+
+// Close user menu on outside click
+document.addEventListener('click', function(e) {
+    var menu = document.getElementById('user-menu');
+    var btn = document.getElementById('user-menu-btn');
+    if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.remove('open');
+    }
+});
+
+// Mobile: touch to resize sidebar
+var touchStartY = 0;
+var sidebarEl = document.querySelector('.sidebar');
+if (sidebarEl && window.innerWidth <= 768) {
+    sidebarEl.addEventListener('touchstart', function(e) {
+        if (e.target.closest('.poi-list, .camping-results, .filter-section-content, .region-buttons, .country-dropdown-list')) return;
+        touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+    sidebarEl.addEventListener('touchmove', function(e) {
+        if (e.target.closest('.poi-list, .camping-results, .filter-section-content, .region-buttons, .country-dropdown-list')) return;
+        var diff = touchStartY - e.touches[0].clientY;
+        var current = parseInt(sidebarEl.style.height || '45') || 45;
+        if (diff > 30 && current < 80) {
+            sidebarEl.style.height = '75vh';
+            sidebarEl.style.maxHeight = '75vh';
+            document.getElementById('map').style.height = '25vh';
+        } else if (diff < -30 && current > 30) {
+            sidebarEl.style.height = '30vh';
+            sidebarEl.style.maxHeight = '30vh';
+            document.getElementById('map').style.height = '70vh';
+        }
+    }, { passive: true });
+}
+</script>
 </body>
 </html>

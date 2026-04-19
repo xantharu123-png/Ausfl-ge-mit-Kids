@@ -1,0 +1,33 @@
+{
+  "started": "2026-04-19T09:36:59.321405",
+  "countries": {
+    "DE": {
+      "started": "2026-04-19T09:36:59.323557",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T09:50:39.238442",
+      "after": 99,
+      "added": 99,
+      "duration_s": 819
+    },
+    "GR": {
+      "started": "2026-04-19T09:50:39.239982",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T10:15:33.652293",
+      "after": 71,
+      "added": 71,
+      "duration_s": 1494
+    },
+    "JP": {
+      "started": "2026-04-19T10:15:33.656647",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T10:43:57.305196",
+      "after": 58,
+      "added": 58,
+      "duration_s": 1703
+    }
+  },
+  "finished": "2026-04-19T10:43:57.305680"
+}

@@ -1,0 +1,258 @@
+{
+  "started": "2026-04-19T08:56:17.969723",
+  "countries": {
+    "CA_ZEN": {
+      "started": "2026-04-19T08:56:23.033764",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T08:56:59.240446",
+      "after": 28,
+      "added": 28,
+      "duration_s": 36
+    },
+    "CA_OST": {
+      "started": "2026-04-19T08:56:59.242738",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T08:57:59.304787",
+      "after": 9,
+      "added": 9,
+      "duration_s": 60
+    },
+    "CA_ON": {
+      "started": "2026-04-19T08:57:59.307517",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T08:58:46.096833",
+      "after": 12,
+      "added": 12,
+      "duration_s": 46
+    },
+    "QA": {
+      "started": "2026-04-19T08:58:46.098676",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T09:00:21.772062",
+      "after": 9,
+      "added": 9,
+      "duration_s": 95
+    },
+    "CA_WEST": {
+      "started": "2026-04-19T09:00:21.773936",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T09:03:05.167987",
+      "after": 21,
+      "added": 21,
+      "duration_s": 163
+    },
+    "AE": {
+      "started": "2026-04-19T09:03:05.170089",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T09:06:31.364563",
+      "after": 26,
+      "added": 26,
+      "duration_s": 206
+    },
+    "BE": {
+      "started": "2026-04-19T09:06:31.367335",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T09:15:38.596447",
+      "after": 66,
+      "added": 66,
+      "duration_s": 547
+    },
+    "AT": {
+      "started": "2026-04-19T09:15:38.598900",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T09:21:31.115583",
+      "after": 78,
+      "added": 78,
+      "duration_s": 352
+    },
+    "FO": {
+      "started": "2026-04-19T09:21:31.118105",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T09:32:57.986607",
+      "after": 50,
+      "added": 50,
+      "duration_s": 686
+    },
+    "ES": {
+      "started": "2026-04-19T09:32:57.989418",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T09:44:03.010985",
+      "after": 111,
+      "added": 111,
+      "duration_s": 665
+    },
+    "SI": {
+      "started": "2026-04-19T09:44:03.014582",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T09:56:18.244589",
+      "after": 52,
+      "added": 52,
+      "duration_s": 735
+    },
+    "FI": {
+      "started": "2026-04-19T09:56:18.246778",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T10:12:41.795383",
+      "after": 45,
+      "added": 45,
+      "duration_s": 983
+    },
+    "LU": {
+      "started": "2026-04-19T10:12:41.798917",
+      "before": 8,
+      "done": true,
+      "finished": "2026-04-19T10:35:05.040310",
+      "after": 41,
+      "added": 33,
+      "duration_s": 1343
+    },
+    "NO": {
+      "started": "2026-04-19T10:35:05.043530",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T10:53:31.502376",
+      "after": 72,
+      "added": 72,
+      "duration_s": 1106
+    },
+    "CY": {
+      "started": "2026-04-19T10:53:31.504417",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T11:06:04.153021",
+      "after": 42,
+      "added": 42,
+      "duration_s": 752
+    },
+    "IS": {
+      "started": "2026-04-19T11:06:04.156161",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T11:18:14.329881",
+      "after": 74,
+      "added": 74,
+      "duration_s": 730
+    },
+    "IT": {
+      "started": "2026-04-19T11:18:14.332110",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T11:27:23.982069",
+      "after": 199,
+      "added": 199,
+      "duration_s": 549
+    },
+    "NL": {
+      "started": "2026-04-19T11:27:23.988750",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T11:38:16.686646",
+      "after": 87,
+      "added": 87,
+      "duration_s": 652
+    },
+    "SK": {
+      "started": "2026-04-19T11:38:16.690499",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T11:48:51.035255",
+      "after": 89,
+      "added": 89,
+      "duration_s": 634
+    },
+    "BA": {
+      "started": "2026-04-19T11:48:51.041840",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T12:06:49.968417",
+      "after": 153,
+      "added": 153,
+      "duration_s": 1078
+    },
+    "SE": {
+      "started": "2026-04-19T12:06:49.973009",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T12:18:09.144338",
+      "after": 110,
+      "added": 110,
+      "duration_s": 679
+    },
+    "PT": {
+      "started": "2026-04-19T12:18:09.147100",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T12:29:34.926075",
+      "after": 136,
+      "added": 136,
+      "duration_s": 685
+    },
+    "HR": {
+      "started": "2026-04-19T12:29:34.929652",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T12:41:08.332876",
+      "after": 152,
+      "added": 152,
+      "duration_s": 693
+    },
+    "PL": {
+      "started": "2026-04-19T12:41:08.335478",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T12:52:19.519741",
+      "after": 146,
+      "added": 146,
+      "duration_s": 671
+    },
+    "CZ": {
+      "started": "2026-04-19T12:52:19.522051",
+      "before": 0,
+      "done": true,
+      "finished": "2026-04-19T13:04:27.128888",
+      "after": 141,
+      "added": 141,
+      "duration_s": 727
+    },
+    "DE": {
+      "started": "2026-04-19T13:04:27.133158",
+      "before": 99,
+      "done": true,
+      "finished": "2026-04-19T13:13:26.630921",
+      "after": 176,
+      "added": 77,
+      "duration_s": 539
+    },
+    "GR": {
+      "started": "2026-04-19T13:13:26.634035",
+      "before": 71,
+      "done": true,
+      "finished": "2026-04-19T13:27:06.283798",
+      "after": 123,
+      "added": 52,
+      "duration_s": 819
+    },
+    "JP": {
+      "started": "2026-04-19T13:27:06.287773",
+      "before": 58,
+      "done": true,
+      "finished": "2026-04-19T13:41:44.354444",
+      "after": 104,
+      "added": 46,
+      "duration_s": 878
+    }
+  },
+  "finished": "2026-04-19T13:41:44.354892"
+}
