@@ -4235,7 +4235,7 @@
         // ===== Wikipedia/Wikimedia Foto-System (gratis, kein API-Key) =====
         const _photoCache = JSON.parse(localStorage.getItem('photoCacheFI') || '{}');
         const _photoLoading = {};
-        const _photoCacheVersion = 3;
+        const _photoCacheVersion = 4;
         if (parseInt(localStorage.getItem('photoCacheVersionFI') || '0') < _photoCacheVersion) {
             localStorage.removeItem('photoCacheFI');
             localStorage.setItem('photoCacheVersionFI', String(_photoCacheVersion));
@@ -4248,7 +4248,7 @@
                 if (!data || typeof data !== 'object') return;
                 var loaded = 0;
                 Object.keys(data).forEach(function(k) {
-                    if (!_photoCache[k]) { _photoCache[k] = data[k]; loaded++; }
+                    var prev = _photoCache[k]; if (prev !== data[k]) { _photoCache[k] = data[k]; loaded++; }
                 });
                 if (loaded > 0) {
                     try { localStorage.setItem('photoCacheFI', JSON.stringify(_photoCache)); } catch(e) {}

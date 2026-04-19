@@ -4233,7 +4233,7 @@ const allPOIs = [
         // ===== Wikipedia/Wikimedia Foto-System (gratis, kein API-Key) =====
         const _photoCache = JSON.parse(localStorage.getItem('photoCachePL') || '{}');
         const _photoLoading = {};
-        const _photoCacheVersion = 3;
+        const _photoCacheVersion = 4;
         if (parseInt(localStorage.getItem('photoCacheVersionPL') || '0') < _photoCacheVersion) {
             localStorage.removeItem('photoCachePL');
             localStorage.setItem('photoCacheVersionPL', String(_photoCacheVersion));
@@ -4246,7 +4246,7 @@ const allPOIs = [
                 if (!data || typeof data !== 'object') return;
                 var loaded = 0;
                 Object.keys(data).forEach(function(k) {
-                    if (!_photoCache[k]) { _photoCache[k] = data[k]; loaded++; }
+                    var prev = _photoCache[k]; if (prev !== data[k]) { _photoCache[k] = data[k]; loaded++; }
                 });
                 if (loaded > 0) {
                     try { localStorage.setItem('photoCachePL', JSON.stringify(_photoCache)); } catch(e) {}
