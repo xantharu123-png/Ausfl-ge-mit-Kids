@@ -1,0 +1,28 @@
+{
+  "name": "Familienguide 2026",
+  "short_name": "Familienguide",
+  "description": "Interaktiver Reiseführer für Familien — Top-Sehenswürdigkeiten, Camping, Routenplaner",
+  "start_url": "/app.html",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#1a1a2e",
+  "orientation": "any",
+  "categories": ["travel", "navigation", "lifestyle"],
+  "lang": "de",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%231a1a2e'/><text x='256' y='340' font-size='280' text-anchor='middle' fill='white'>🗺️</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%231a1a2e'/><text x='96' y='130' font-size='100' text-anchor='middle' fill='white'>🗺️</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
+}
