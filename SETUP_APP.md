@@ -110,6 +110,8 @@ localStorage.setItem('fg_supabase_url', 'https://abc123.supabase.co');
 localStorage.setItem('fg_supabase_key', 'eyJ...');
 ```
 
+Neu einfacher: In `app.html` im User-Menü auf **`Setup & Keys`** gehen und die Werte dort eintragen. Die App speichert die Runtime-Konfiguration in `localStorage` und lädt sich danach neu.
+
 ## Schritt 5: Stripe Abo einrichten (für Premium)
 
 1. Erstelle einen **Stripe Account** auf https://stripe.com
@@ -141,6 +143,18 @@ Deno.serve(async (req) => {
 ```
 
 4. Webhook einrichten der bei Zahlung `user_profiles.plan = 'premium'` setzt
+
+Optional kannst du statt der Edge Function auch einen reinen Stripe Payment Link hinterlegen. Empfohlen ist aber der Endpoint, weil er pro User eine Session erzeugen und `success_url` / `cancel_url` sauber steuern kann.
+
+Die App unterstützt dafür diese Runtime-Keys:
+
+```js
+localStorage.setItem('fg_checkout_session_url', 'https://abc123.supabase.co/functions/v1/create-checkout');
+// oder als Fallback:
+localStorage.setItem('fg_stripe_payment_link', 'https://buy.stripe.com/...');
+```
+
+Auch diese Werte kannst du direkt im **`Setup & Keys`**-Dialog in `app.html` pflegen.
 
 ## Schritt 6: Deploy auf Vercel
 

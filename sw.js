@@ -1,9 +1,12 @@
 // Familienguide 2026 — Service Worker
-const CACHE_NAME = 'familienguide-v1';
-const STATIC_ASSETS = [
-  '/',
-  '/map_frankreich.html',
-  '/manifest.json',
+const CACHE_NAME = 'familienguide-v2';
+const APP_SHELL = [
+  './',
+  './app.html',
+  './guide-config.js',
+  './manifest.json',
+  './audit-summary.json',
+  './map_frankreich.html',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
   'https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js',
@@ -15,10 +18,14 @@ const STATIC_ASSETS = [
 // Install: cache static assets
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(STATIC_ASSETS).catch(err => {
-        console.warn('Some assets failed to cache:', err);
-      });
+    caches.open(CACHE_NAME).then(async cache => {
+      for (const asset of APP_SHELL) {
+        try {
+          await cache.add(asset);
+        } catch (err) {
+          console.warn('Asset failed to cache:', asset, err);
+        }
+      }
     })
   );
   self.skipWaiting();
@@ -72,14 +79,31 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Network-first for HTML pages
-  if (event.request.headers.get('accept')?.includes('text/html')) {
+  // Network-first for navigations and app shell HTML
+  if (event.request.mode === 'navigate' || event.request.headers.get('accept')?.includes('text/html')) {
     event.respondWith(
       fetch(event.request).then(response => {
         const clone = response.clone();
         caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         return response;
       }).catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Same-origin JSON/JS/CSS: stale-while-revalidate for app data and config
+  if (url.origin === self.location.origin) {
+    event.respondWith(
+      caches.match(event.request).then(cached => {
+        const fetched = fetch(event.request).then(response => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          }
+          return response;
+        }).catch(() => cached);
+        return cached || fetched;
+      })
     );
     return;
   }

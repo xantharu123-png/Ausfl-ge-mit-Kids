@@ -271,6 +271,203 @@
         .pm-price { font-size: 2.2rem; font-weight: 700; color: white; }
         .pm-price span { font-size: 0.88rem; font-weight: 400; color: var(--text-muted); }
         .pm-period { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 20px; }
+        .pm-hint {
+            margin-top: 12px;
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+        }
+        .status-strip {
+            margin: 0 24px 16px;
+            padding: 12px 16px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            display: none;
+            font-size: 0.84rem;
+            line-height: 1.45;
+        }
+        .status-strip.visible { display: block; }
+        .status-strip.info {
+            background: rgba(99,102,241,0.12);
+            border-color: rgba(99,102,241,0.25);
+            color: #dbe4ff;
+        }
+        .status-strip.success {
+            background: rgba(78,204,163,0.14);
+            border-color: rgba(78,204,163,0.35);
+            color: #d8fff2;
+        }
+        .status-strip.error {
+            background: rgba(233,69,96,0.12);
+            border-color: rgba(233,69,96,0.3);
+            color: #ffd7df;
+        }
+        .audit-panel {
+            margin: 0 24px 20px;
+            padding: 18px 20px;
+            border-radius: 18px;
+            border: 1px solid rgba(78,204,163,0.18);
+            background:
+                radial-gradient(circle at top right, rgba(78,204,163,0.12), transparent 35%),
+                linear-gradient(135deg, rgba(22,33,62,0.98), rgba(16,26,46,0.98));
+            display: none;
+        }
+        .audit-panel.visible { display: block; }
+        .audit-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: flex-start;
+            margin-bottom: 14px;
+        }
+        .audit-head h3 {
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+        .audit-head p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .audit-stamp {
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.06);
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            white-space: nowrap;
+        }
+        .audit-metrics {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .audit-metric {
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .audit-metric strong {
+            display: block;
+            font-size: 1.05rem;
+            color: white;
+            margin-bottom: 4px;
+        }
+        .audit-metric span {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+        .audit-lists {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+        .audit-list {
+            padding: 14px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .audit-list h4 {
+            font-size: 0.82rem;
+            margin-bottom: 8px;
+            color: white;
+        }
+        .audit-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 8px 0;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            font-size: 0.8rem;
+        }
+        .audit-row:first-of-type { border-top: none; padding-top: 0; }
+        .audit-row:last-of-type { padding-bottom: 0; }
+        .audit-row-label {
+            color: var(--text-secondary);
+        }
+        .audit-row-value {
+            color: white;
+            text-align: right;
+            white-space: nowrap;
+        }
+        .audit-note {
+            margin-top: 12px;
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+        }
+        .config-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.72);
+            z-index: 99997;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .config-modal.open { display: flex; }
+        .config-card {
+            width: 100%;
+            max-width: 520px;
+            padding: 28px;
+            border-radius: 22px;
+            background: rgba(22,33,62,0.98);
+            border: 1px solid var(--border);
+            box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+        }
+        .config-card h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            margin-bottom: 6px;
+        }
+        .config-card p {
+            color: var(--text-secondary);
+            font-size: 0.84rem;
+            line-height: 1.5;
+            margin-bottom: 18px;
+        }
+        .config-field {
+            display: block;
+            margin-bottom: 12px;
+        }
+        .config-field span {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+        }
+        .config-field input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.05);
+            color: white;
+            font-size: 0.9rem;
+            font-family: inherit;
+        }
+        .config-field input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(233,69,96,0.15);
+        }
+        .config-help {
+            margin: 6px 0 14px;
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+        }
+        .config-status {
+            min-height: 22px;
+            margin-bottom: 10px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .config-status.success { color: var(--accent); }
+        .config-status.error { color: var(--primary); }
 
         /* Stats */
         .dash-stats {
@@ -294,10 +491,16 @@
             .dash-search { margin: 0 16px 16px; }
             .upgrade-strip { margin: 0 16px 12px; }
             .install-strip { margin: 0 16px 12px; }
+            .status-strip { margin: 0 16px 12px; }
+            .audit-panel { margin: 0 16px 16px; padding: 16px; }
+            .audit-head { flex-direction: column; }
+            .audit-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .audit-lists { grid-template-columns: 1fr; }
             .dash-stats { padding: 0 16px 16px; }
             .auth-card { padding: 28px 20px; }
             .auth-logo-icon { width: 64px; height: 64px; font-size: 32px; }
             .auth-logo h1 { font-size: 1.5rem; }
+            .config-card { padding: 22px 18px; }
         }
         @media (max-width: 380px) {
             .country-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
@@ -359,6 +562,36 @@
         <p class="pm-period">oder 39,99€ / Jahr (spar 33%)</p>
         <button class="auth-btn auth-btn-primary" id="checkout-btn" onclick="startCheckout()">Jetzt Premium werden</button>
         <button class="auth-btn auth-btn-ghost" onclick="closePremiumModal()" style="margin-top:6px;">Vielleicht später</button>
+        <p class="pm-hint" id="premium-hint">Mit Checkout-Endpoint oder Stripe Payment Link konfigurierbar.</p>
+    </div>
+</div>
+
+<!-- ===== CONFIG MODAL ===== -->
+<div class="config-modal" id="config-modal" onclick="if(event.target===this)closeConfigModal()">
+    <div class="config-card">
+        <h2>App konfigurieren</h2>
+        <p>Du kannst Supabase und den Premium-Checkout direkt hier hinterlegen, ohne den Code jedes Mal anzupassen.</p>
+        <label class="config-field">
+            <span>Supabase URL</span>
+            <input type="url" id="cfg-supabase-url" placeholder="https://dein-projekt.supabase.co">
+        </label>
+        <label class="config-field">
+            <span>Supabase anon key</span>
+            <input type="password" id="cfg-supabase-key" placeholder="eyJhbGciOi...">
+        </label>
+        <label class="config-field">
+            <span>Checkout Endpoint (empfohlen)</span>
+            <input type="url" id="cfg-checkout-url" placeholder="https://dein-projekt.supabase.co/functions/v1/create-checkout">
+        </label>
+        <label class="config-field">
+            <span>Stripe Payment Link (Fallback)</span>
+            <input type="url" id="cfg-payment-link" placeholder="https://buy.stripe.com/...">
+        </label>
+        <div class="config-help">Wenn ein Checkout Endpoint gesetzt ist, wird er bevorzugt. Er sollte JSON mit einer `url` für Stripe zurückgeben.</div>
+        <div class="config-status" id="config-status"></div>
+        <button class="auth-btn auth-btn-primary" onclick="saveConfig()">Konfiguration speichern</button>
+        <button class="auth-btn auth-btn-ghost" onclick="resetConfig()" style="margin-top:8px;">Konfiguration zurücksetzen</button>
+        <button class="auth-btn auth-btn-ghost" onclick="closeConfigModal()" style="margin-top:8px;">Schliessen</button>
     </div>
 </div>
 
@@ -378,6 +611,7 @@
             <div class="user-menu" id="user-menu">
                 <div class="user-menu-item" id="user-email-display" style="font-size:0.78rem;color:var(--text-muted);pointer-events:none;"></div>
                 <div class="user-menu-item" onclick="openPremiumModal()">⭐ Premium upgraden</div>
+                <div class="user-menu-item" onclick="openConfigModal()">⚙ Setup & Keys</div>
                 <div class="user-menu-item" id="install-menu" style="display:none;" onclick="installPWA()">📲 App installieren</div>
                 <div class="user-menu-item" onclick="logout()" style="color:#e94560;">🚪 Abmelden</div>
             </div>
@@ -399,6 +633,8 @@
         <button class="install-strip-btn">Installieren</button>
     </div>
 
+    <div class="status-strip" id="status-strip"></div>
+
     <!-- Stats -->
     <div class="dash-stats">
         <div class="dash-stat">
@@ -406,13 +642,52 @@
             <div class="dash-stat-label">Länder</div>
         </div>
         <div class="dash-stat">
-            <div class="dash-stat-value" id="stat-pois">10.000+</div>
-            <div class="dash-stat-label">Sehenswürdigkeiten</div>
+            <div class="dash-stat-value" id="stat-pois">--</div>
+            <div class="dash-stat-label">POIs</div>
         </div>
         <div class="dash-stat">
-            <div class="dash-stat-value" id="stat-camping">∞</div>
-            <div class="dash-stat-label">Campingplätze</div>
+            <div class="dash-stat-value" id="stat-camping">--</div>
+            <div class="dash-stat-label">Baseline-Fotos</div>
         </div>
+    </div>
+
+    <div class="audit-panel" id="audit-panel">
+        <div class="audit-head">
+            <div>
+                <h3>POI Audit Snapshot</h3>
+                <p>Qualitätsstatus der Karten-Daten und Foto-Baselines direkt aus dem letzten Audit-Lauf.</p>
+            </div>
+            <div class="audit-stamp" id="audit-stamp">wird geladen...</div>
+        </div>
+        <div class="audit-metrics">
+            <div class="audit-metric">
+                <strong id="audit-coverage">--</strong>
+                <span>Coverage</span>
+            </div>
+            <div class="audit-metric">
+                <strong id="audit-clusters">--</strong>
+                <span>Cluster-Orte</span>
+            </div>
+            <div class="audit-metric">
+                <strong id="audit-dups">--</strong>
+                <span>Exakt-Duplikate</span>
+            </div>
+            <div class="audit-metric">
+                <strong id="audit-suspicious">--</strong>
+                <span>Verdächtige URLs</span>
+            </div>
+        </div>
+        <div class="audit-lists">
+            <div class="audit-list">
+                <h4>Cluster-Hotspots</h4>
+                <div id="audit-hotspots"></div>
+            </div>
+            <div class="audit-list">
+                <h4>Niedrigste Foto-Coverage</h4>
+                <div id="audit-low-coverage"></div>
+            </div>
+        </div>
+        <div class="audit-note" id="audit-note">Audit wird geladen...</div>
     </div>
 
     <!-- Search -->
@@ -497,16 +772,54 @@ const GUIDE_CONFIG = window.GuideConfig || {
     }
 };
 
-// ===== SUPABASE CONFIG =====
-const SUPABASE_URL = localStorage.getItem('fg_supabase_url') || '';
-const SUPABASE_ANON_KEY = localStorage.getItem('fg_supabase_key') || '';
+// ===== RUNTIME CONFIG =====
+const STORAGE_KEYS = Object.freeze({
+    supabaseUrl: 'fg_supabase_url',
+    supabaseKey: 'fg_supabase_key',
+    checkoutUrl: 'fg_checkout_session_url',
+    paymentLink: 'fg_stripe_payment_link'
+});
+const AUDIT_SUMMARY_URL = 'audit-summary.json';
+let runtimeConfig = getRuntimeConfig();
 let sb = null, currentUser = null, userPlan = 'free';
+let auditSummaryPromise = null;
+
+function getRuntimeConfig() {
+    return {
+        supabaseUrl: localStorage.getItem(STORAGE_KEYS.supabaseUrl) || '',
+        supabaseKey: localStorage.getItem(STORAGE_KEYS.supabaseKey) || '',
+        checkoutUrl: localStorage.getItem(STORAGE_KEYS.checkoutUrl) || '',
+        paymentLink: localStorage.getItem(STORAGE_KEYS.paymentLink) || ''
+    };
+}
+
+function getAppShellUrl() {
+    return new URL('app.html', window.location.href).href;
+}
+
+function formatInteger(value) {
+    return new Intl.NumberFormat('de-CH').format(Number(value || 0));
+}
+
+function setStatus(message, tone) {
+    const el = document.getElementById('status-strip');
+    if (!el) return;
+    if (!message) {
+        el.textContent = '';
+        el.className = 'status-strip';
+        return;
+    }
+    el.textContent = message;
+    el.className = 'status-strip visible ' + (tone || 'info');
+}
 
 // ===== AUTH =====
 async function initApp() {
-    if (SUPABASE_URL && SUPABASE_ANON_KEY && typeof window.supabase !== 'undefined') {
+    runtimeConfig = getRuntimeConfig();
+
+    if (runtimeConfig.supabaseUrl && runtimeConfig.supabaseKey && typeof window.supabase !== 'undefined') {
         try {
-            sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            sb = window.supabase.createClient(runtimeConfig.supabaseUrl, runtimeConfig.supabaseKey);
             const { data: { session } } = await sb.auth.getSession();
             if (session) { currentUser = session.user; await loadPlan(); showDashboard(); return; }
             sb.auth.onAuthStateChange(async (ev, session) => {
@@ -549,11 +862,8 @@ function showDashboard() {
     document.getElementById('auth-overlay').classList.add('hidden');
     document.getElementById('dashboard').classList.add('visible');
     renderDashboard();
-    // Auto-open premium modal if redirected from map with ?upgrade=1
-    if (new URLSearchParams(location.search).get('upgrade') === '1') {
-        openPremiumModal();
-        history.replaceState(null, '', location.pathname);
-    }
+    void loadAuditSummary();
+    void handleLandingState();
 }
 
 async function loginWithEmail() {
@@ -594,7 +904,7 @@ async function signupWithEmail() {
 
 async function loginWithGoogle() {
     if (!sb) { document.getElementById('login-error').textContent = 'Supabase nicht konfiguriert'; return; }
-    await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + '/app.html' } });
+    await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: getAppShellUrl() } });
 }
 
 function skipLogin() {
@@ -659,24 +969,48 @@ function filterCountries(q) {
     });
 }
 
-function updatePremiumContext() {
+function legacyUpdatePremiumContext() {
     const params = new URLSearchParams(location.search);
     const fromFile = GUIDE_CONFIG.normalizeFileName(params.get('from'));
     const blockedCountry = GUIDE_CONFIG.getCountryLabel(fromFile);
     const title = document.getElementById('premium-title');
     const subtitle = document.getElementById('premium-subtitle');
     const checkout = document.getElementById('checkout-btn');
+    const hint = document.getElementById('premium-hint');
+    const config = getRuntimeConfig();
 
     if (blockedCountry) {
         title.textContent = blockedCountry + ' ist Premium';
         subtitle.textContent = blockedCountry + ' und alle weiteren Laender. Offline. Unbegrenzt.';
         if (checkout) checkout.textContent = blockedCountry + ' freischalten';
+        if (hint && config.checkoutUrl) {
+            hint.textContent = 'Checkout ist konfiguriert. Wir leiten dich direkt zu Stripe weiter.';
+        } else if (hint && config.paymentLink) {
+            hint.textContent = 'Stripe Payment Link ist konfiguriert. Du kannst Premium sofort abschliessen.';
+        } else if (hint) {
+            hint.textContent = 'Noch kein Checkout hinterlegt. Du kannst ihn im Menu unter "Setup & Keys" konfigurieren.';
+        }
         return;
+    } else {
+        title.textContent = '⭐ Premium';
+        subtitle.textContent = 'Alle Laender. Offline. Unbegrenzt.';
+        if (checkout) checkout.textContent = 'Jetzt Premium werden';
     }
 
     title.textContent = '⭐ Premium';
     subtitle.textContent = 'Alle Laender. Offline. Unbegrenzt.';
     if (checkout) checkout.textContent = 'Jetzt Premium werden';
+    title.textContent = '⭐ Premium';
+    subtitle.textContent = 'Alle Laender. Offline. Unbegrenzt.';
+    if (checkout) checkout.textContent = 'Jetzt Premium werden';
+    if (!hint) return;
+    if (config.checkoutUrl) {
+        hint.textContent = 'Checkout ist konfiguriert. Wir leiten dich direkt zu Stripe weiter.';
+    } else if (config.paymentLink) {
+        hint.textContent = 'Stripe Payment Link ist konfiguriert. Du kannst Premium sofort abschliessen.';
+    } else {
+        hint.textContent = 'Noch kein Checkout hinterlegt. Du kannst ihn im Menu unter "Setup & Keys" konfigurieren.';
+    }
 }
 
 // ===== PREMIUM MODAL =====
@@ -687,9 +1021,9 @@ function openPremiumModal() {
 }
 function closePremiumModal() { document.getElementById('premium-modal').classList.remove('open'); }
 
-async function startCheckout() {
+async function legacyStartCheckout() {
     if (sb && currentUser && currentUser.email !== 'guest') {
-        // TODO: Call Supabase Edge Function to create Stripe checkout session
+        // Legacy stub retained for reference; overridden by the runtime checkout handler below.
         alert('Stripe Checkout wird eingerichtet.\n\nDu brauchst:\n1. Supabase Edge Function\n2. Stripe Account\n3. Webhook für plan-Update\n\nSiehe SETUP_APP.md für Details.');
     } else {
         alert('Bitte erstelle zuerst ein Konto, um Premium zu nutzen.');
@@ -715,6 +1049,241 @@ async function installPWA() {
 // ===== SERVICE WORKER =====
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW:', e));
+}
+
+function updatePremiumContext() {
+    const params = new URLSearchParams(location.search);
+    const fromFile = GUIDE_CONFIG.normalizeFileName(params.get('from'));
+    const blockedCountry = GUIDE_CONFIG.getCountryLabel(fromFile);
+    const title = document.getElementById('premium-title');
+    const subtitle = document.getElementById('premium-subtitle');
+    const checkout = document.getElementById('checkout-btn');
+    const hint = document.getElementById('premium-hint');
+    const config = getRuntimeConfig();
+
+    if (blockedCountry) {
+        title.textContent = blockedCountry + ' ist Premium';
+        subtitle.textContent = blockedCountry + ' und alle weiteren Laender. Offline. Unbegrenzt.';
+        if (checkout) checkout.textContent = blockedCountry + ' freischalten';
+    } else {
+        title.textContent = 'Premium';
+        subtitle.textContent = 'Alle Laender. Offline. Unbegrenzt.';
+        if (checkout) checkout.textContent = 'Jetzt Premium werden';
+    }
+
+    if (!hint) return;
+    if (config.checkoutUrl) {
+        hint.textContent = 'Checkout ist konfiguriert. Wir leiten dich direkt zu Stripe weiter.';
+    } else if (config.paymentLink) {
+        hint.textContent = 'Stripe Payment Link ist konfiguriert. Du kannst Premium sofort abschliessen.';
+    } else {
+        hint.textContent = 'Noch kein Checkout hinterlegt. Du kannst ihn im Menu unter "Setup & Keys" konfigurieren.';
+    }
+}
+
+async function startCheckout() {
+    runtimeConfig = getRuntimeConfig();
+
+    if (!currentUser || currentUser.email === 'guest') {
+        closePremiumModal();
+        showAuth();
+        document.getElementById('login-error').textContent = 'Bitte erstelle zuerst ein Konto, um Premium zu nutzen.';
+        return;
+    }
+
+    if (runtimeConfig.checkoutUrl && sb) {
+        try {
+            setStatus('Checkout wird vorbereitet ...', 'info');
+            const { data: { session } } = await sb.auth.getSession();
+            const response = await fetch(runtimeConfig.checkoutUrl, {
+                method: 'POST',
+                headers: Object.assign(
+                    { 'Content-Type': 'application/json' },
+                    session?.access_token ? { Authorization: 'Bearer ' + session.access_token } : {}
+                ),
+                body: JSON.stringify({
+                    userId: currentUser.id,
+                    email: currentUser.email,
+                    from: GUIDE_CONFIG.normalizeFileName(new URLSearchParams(location.search).get('from')),
+                    successUrl: getAppShellUrl() + '?payment=success',
+                    cancelUrl: getAppShellUrl() + '?payment=cancel'
+                })
+            });
+
+            let payload = null;
+            const contentType = response.headers.get('content-type') || '';
+            if (contentType.includes('application/json')) {
+                payload = await response.json();
+            } else {
+                const text = (await response.text()).trim();
+                if (text && /^https?:\/\//i.test(text)) {
+                    window.location.href = text;
+                    return;
+                }
+            }
+
+            if (!response.ok) {
+                throw new Error(payload?.error || payload?.message || 'Checkout konnte nicht gestartet werden.');
+            }
+
+            const redirectUrl = payload?.url || payload?.checkoutUrl || payload?.redirectUrl;
+            if (!redirectUrl) {
+                throw new Error('Checkout-Endpoint hat keine URL zurückgegeben.');
+            }
+
+            window.location.href = redirectUrl;
+            return;
+        } catch (error) {
+            setStatus((error && error.message) ? error.message : 'Checkout konnte nicht gestartet werden.', 'error');
+            openConfigModal('Pruefe den Checkout Endpoint oder verwende einen Stripe Payment Link als Fallback.');
+            return;
+        }
+    }
+
+    if (runtimeConfig.paymentLink) {
+        window.location.href = runtimeConfig.paymentLink;
+        return;
+    }
+
+    openConfigModal('Lege zuerst einen Checkout Endpoint oder Stripe Payment Link an.');
+}
+
+function openConfigModal(message) {
+    runtimeConfig = getRuntimeConfig();
+    document.getElementById('cfg-supabase-url').value = runtimeConfig.supabaseUrl;
+    document.getElementById('cfg-supabase-key').value = runtimeConfig.supabaseKey;
+    document.getElementById('cfg-checkout-url').value = runtimeConfig.checkoutUrl;
+    document.getElementById('cfg-payment-link').value = runtimeConfig.paymentLink;
+    setConfigStatus(message || '', message ? 'error' : '');
+    document.getElementById('config-modal').classList.add('open');
+    document.getElementById('user-menu').classList.remove('open');
+}
+
+function closeConfigModal() {
+    document.getElementById('config-modal').classList.remove('open');
+}
+
+function setConfigStatus(message, tone) {
+    const el = document.getElementById('config-status');
+    if (!el) return;
+    el.textContent = message || '';
+    el.className = tone ? 'config-status ' + tone : 'config-status';
+}
+
+function saveConfig() {
+    const nextConfig = {
+        supabaseUrl: document.getElementById('cfg-supabase-url').value.trim(),
+        supabaseKey: document.getElementById('cfg-supabase-key').value.trim(),
+        checkoutUrl: document.getElementById('cfg-checkout-url').value.trim(),
+        paymentLink: document.getElementById('cfg-payment-link').value.trim()
+    };
+
+    Object.entries(STORAGE_KEYS).forEach(([key, storageKey]) => {
+        const value = nextConfig[key] || '';
+        if (value) localStorage.setItem(storageKey, value);
+        else localStorage.removeItem(storageKey);
+    });
+
+    runtimeConfig = getRuntimeConfig();
+    setConfigStatus('Gespeichert. Die App wird neu geladen.', 'success');
+    setTimeout(() => {
+        window.location.href = getAppShellUrl();
+    }, 350);
+}
+
+function resetConfig() {
+    Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
+    runtimeConfig = getRuntimeConfig();
+    document.getElementById('cfg-supabase-url').value = '';
+    document.getElementById('cfg-supabase-key').value = '';
+    document.getElementById('cfg-checkout-url').value = '';
+    document.getElementById('cfg-payment-link').value = '';
+    setConfigStatus('Konfiguration entfernt. Lade die App neu, wenn du komplett in den Demo-Modus zurück willst.', 'success');
+}
+
+async function handleLandingState() {
+    const params = new URLSearchParams(location.search);
+    let shouldCleanup = false;
+
+    if (params.get('upgrade') === '1') {
+        openPremiumModal();
+        shouldCleanup = true;
+    }
+
+    const paymentState = params.get('payment');
+    if (paymentState === 'success') {
+        shouldCleanup = true;
+        if (sb && currentUser) {
+            await loadPlan();
+            renderDashboard();
+        }
+        if (userPlan === 'premium') {
+            setStatus('Premium ist aktiv. Viel Spass mit allen Laendern.', 'success');
+        } else {
+            setStatus('Zahlung abgeschlossen. Sobald der Webhook das Profil aktualisiert, ist Premium aktiv.', 'success');
+        }
+    } else if (paymentState === 'cancel') {
+        shouldCleanup = true;
+        setStatus('Checkout abgebrochen. Du kannst spaeter jederzeit upgraden.', 'info');
+    }
+
+    if (shouldCleanup) {
+        history.replaceState(null, '', location.pathname);
+    }
+}
+
+async function loadAuditSummary() {
+    if (!auditSummaryPromise) {
+        auditSummaryPromise = fetch(AUDIT_SUMMARY_URL, { cache: 'no-store' })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('audit-summary.json konnte nicht geladen werden');
+                }
+                return response.json();
+            })
+            .then(renderAuditSummary)
+            .catch(error => {
+                const panel = document.getElementById('audit-panel');
+                if (panel) panel.classList.remove('visible');
+                console.warn('Audit summary:', error);
+            });
+    }
+
+    return auditSummaryPromise;
+}
+
+function renderAuditSummary(summary) {
+    if (!summary || !summary.totals) return summary;
+
+    document.getElementById('audit-panel').classList.add('visible');
+    document.getElementById('audit-stamp').textContent = 'Audit ' + (summary.generated_at || 'aktuell');
+    document.getElementById('stat-pois').textContent = formatInteger(summary.totals.pois);
+    document.getElementById('stat-camping').textContent = formatInteger(summary.totals.baseline_photos);
+    document.getElementById('audit-coverage').textContent = String(summary.totals.coverage_pct || 0).replace('.', ',') + ' %';
+    document.getElementById('audit-clusters').textContent = formatInteger(summary.totals.coord_cluster_locations);
+    document.getElementById('audit-dups').textContent = formatInteger(summary.totals.exact_name_dups);
+    document.getElementById('audit-suspicious').textContent = formatInteger(summary.totals.suspicious_urls);
+    document.getElementById('audit-note').textContent =
+        'Snapshot: ' + formatInteger(summary.totals.pois) + ' POIs, ' +
+        formatInteger(summary.totals.baseline_photos) + ' Baseline-Fotos und ' +
+        formatInteger(summary.totals.orphan_photos || 0) + ' Orphan-Fotos.';
+
+    renderAuditRows('audit-hotspots', summary.cluster_hotspots || [], item =>
+        '<div class="audit-row"><span class="audit-row-label">' + item.label +
+        '</span><span class="audit-row-value">' + formatInteger(item.coord_cluster_locations) + ' Cluster</span></div>'
+    );
+    renderAuditRows('audit-low-coverage', summary.lowest_coverage || [], item =>
+        '<div class="audit-row"><span class="audit-row-label">' + item.label +
+        '</span><span class="audit-row-value">' + String(item.coverage_pct).replace('.', ',') + ' %</span></div>'
+    );
+
+    return summary;
+}
+
+function renderAuditRows(targetId, items, formatter) {
+    const target = document.getElementById(targetId);
+    if (!target) return;
+    target.innerHTML = items.map(item => formatter(item)).join('') || '<div class="audit-row"><span class="audit-row-label">Keine Daten</span><span class="audit-row-value">-</span></div>';
 }
 
 // ===== CLOSE MENUS =====

@@ -4308,8 +4308,7 @@ const allPOIs = [
                     }
                 } catch(e) {}
             }
-            _photoCache[poi.id] = getCategoryFallback(poi.category);
-            _savePhotoCache();
+            _updatePhotoElements(poi.id, getCategoryFallback(poi.category), imgElements);
             _photoLoading[poi.id] = false;
         }
         function _updatePhotoElements(poiId, url, imgElements) {

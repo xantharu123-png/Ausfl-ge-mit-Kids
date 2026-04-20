@@ -3208,7 +3208,7 @@ const allPOIs = [
         // ===== Wikipedia/Wikimedia Foto-System (gratis, kein API-Key) =====
         const _photoCache = JSON.parse(localStorage.getItem('photoCacheAE') || '{}');
         const _photoLoading = {};
-        const _photoCacheVersion = 4;
+        const _photoCacheVersion = 5;
         if (parseInt(localStorage.getItem('photoCacheVersionAE') || '0') < _photoCacheVersion) {
             localStorage.removeItem('photoCacheAE');
             localStorage.setItem('photoCacheVersionAE', String(_photoCacheVersion));
@@ -3244,7 +3244,20 @@ const allPOIs = [
             weihnachten: 'https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=400&q=80'
         };
         const _defaultFallback = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80';
-        function getCategoryFallback(category) { return _categoryFallbacks[category] || _defaultFallback; }
+        function getCategoryFallback(category) {
+            var labelMap = {
+                sehenswuerdigkeit: 'Sehenswuerdigkeit',
+                kultur: 'Kultur',
+                familie: 'Familie',
+                sport: 'Sport',
+                festival: 'Festival',
+                volksfest: 'Volksfest',
+                weihnachten: 'Weihnachten'
+            };
+            var label = labelMap[category] || 'POI';
+            var svg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 260'><rect width='400' height='260' fill='#16213e'/><rect x='24' y='24' width='352' height='212' rx='18' fill='#1f2b47' stroke='#364966'/><circle cx='200' cy='98' r='28' fill='#364966'/><path d='M104 170l42-44 38 32 40-52 72 64H104z' fill='#4ecca3' opacity='0.55'/><text x='200' y='202' text-anchor='middle' fill='#dbe7f3' font-family='Arial, sans-serif' font-size='20' font-weight='700'>" + label + "</text><text x='200' y='226' text-anchor='middle' fill='#8a9ab5' font-family='Arial, sans-serif' font-size='12'>Kein verifiziertes Foto gefunden</text></svg>";
+            return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+        }
         function getPoiPhoto(poi) {
             if (poi.image) return poi.image;
             if (_photoCache[poi.id]) return _photoCache[poi.id];
@@ -3347,8 +3360,7 @@ const allPOIs = [
                     }
                 } catch(e) {}
             }
-            _photoCache[poi.id] = getCategoryFallback(poi.category);
-            _savePhotoCache();
+            _updatePhotoElements(poi.id, getCategoryFallback(poi.category), imgElements);
             _photoLoading[poi.id] = false;
         }
         function _updatePhotoElements(poiId, url, imgElements) {
