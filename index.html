@@ -2439,7 +2439,8 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-    <script>
+    <script src="photos_CH.js"></script>
+<script>
         // ============================================
         // DATEN: Alle POIs aus dem Jahresguide 2026
         // ============================================
@@ -4529,27 +4530,44 @@
             volksfest: 'https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?w=400&q=80',
             weihnachten: 'https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=400&q=80'
         };
-        const _defaultFallback = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80';
-
-        // Baseline-Fotos aus JSON laden (vorab von Wikipedia geholt)
+        const _defaultFallback = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80';        // Baseline-Fotos aus JS oder JSON laden (funktioniert auch bei file://)
         (function loadBaselinePhotos() {
-            fetch('photos_CH.json').then(function(r) { return r.ok ? r.json() : null; }).then(function(data) {
+            function applyBaseline(data) {
                 if (!data || typeof data !== 'object') return;
                 var loaded = 0;
                 Object.keys(data).forEach(function(k) {
-                    var prev = _photoCache[k]; if (prev !== data[k]) { _photoCache[k] = data[k]; loaded++; }
+                    var prev = _photoCache[k];
+                    if (prev !== data[k]) {
+                        _photoCache[k] = data[k];
+                        loaded++;
+                    }
                 });
                 if (loaded > 0) {
                     try { localStorage.setItem('photoCacheCH', JSON.stringify(_photoCache)); } catch(e) {}
                     console.log('[Photos] ' + loaded + ' Baseline-Fotos geladen');
-                    // Update already visible images
                     document.querySelectorAll('img[data-poi-photo]').forEach(function(img) {
                         var pid = img.getAttribute('data-poi-photo');
-                        if (_photoCache[pid] && img.src !== _photoCache[pid]) { img.src = _photoCache[pid]; }
+                        if (_photoCache[pid] && img.src !== _photoCache[pid]) {
+                            img.src = _photoCache[pid];
+                        }
                     });
                 }
-            }).catch(function() {});
+            }
+
+            var globalPhotos = (window.__PHOTO_BASELINE__ && window.__PHOTO_BASELINE__['CH']) || null;
+            if (globalPhotos && typeof globalPhotos === 'object') {
+                applyBaseline(globalPhotos);
+                return;
+            }
+
+            fetch('photos_CH.json')
+                .then(function(r) { return r.ok ? r.json() : null; })
+                .then(applyBaseline)
+                .catch(function(err) {
+                    console.warn('[Photos] Baseline konnte nicht geladen werden:', err);
+                });
         })();
+
 
         function getCategoryFallback(category) {
             var labelMap = {
@@ -4572,7 +4590,7 @@
             return getCategoryFallback(poi.category);
         }
 
-        const _photoCacheVersion = 5; // 2026-04-19: Generika-Blacklist und Cleanup
+        const _photoCacheVersion = 6; // 2026-04-19: Generika-Blacklist und Cleanup
         if (parseInt(localStorage.getItem('photoCacheVersionCH') || '0') < _photoCacheVersion) {
             localStorage.removeItem('photoCacheCH');
             localStorage.setItem('photoCacheVersionCH', String(_photoCacheVersion));
@@ -4905,6 +4923,59 @@
         let favoriteCamping = JSON.parse(localStorage.getItem('favoriteCamping') || '[]');
         let campingFavOnly = false;
 
+        function normalizeFavoriteCampingState() {
+            var normalized = [];
+            var seen = new Set();
+            if (!Array.isArray(favoriteCamping)) favoriteCamping = [];
+            favoriteCamping.forEach(function(entry) {
+                var normalizedEntry = null;
+                if (typeof entry === 'string' && entry) {
+                    normalizedEntry = { key: entry, data: null };
+                } else if (entry && typeof entry === 'object' && typeof entry.key === 'string' && entry.key) {
+                    normalizedEntry = { key: entry.key, data: entry.data || null };
+                }
+                if (!normalizedEntry || seen.has(normalizedEntry.key)) return;
+                seen.add(normalizedEntry.key);
+                normalized.push(normalizedEntry);
+            });
+            favoriteCamping = normalized;
+            localStorage.setItem('favoriteCamping', JSON.stringify(favoriteCamping));
+        }
+
+        function getCampKeyAttr(campKey) {
+            return encodeURIComponent(String(campKey || ''));
+        }
+
+        function updateCampFavoriteButtonState(btn, isFav) {
+            if (!btn) return;
+            btn.textContent = isFav ? '❤️' : '🤍';
+            btn.classList.toggle('active', isFav);
+            var label = btn.nextElementSibling;
+            if (label && label.tagName === 'SPAN') {
+                label.textContent = isFav ? 'Favorit' : 'Favorit speichern';
+            }
+        }
+
+        function syncCampFavoriteButtons(root) {
+            var scope = root || document;
+            scope.querySelectorAll('.fav-btn[data-camp-key]').forEach(function(btn) {
+                var encodedKey = btn.getAttribute('data-camp-key') || '';
+                var decodedKey = encodedKey;
+                try { decodedKey = decodeURIComponent(encodedKey); } catch (e) {}
+                updateCampFavoriteButtonState(btn, isCampFav(decodedKey));
+            });
+        }
+
+        function getCampFavoriteButtonHtml(campKey, stopPropagation) {
+            var isFav = isCampFav(campKey);
+            var escapedKey = String(campKey).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+            var onclick = (stopPropagation ? 'event.stopPropagation();' : '') + "toggleFavoriteCamping('" + escapedKey + "',this);";
+            var safeOnclick = onclick.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+            return '<button class="fav-btn' + (isFav ? ' active' : '') + '" data-camp-key="' + getCampKeyAttr(campKey) + '" onclick="' + safeOnclick + '">' + (isFav ? '❤️' : '🤍') + '</button> <span style="font-size:11px;color:#b8c5d6;">' + (isFav ? 'Favorit' : 'Favorit speichern') + '</span>';
+        }
+
+        normalizeFavoriteCampingState();
+
         // Lade Favoriten aus JSON-Dateien falls localStorage leer (Backup/Restore)
         (function loadBaselineFavorites() {
             fetch('poi_favorites_CH.json').then(r => r.ok ? r.json() : null).then(data => {
@@ -4918,7 +4989,7 @@
             fetch('camp_favorites.json').then(r => r.ok ? r.json() : null).then(data => {
                 if (data && Array.isArray(data) && data.length > 0 && favoriteCamping.length === 0) {
                     favoriteCamping = data;
-                    localStorage.setItem('favoriteCamping', JSON.stringify(favoriteCamping));
+                    normalizeFavoriteCampingState();
                     console.log('[Favorites] Camping-Favoriten aus Backup geladen:', data.length);
                     updateFavCounts();
                 }
@@ -5084,16 +5155,15 @@
                 const data = window._campingSiteData && window._campingSiteData[campKey];
                 favoriteCamping.push({ key: campKey, data: data || null });
             }
-            localStorage.setItem('favoriteCamping', JSON.stringify(favoriteCamping));
+            normalizeFavoriteCampingState();
             const isFav = favoriteCamping.some(c => c.key === campKey);
             if (btn) {
-                btn.textContent = isFav ? '❤️' : '🤍';
-                btn.classList.toggle('active', isFav);
+                updateCampFavoriteButtonState(btn, isFav);
             }
-            document.querySelectorAll('.fav-btn[data-camp-key="' + campKey + '"]').forEach(b => {
-                b.textContent = isFav ? '❤️' : '🤍';
-                b.classList.toggle('active', isFav);
+            document.querySelectorAll('.fav-btn[data-camp-key="' + getCampKeyAttr(campKey) + '"]').forEach(b => {
+                updateCampFavoriteButtonState(b, isFav);
             });
+            syncCampFavoriteButtons();
             updateFavCounts();
         }
 
@@ -5156,7 +5226,7 @@
                     }
                     if (data.campingFavorites) {
                         favoriteCamping = data.campingFavorites;
-                        localStorage.setItem('favoriteCamping', JSON.stringify(favoriteCamping));
+                        normalizeFavoriteCampingState();
                     }
                     updateFavCounts();
                     filterPOIs(false);
@@ -6588,16 +6658,20 @@
                 if (isP4N && site.tags.p4n_url) popup += '<br><a href="' + site.tags.p4n_url + '" target="_blank" style="color:#6ea8fe">🅿️ Park4Night</a>';
                 popup += ' · <a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(name) + '+' + site.lat + ',' + (site.lon||site.lng) + '" target="_blank" style="color:#ff9800">📍 Maps</a>';
                 var ck = getCampKey(site);
-                popup += '<br><button class="fav-btn' + (isCampFav(ck) ? ' active' : '') + '" data-camp-key="' + ck + '" onclick="toggleFavoriteCamping(\'' + ck.replace(/'/g,"\\'") + '\',this);">' + (isCampFav(ck) ? '❤️' : '🤍') + '</button> <span style="font-size:11px;color:#b8c5d6">' + (isCampFav(ck) ? 'Favorit' : 'Favorit speichern') + '</span>';
+                popup += '<br>' + getCampFavoriteButtonHtml(ck, true);
                 popup += '</div>';
                 marker.bindPopup(popup, { maxWidth: 280 });
+                marker.on('popupopen', function() {
+                    var popupEl = this.getPopup() && this.getPopup().getElement();
+                    if (popupEl) syncCampFavoriteButtons(popupEl);
+                });
                 window._campingSiteData[ck] = { name: name, lat: site.lat, lon: site.lon||site.lng, type: typeLabel, tags: site.tags };
                 campingCluster.addLayer(marker);
                 campingMarkers.push(marker);
                 if (i < 50) {
                     var campKey = ck;
                     if (campingFavOnly && !isCampFav(campKey)) return;
-                    html += '<div class="camping-card" onclick="var m=campingMarkers[' + i + ']; if(m){map.setView(m.getLatLng(), 15); setTimeout(function(){m.openPopup()}, 300);}"><div class="camping-card-name"><button class="fav-btn' + (isCampFav(campKey) ? ' active' : '') + '" data-camp-key="' + campKey + '" onclick="event.stopPropagation();toggleFavoriteCamping(\'' + campKey.replace(/'/g,"\\'") + '\',this);">' + (isCampFav(campKey) ? '❤️' : '🤍') + '</button> ' + (i+1) + '. ' + name + '</div>';
+                    html += '<div class="camping-card" onclick="var m=campingMarkers[' + i + ']; if(m){map.setView(m.getLatLng(), 15); setTimeout(function(){m.openPopup()}, 300);}"><div class="camping-card-name">' + getCampFavoriteButtonHtml(campKey, true) + ' ' + (i+1) + '. ' + name + '</div>';
                     if (site.tags.p4n_rating > 0) html += '<div class="camping-card-details">⭐ ' + site.tags.p4n_rating.toFixed(1) + ' <span style="color:#8899aa">(' + (site.tags.p4n_reviews||0) + ')</span></div>';
                     html += '</div>';
                 }
@@ -6738,7 +6812,7 @@
                         if (email) popup += '<br>✉️ <a href="mailto:' + email + '" style="color:#4ecca3;font-size:11px;">' + email + '</a>';
                         if (website) popup += '<br>🌐 <a href="' + (website.startsWith('http') ? website : 'https://'+website) + '" target="_blank" style="color:#4ecca3;font-size:11px;">' + website.replace(/^https?:\/\/(www\.)?/,'').substring(0,35) + '</a>';
                         var ck1 = getCampKey(site);
-                        popup += '<br><button class="fav-btn' + (isCampFav(ck1) ? ' active' : '') + '" data-camp-key="' + ck1 + '" onclick="toggleFavoriteCamping(\'' + ck1.replace(/'/g,"\\'") + '\',this);">' + (isCampFav(ck1) ? '❤️' : '🤍') + '</button> <span style="font-size:11px;color:#b8c5d6;">' + (isCampFav(ck1) ? 'Favorit' : 'Favorit speichern') + '</span>';
+                        popup += '<br>' + getCampFavoriteButtonHtml(ck1, true);
                         popup += '<br><a href="https://www.google.com/search?q=' + encodeURIComponent(name + ' camping') + '" target="_blank" style="color:#4ecca3;font-size:11px;">🔍 Google</a>';
                         popup += ' · <a href="https://www.google.com/maps/search/?api=1&query=' + site.lat + ',' + site.lon + '" target="_blank" style="color:#ff9800;font-size:11px;">📍 Maps</a>';
                         // Google Bewertung
@@ -6749,6 +6823,8 @@
                         marker.bindPopup(popup, { maxWidth: 300 });
                         (function(mName, mLat, mLon, mIdx, mIsP4N) {
                             marker.on('popupopen', async function() {
+                                var popupEl = this.getPopup() && this.getPopup().getElement();
+                                if (popupEl) syncCampFavoriteButtons(popupEl);
                                 if (googleApiKey && !mIsP4N && !['Campingplatz','Wohnmobilstellplatz','Wohnmobil-Servicestation','Stellplatz'].includes(mName)) {
                                     var r = await fetchCampRating(mName, mLat, mLon);
                                     if (r && r.rating > 0) {
@@ -6773,7 +6849,7 @@
                             if (priceStr) cardDetails.push(priceStr);
                             if (website) cardDetails.push('🌐 <a href="' + (website.startsWith('http') ? website : 'https://'+website) + '" target="_blank" onclick="event.stopPropagation();">' + website.replace(/^https?:\/\/(www\.)?/,'').substring(0,30) + '</a>');
                             html += '<div class="camping-card" onclick="map.setView([' + site.lat + ',' + site.lon + '], 13);campingMarkers[' + i + '].openPopup();">';
-                            html += '<div class="camping-card-name"><button class="fav-btn' + (isCampFav(campKey) ? ' active' : '') + '" data-camp-key="' + campKey + '" onclick="event.stopPropagation();toggleFavoriteCamping(\'' + campKey.replace(/'/g,"\\'") + '\',this);">' + (isCampFav(campKey) ? '❤️' : '🤍') + '</button> ' + (i+1) + '. ' + name + ' ' + getOpenBadge(openStatus) + '</div>';
+                            html += '<div class="camping-card-name">' + getCampFavoriteButtonHtml(campKey, true) + ' ' + (i+1) + '. ' + name + ' ' + getOpenBadge(openStatus) + '</div>';
                             html += '<div class="camping-card-type">' + typeLabel + stars + '</div>';
                             if (cardDetails.length) html += '<div class="camping-card-details">' + cardDetails.join('<br>') + '</div>';
                             html += '</div>';
@@ -6959,7 +7035,7 @@
                     if (email) popup += '<br>✉️ <a href="mailto:' + email + '" style="color:#4ecca3;font-size:11px;">' + email + '</a>';
                     if (website) popup += '<br>🌐 <a href="' + (website.startsWith('http') ? website : 'https://'+website) + '" target="_blank" style="color:#4ecca3;font-size:11px;">' + website.replace(/^https?:\/\/(www\.)?/,'').substring(0,35) + '</a>';
                     var ck2 = getCampKey(site);
-                    popup += '<br><button class="fav-btn' + (isCampFav(ck2) ? ' active' : '') + '" data-camp-key="' + ck2 + '" onclick="toggleFavoriteCamping(\'' + ck2.replace(/'/g,"\\'") + '\',this);">' + (isCampFav(ck2) ? '❤️' : '🤍') + '</button> <span style="font-size:11px;color:#b8c5d6;">' + (isCampFav(ck2) ? 'Favorit' : 'Favorit speichern') + '</span>';
+                    popup += '<br>' + getCampFavoriteButtonHtml(ck2, true);
                     popup += '<br><a href="https://www.google.com/search?q=' + encodeURIComponent(name + ' camping') + '" target="_blank" style="color:#4ecca3;font-size:11px;">🔍 Google</a>';
                     popup += ' · <a href="https://www.google.com/maps/search/?api=1&query=' + site.lat + ',' + site.lon + '" target="_blank" style="color:#ff9800;font-size:11px;">📍 Maps</a>';
                     // Google Bewertung
@@ -6970,6 +7046,8 @@
                     marker.bindPopup(popup, { maxWidth: 300 });
                     (function(mName, mLat, mLon, mIdx, mIsP4N) {
                         marker.on('popupopen', async function() {
+                            var popupEl = this.getPopup() && this.getPopup().getElement();
+                            if (popupEl) syncCampFavoriteButtons(popupEl);
                             if (googleApiKey && !mIsP4N && !['Campingplatz','Wohnmobilstellplatz','Wohnmobil-Servicestation','Stellplatz'].includes(mName)) {
                                 var r = await fetchCampRating(mName, mLat, mLon);
                                 if (r && r.rating > 0) {
@@ -6994,7 +7072,7 @@
                         if (priceStr) cardDetails.push(priceStr);
                         if (website) cardDetails.push('🌐 <a href="' + (website.startsWith('http') ? website : 'https://'+website) + '" target="_blank" onclick="event.stopPropagation();">' + website.replace(/^https?:\/\/(www\.)?/,'').substring(0,30) + '</a>');
                         html += '<div class="camping-card" onclick="map.setView([' + site.lat + ',' + site.lon + '], 13);campingMarkers[' + i + '].openPopup();">';
-                        html += '<div class="camping-card-name"><button class="fav-btn' + (isCampFav(campKey) ? ' active' : '') + '" data-camp-key="' + campKey + '" onclick="event.stopPropagation();toggleFavoriteCamping(\'' + campKey.replace(/'/g,"\\'") + '\',this);">' + (isCampFav(campKey) ? '❤️' : '🤍') + '</button> ' + (i+1) + '. ' + name + ' ' + getOpenBadge(openStatus) + '</div>';
+                        html += '<div class="camping-card-name">' + getCampFavoriteButtonHtml(campKey, true) + ' ' + (i+1) + '. ' + name + ' ' + getOpenBadge(openStatus) + '</div>';
                         html += '<div class="camping-card-type">' + typeLabel + stars + '</div>';
                         if (cardDetails.length) html += '<div class="camping-card-details">' + cardDetails.join('<br>') + '</div>';
                         html += '</div>';

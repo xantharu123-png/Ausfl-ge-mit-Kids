@@ -2144,6 +2144,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script src="photos_IT.js"></script>
     <script>
         // ============================================
         // DATEN: Alle POIs aus dem Jahresguide 2026
@@ -4232,8 +4233,87 @@ const allPOIs = [
   {id:2100,name:"Centro Visita del Lupo Popoli",category:"familie",lat:42.167,lng:13.833,location:"Popoli",region:"Abruzzen",description:"Wolfsgehege im Majella-Nationalpark wo Kinder Apennin-Wölfe aus nächster Nähe beobachten können",month:0},
   {id:2101,name:"Fornillo Beach Positano",category:"familie",lat:40.628,lng:14.482,location:"Positano",region:"Kampanien",description:"Ruhigere Alternative zum Hauptstrand: 10 Min. Fussweg, schwarzer Kiesel, weniger Touristen, mehr Charme",month:0},
   {id:2102,name:"Sentiero dei Limoni",category:"sport",lat:40.65,lng:14.633,location:"Minori",region:"Kampanien",description:"Leichte Panoramawanderung durch Zitronenhaine von Maiori nach Minori - einfacher als der Götterpfad, mit Kindern machbar",month:0},
-  {id:2103,name:"Cimitero delle Fontanelle",category:"sehenswuerdigkeit",lat:40.858,lng:14.243,location:"Neapel",region:"Kampanien",description:"Unterirdisches Beinhaus im Rione Sanità mit tausenden Schädeln aus Pest und Cholera-Zeiten - einzigartig und gratis",month:0}];,
+  {id:2103,name:"Cimitero delle Fontanelle",category:"sehenswuerdigkeit",lat:40.858,lng:14.243,location:"Neapel",region:"Kampanien",description:"Unterirdisches Beinhaus im Rione Sanità mit tausenden Schädeln aus Pest und Cholera-Zeiten - einzigartig und gratis",month:0}
 ];
+
+
+        // ===== Wikipedia/Wikimedia Foto-System (gratis, kein API-Key) =====
+        const _photoCache = JSON.parse(localStorage.getItem('photoCacheIT') || '{}');
+        const _photoLoading = {};
+        const _photoCacheVersion = 6;
+        if (parseInt(localStorage.getItem('photoCacheVersionIT') || '0') < _photoCacheVersion) {
+            localStorage.removeItem('photoCacheIT');
+            localStorage.setItem('photoCacheVersionIT', String(_photoCacheVersion));
+            Object.keys(_photoCache).forEach(k => delete _photoCache[k]);
+        }
+        var _GENERIC_IMAGE_BLACKLIST = [];
+        const _categoryFallbacks = {
+            sehenswuerdigkeit: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80',
+            kultur: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=400&q=80',
+            familie: 'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=400&q=80',
+            sport: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=400&q=80',
+            festival: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400&q=80',
+            volksfest: 'https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?w=400&q=80',
+            weihnachten: 'https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=400&q=80'
+        };
+        const _defaultFallback = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80';
+        (function loadBaselinePhotos() {
+            function applyBaseline(data) {
+                if (!data || typeof data !== 'object') return;
+                var loaded = 0;
+                Object.keys(data).forEach(function(k) {
+                    var prev = _photoCache[k];
+                    if (prev !== data[k]) {
+                        _photoCache[k] = data[k];
+                        loaded++;
+                    }
+                });
+                if (loaded > 0) {
+                    try { localStorage.setItem('photoCacheIT', JSON.stringify(_photoCache)); } catch(e) {}
+                    console.log('[Photos] ' + loaded + ' Baseline-Fotos geladen');
+                    document.querySelectorAll('img[data-poi-photo]').forEach(function(img) {
+                        var pid = img.getAttribute('data-poi-photo');
+                        if (_photoCache[pid] && img.src !== _photoCache[pid]) {
+                            img.src = _photoCache[pid];
+                        }
+                    });
+                }
+            }
+
+            var globalPhotos = (window.__PHOTO_BASELINE__ && window.__PHOTO_BASELINE__['IT']) || null;
+            if (globalPhotos && typeof globalPhotos === 'object') {
+                applyBaseline(globalPhotos);
+                return;
+            }
+
+            fetch('photos_IT.json')
+                .then(function(r) { return r.ok ? r.json() : null; })
+                .then(applyBaseline)
+                .catch(function(err) {
+                    console.warn('[Photos] Baseline konnte nicht geladen werden:', err);
+                });
+        })();
+
+        function getCategoryFallback(category) {
+            var labelMap = {
+                sehenswuerdigkeit: 'Sehenswuerdigkeit',
+                kultur: 'Kultur',
+                familie: 'Familie',
+                sport: 'Sport',
+                festival: 'Festival',
+                volksfest: 'Volksfest',
+                weihnachten: 'Weihnachten'
+            };
+            var label = labelMap[category] || 'POI';
+            var svg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 260'><rect width='400' height='260' fill='#16213e'/><rect x='24' y='24' width='352' height='212' rx='18' fill='#1f2b47' stroke='#364966'/><circle cx='200' cy='98' r='28' fill='#364966'/><path d='M104 170l42-44 38 32 40-52 72 64H104z' fill='#4ecca3' opacity='0.55'/><text x='200' y='202' text-anchor='middle' fill='#dbe7f3' font-family='Arial, sans-serif' font-size='20' font-weight='700'>" + label + "</text><text x='200' y='226' text-anchor='middle' fill='#8a9ab5' font-family='Arial, sans-serif' font-size='12'>Kein verifiziertes Foto gefunden</text></svg>";
+            return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+        }
+
+        function getPoiPhoto(poi) {
+            if (poi.image) return poi.image;
+            if (_photoCache[poi.id]) return _photoCache[poi.id];
+            return getCategoryFallback(poi.category);
+        }
 
         function _isMapOrBadImage(url) {
             var lc = url.toLowerCase();

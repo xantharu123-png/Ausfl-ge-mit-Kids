@@ -2144,7 +2144,8 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-    <script>
+    <script src="photos_DE.js"></script>
+<script>
         // ============================================
         // DATEN: Alle POIs aus dem Jahresguide 2026
         // ============================================
@@ -4732,30 +4733,49 @@ const allPOIs = [
         // ===== Wikipedia/Wikimedia Foto-System (gratis, kein API-Key) =====
         const _photoCache = JSON.parse(localStorage.getItem('photoCacheDE') || '{}');
         const _photoLoading = {};
-        const _photoCacheVersion = 5;
+        const _photoCacheVersion = 6;
         if (parseInt(localStorage.getItem('photoCacheVersionDE') || '0') < _photoCacheVersion) {
             localStorage.removeItem('photoCacheDE');
             localStorage.setItem('photoCacheVersionDE', String(_photoCacheVersion));
             Object.keys(_photoCache).forEach(k => delete _photoCache[k]);
         }
 
-                // Baseline-Fotos aus JSON laden (vorab von Wikipedia geholt)
+        // Baseline-Fotos aus JS oder JSON laden (funktioniert auch bei file://)
         (function loadBaselinePhotos() {
-            fetch('photos_DE.json').then(function(r) { return r.ok ? r.json() : null; }).then(function(data) {
+            function applyBaseline(data) {
                 if (!data || typeof data !== 'object') return;
                 var loaded = 0;
                 Object.keys(data).forEach(function(k) {
-                    var prev = _photoCache[k]; if (prev !== data[k]) { _photoCache[k] = data[k]; loaded++; }
+                    var prev = _photoCache[k];
+                    if (prev !== data[k]) {
+                        _photoCache[k] = data[k];
+                        loaded++;
+                    }
                 });
                 if (loaded > 0) {
                     try { localStorage.setItem('photoCacheDE', JSON.stringify(_photoCache)); } catch(e) {}
                     console.log('[Photos] ' + loaded + ' Baseline-Fotos geladen');
                     document.querySelectorAll('img[data-poi-photo]').forEach(function(img) {
                         var pid = img.getAttribute('data-poi-photo');
-                        if (_photoCache[pid] && img.src.indexOf('unsplash.com') > -1) { img.src = _photoCache[pid]; }
+                        if (_photoCache[pid] && img.src !== _photoCache[pid]) {
+                            img.src = _photoCache[pid];
+                        }
                     });
                 }
-            }).catch(function() {});
+            }
+
+            var globalPhotos = (window.__PHOTO_BASELINE__ && window.__PHOTO_BASELINE__['DE']) || null;
+            if (globalPhotos && typeof globalPhotos === 'object') {
+                applyBaseline(globalPhotos);
+                return;
+            }
+
+            fetch('photos_DE.json')
+                .then(function(r) { return r.ok ? r.json() : null; })
+                .then(applyBaseline)
+                .catch(function(err) {
+                    console.warn('[Photos] Baseline konnte nicht geladen werden:', err);
+                });
         })();
 
         const _categoryFallbacks = {
