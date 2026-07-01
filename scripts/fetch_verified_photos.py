@@ -1,0 +1,380 @@
+#!/usr/bin/env python3
+"""Fetch high-trust Wikimedia photos for missing POI baselines.
+
+This is intentionally stricter than the legacy fetcher. It accepts an image
+only when the article title/extract matches meaningful POI name tokens. A
+nearby geosearch result helps ranking, but location alone is never enough.
+
+Examples:
+  python scripts/fetch_verified_photos.py CH --limit 50
+  python scripts/fetch_verified_photos.py CH --limit 50 --apply
+  python scripts/fetch_verified_photos.py ALL --only-worthy --limit 100 --apply
+"""
+
+from __future__ import annotations
+
+import argparse
+import concurrent.futures
+import json
+import re
+import ssl
+import sys
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+from collections import Counter
+from pathlib import Path
+from typing import Any
+
+from photo_trust_audit import (
+    HTML_TO_CC,
+    ROOT,
+    BAD_EXT_RE,
+    BAD_URL_RE,
+    KNOWN_GENERIC_RE,
+    extract_pois,
+    image_filename,
+    load_photos,
+    meaningful_tokens,
+    normalize,
+    write_photos,
+)
+
+
+UA = (
+    "JahresguidePhotoVerifier/1.0 "
+    "(https://jahresguide.app; contact miroslav.mikulic@gmail.com) Python/3"
+)
+SSL_CTX = ssl.create_default_context()
+
+LANG_PRIO = {
+    "CH": ["de", "fr", "it", "en"],
+    "FR": ["fr", "de", "en"],
+    "DE": ["de", "en"],
+    "AT": ["de", "en"],
+    "IT": ["it", "de", "en"],
+    "ES": ["es", "de", "en"],
+    "PT": ["pt", "de", "en"],
+    "GR": ["el", "de", "en"],
+    "NL": ["nl", "de", "en"],
+    "BE": ["nl", "fr", "de", "en"],
+    "LU": ["fr", "de", "lb", "en"],
+    "CZ": ["cs", "de", "en"],
+    "SK": ["sk", "de", "en"],
+    "PL": ["pl", "de", "en"],
+    "HR": ["hr", "de", "en"],
+    "SI": ["sl", "de", "en"],
+    "BA": ["bs", "hr", "sr", "de", "en"],
+    "NO": ["no", "nb", "de", "en"],
+    "SE": ["sv", "de", "en"],
+    "FI": ["fi", "de", "en"],
+    "IS": ["is", "de", "en"],
+    "FO": ["fo", "da", "de", "en"],
+    "CY": ["el", "de", "en"],
+    "JP": ["ja", "en", "de"],
+    "QA": ["ar", "en", "de"],
+    "AE": ["ar", "en", "de"],
+    "CA_ON": ["en", "fr", "de"],
+    "CA_OST": ["en", "fr", "de"],
+    "CA_WEST": ["en", "fr", "de"],
+    "CA_ZEN": ["en", "fr", "de"],
+}
+
+WORTHY_CATEGORIES = {"sehenswuerdigkeit", "kultur", "weihnachten"}
+
+
+def fetch_json(url: str, timeout: int = 8) -> dict[str, Any] | None:
+    request = urllib.request.Request(
+        url,
+        headers={"User-Agent": UA, "Accept": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=timeout, context=SSL_CTX) as response:
+            if response.status == 200:
+                return json.loads(response.read().decode("utf-8"))
+    except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, json.JSONDecodeError):
+        return None
+    return None
+
+
+def summary(lang: str, title: str) -> dict[str, Any] | None:
+    encoded = urllib.parse.quote(title.replace(" ", "_"))
+    return fetch_json(f"https://{lang}.wikipedia.org/api/rest_v1/page/summary/{encoded}")
+
+
+def wiki_search(lang: str, query: str, limit: int = 5) -> list[str]:
+    url = (
+        f"https://{lang}.wikipedia.org/w/api.php?action=query&format=json"
+        f"&list=search&srsearch={urllib.parse.quote(query)}&srlimit={limit}"
+    )
+    data = fetch_json(url, timeout=8)
+    if not data:
+        return []
+    return [hit["title"] for hit in data.get("query", {}).get("search", []) if hit.get("title")]
+
+
+def wiki_geosearch(lang: str, lat: float, lng: float, radius: int = 1200, limit: int = 10) -> list[dict[str, Any]]:
+    url = (
+        f"https://{lang}.wikipedia.org/w/api.php?action=query&format=json"
+        f"&list=geosearch&gscoord={lat}%7C{lng}&gsradius={radius}&gslimit={limit}"
+    )
+    data = fetch_json(url, timeout=8)
+    if not data:
+        return []
+    return data.get("query", {}).get("geosearch", [])
+
+
+def photo_from_summary(data: dict[str, Any] | None) -> str | None:
+    if not data or data.get("type") == "disambiguation":
+        return None
+    src = (
+        data.get("thumbnail", {}).get("source")
+        or data.get("originalimage", {}).get("source")
+        or ""
+    )
+    if not src:
+        return None
+    lower = src.lower()
+    if BAD_EXT_RE.search(lower) or BAD_URL_RE.search(lower) or KNOWN_GENERIC_RE.search(lower):
+        return None
+    if not re.search(r"\.(jpe?g|png)(?:[/?#]|$)", lower):
+        return None
+    return re.sub(r"/\d+px-", "/500px-", src)
+
+
+def build_queries(poi: dict[str, Any]) -> list[str]:
+    name = str(poi.get("name", "")).strip()
+    location = str(poi.get("location", "")).strip()
+    region = str(poi.get("region", "")).strip()
+    queries = [
+        name,
+        name.replace("-", " "),
+        f"{name} {location}" if location and location.lower() not in name.lower() else "",
+        f"{name} {region}" if region and len(region) <= 12 else "",
+        f"{name} ({location})" if location and location.lower() not in name.lower() else "",
+    ]
+    seen = set()
+    return [q for q in queries if q and not (q.lower() in seen or seen.add(q.lower()))]
+
+
+def score_candidate(
+    poi: dict[str, Any],
+    data: dict[str, Any],
+    method: str,
+    distance_m: int | None,
+) -> tuple[float, dict[str, Any]]:
+    place_tokens = meaningful_tokens(str(poi.get("location", "")), str(poi.get("region", "")))
+    raw_name_tokens = meaningful_tokens(str(poi.get("name", "")))
+    core_name_tokens = raw_name_tokens - place_tokens
+    name_tokens = core_name_tokens or raw_name_tokens
+    title = str(data.get("title", ""))
+    photo_url = photo_from_summary(data) or ""
+    filename_norm = normalize(image_filename(photo_url))
+    text = " ".join(
+        [
+            title,
+            str(data.get("description", "")),
+            str(data.get("extract", ""))[:800],
+            image_filename(photo_url),
+        ]
+    )
+    title_norm = normalize(title)
+    text_norm = normalize(text)
+
+    title_hits = {token for token in name_tokens if token in title_norm}
+    file_hits = {token for token in name_tokens if token in filename_norm}
+    name_hits = {token for token in name_tokens if token in text_norm}
+    place_hits = {token for token in place_tokens if token in text_norm}
+
+    score = 0.0
+    score += len(title_hits) * 3
+    score += len(file_hits) * 2
+    score += len(name_hits) * 1.5
+    score += len(place_hits) * 0.75
+    if method == "geo" and distance_m is not None:
+        score += max(0.0, 2.5 - (distance_m / 600.0))
+
+    details = {
+        "title": title,
+        "method": method,
+        "distance_m": distance_m,
+        "core_name_tokens": sorted(name_tokens),
+        "title_hits": sorted(title_hits),
+        "file_hits": sorted(file_hits),
+        "name_hits": sorted(name_hits),
+        "place_hits": sorted(place_hits),
+        "score": round(score, 2),
+    }
+    return score, details
+
+
+def is_accepted(
+    poi: dict[str, Any],
+    data: dict[str, Any],
+    method: str,
+    distance_m: int | None,
+    min_score: float,
+) -> tuple[bool, dict[str, Any]]:
+    score, details = score_candidate(poi, data, method, distance_m)
+    name_hit_count = len(details["title_hits"]) + len(details["name_hits"])
+    if name_hit_count == 0:
+        return False, details
+    if method == "geo" and not (details["title_hits"] or details["file_hits"]):
+        return False, details
+    if method == "geo" and distance_m is not None and distance_m > 1200:
+        return False, details
+    if score < min_score:
+        return False, details
+    return True, details
+
+
+def find_photo_for_poi(
+    cc: str,
+    poi: dict[str, Any],
+    used_urls: Counter[str],
+    max_duplicate: int,
+    min_score: float,
+) -> dict[str, Any] | None:
+    langs = LANG_PRIO.get(cc, ["de", "en"])
+    tried: set[tuple[str, str]] = set()
+
+    def try_title(lang: str, title: str, method: str, distance_m: int | None = None) -> dict[str, Any] | None:
+        key = (lang, title.lower())
+        if key in tried:
+            return None
+        tried.add(key)
+        data = summary(lang, title)
+        url = photo_from_summary(data)
+        if not data or not url or used_urls[url] >= max_duplicate:
+            return None
+        accepted, details = is_accepted(poi, data, method, distance_m, min_score)
+        if not accepted:
+            return None
+        details.update({"lang": lang, "url": url})
+        return details
+
+    for lang in langs:
+        for query in build_queries(poi):
+            found = try_title(lang, query, "title")
+            if found:
+                return found
+
+    search_langs = list(dict.fromkeys([langs[0], "en", "de"]))
+    for lang in search_langs:
+        for query in build_queries(poi)[:3]:
+            for title in wiki_search(lang, query, limit=5):
+                found = try_title(lang, title, "search")
+                if found:
+                    return found
+
+    lat = poi.get("lat")
+    lng = poi.get("lng")
+    if isinstance(lat, (int, float)) and isinstance(lng, (int, float)):
+        for lang in search_langs:
+            for hit in wiki_geosearch(lang, float(lat), float(lng)):
+                title = hit.get("title")
+                if not title:
+                    continue
+                found = try_title(lang, title, "geo", int(hit.get("dist", 999999)))
+                if found:
+                    return found
+    return None
+
+
+def country_from_arg(value: str) -> list[str]:
+    if value.upper() == "ALL":
+        return list(HTML_TO_CC.values())
+    cc = value.upper()
+    aliases = {"CA_E": "CA_OST", "CA_O": "CA_OST", "CA_Z": "CA_ZEN", "CA_W": "CA_WEST"}
+    cc = aliases.get(cc, cc)
+    if cc not in set(HTML_TO_CC.values()):
+        raise SystemExit(f"Unknown country code: {value}")
+    return [cc]
+
+
+def process_country(args: argparse.Namespace, cc: str) -> dict[str, Any]:
+    html_name = next(name for name, mapped_cc in HTML_TO_CC.items() if mapped_cc == cc)
+    pois = extract_pois(ROOT / html_name)
+    photos = load_photos(cc)
+    before_count = len(photos)
+    used_urls = Counter(photos.values())
+
+    candidates = [poi for poi in pois if str(poi["id"]) not in photos]
+    if args.only_worthy:
+        candidates = [poi for poi in candidates if poi.get("category") in WORTHY_CATEGORIES]
+    priority = {"sehenswuerdigkeit": 0, "kultur": 1, "weihnachten": 2, "familie": 3}
+    candidates.sort(key=lambda poi: priority.get(str(poi.get("category")), 9))
+    if args.limit:
+        candidates = candidates[: args.limit]
+
+    print(f"[{cc}] checking {len(candidates)} POIs", flush=True)
+    found: dict[str, str] = {}
+    meta: dict[str, Any] = {}
+    started = time.time()
+
+    def work(poi: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any] | None]:
+        return poi, find_photo_for_poi(cc, poi, used_urls, args.max_duplicate, args.min_score)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as executor:
+        futures = [executor.submit(work, poi) for poi in candidates]
+        for index, future in enumerate(concurrent.futures.as_completed(futures), start=1):
+            poi, result = future.result()
+            if result:
+                pid = str(poi["id"])
+                url = result["url"]
+                if used_urls[url] >= args.max_duplicate:
+                    continue
+                found[pid] = url
+                used_urls[url] += 1
+                meta[pid] = {
+                    "poi_name": poi.get("name"),
+                    "location": poi.get("location"),
+                    **result,
+                }
+            if index % 25 == 0:
+                print(f"[{cc}] {index}/{len(candidates)} checked, +{len(found)}", flush=True)
+
+    if args.apply and found:
+        photos.update(found)
+        write_photos(cc, dict(sorted(photos.items(), key=lambda item: int(item[0]))))
+
+    report = {
+        "cc": cc,
+        "mode": "apply" if args.apply else "dry-run",
+        "checked": len(candidates),
+        "found": len(found),
+        "before": before_count,
+        "after": before_count + len(found),
+        "seconds": round(time.time() - started, 1),
+        "items": meta,
+    }
+    suffix = "apply" if args.apply else "dry_run"
+    (ROOT / f"photo_fetch_report_{cc}_{suffix}.json").write_text(
+        json.dumps(report, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    print(f"[{cc}] found {len(found)} in {report['seconds']}s", flush=True)
+    return report
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("country", help="Country code, e.g. CH, DE, FR, or ALL")
+    parser.add_argument("--apply", action="store_true")
+    parser.add_argument("--limit", type=int, default=100)
+    parser.add_argument("--workers", type=int, default=6)
+    parser.add_argument("--max-duplicate", type=int, default=2)
+    parser.add_argument("--min-score", type=float, default=3.5)
+    parser.add_argument("--only-worthy", action="store_true")
+    args = parser.parse_args()
+
+    reports = [process_country(args, cc) for cc in country_from_arg(args.country)]
+    total_checked = sum(report["checked"] for report in reports)
+    total_found = sum(report["found"] for report in reports)
+    print(f"total: checked {total_checked}, found {total_found}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

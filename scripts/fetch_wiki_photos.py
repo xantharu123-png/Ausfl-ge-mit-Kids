@@ -127,7 +127,7 @@ def extract_photo(data):
         return None
     if is_bad_image(src):
         return None
-    src = re.sub(r'/\d+px-', '/400px-', src)
+    src = re.sub(r'/\d+px-', '/500px-', src)
     return src
 
 

@@ -1,5 +1,5 @@
 // Familienguide 2026 — Service Worker
-const CACHE_NAME = 'familienguide-v2';
+const CACHE_NAME = 'familienguide-v3-photo-baseline';
 const APP_SHELL = [
   './',
   './app.html',
@@ -91,19 +91,16 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Same-origin JSON/JS/CSS: stale-while-revalidate for app data and config
+  // Same-origin app data/config: network-first so photo/rating baselines update immediately.
   if (url.origin === self.location.origin) {
     event.respondWith(
-      caches.match(event.request).then(cached => {
-        const fetched = fetch(event.request).then(response => {
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-          }
-          return response;
-        }).catch(() => cached);
-        return cached || fetched;
-      })
+      fetch(event.request).then(response => {
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        }
+        return response;
+      }).catch(() => caches.match(event.request))
     );
     return;
   }

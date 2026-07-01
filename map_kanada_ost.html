@@ -2371,7 +2371,7 @@ const allPOIs = [
         // ===== Wikipedia/Wikimedia Foto-System (gratis, kein API-Key) =====
         const _photoCache = JSON.parse(localStorage.getItem('photoCacheCA_O') || '{}');
         const _photoLoading = {};
-        const _photoCacheVersion = 6;
+        const _photoCacheVersion = 8; // 2026-07-01: Wikimedia-Thumbs auf erlaubte 500px-URLs migriert
         if (parseInt(localStorage.getItem('photoCacheVersionCA_O') || '0') < _photoCacheVersion) {
             localStorage.removeItem('photoCacheCA_O');
             localStorage.setItem('photoCacheVersionCA_O', String(_photoCacheVersion));
@@ -2380,6 +2380,19 @@ const allPOIs = [
 
         // Baseline-Fotos aus JS oder JSON laden (funktioniert auch bei file://)
         (function loadBaselinePhotos() {
+            function refreshPhotoElements() {
+                var refreshed = 0;
+                document.querySelectorAll('img[data-poi-photo]').forEach(function(img) {
+                    var pid = img.getAttribute('data-poi-photo');
+                    var photo = _photoCache[pid];
+                    if (photo && img.getAttribute('src') !== photo) {
+                        img.setAttribute('src', photo);
+                        refreshed++;
+                    }
+                });
+                return refreshed;
+            }
+
             function applyBaseline(data) {
                 if (!data || typeof data !== 'object') return;
                 var loaded = 0;
@@ -2390,16 +2403,17 @@ const allPOIs = [
                         loaded++;
                     }
                 });
+                try { localStorage.setItem('photoCacheCA_OST', JSON.stringify(_photoCache)); } catch(e) {}
                 if (loaded > 0) {
-                    try { localStorage.setItem('photoCacheCA_OST', JSON.stringify(_photoCache)); } catch(e) {}
                     console.log('[Photos] ' + loaded + ' Baseline-Fotos geladen');
-                    document.querySelectorAll('img[data-poi-photo]').forEach(function(img) {
-                        var pid = img.getAttribute('data-poi-photo');
-                        if (_photoCache[pid] && img.src !== _photoCache[pid]) {
-                            img.src = _photoCache[pid];
-                        }
-                    });
                 }
+                window.__PHOTO_CACHE_DEBUG__ = {
+                    loaded: loaded,
+                    cached: Object.keys(_photoCache).length,
+                    refreshed: refreshPhotoElements()
+                };
+                setTimeout(function() { window.__PHOTO_CACHE_DEBUG__.refreshed += refreshPhotoElements(); }, 0);
+                setTimeout(function() { window.__PHOTO_CACHE_DEBUG__.refreshed += refreshPhotoElements(); }, 500);
             }
 
             var globalPhotos = (window.__PHOTO_BASELINE__ && window.__PHOTO_BASELINE__['CA_OST']) || null;
@@ -2441,8 +2455,9 @@ const allPOIs = [
             return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
         }
         function getPoiPhoto(poi) {
-            if (poi.image) return poi.image;
-            if (_photoCache[poi.id]) return _photoCache[poi.id];
+            var baseline = window.__PHOTO_BASELINE__ && window.__PHOTO_BASELINE__['CA_OST'];
+            var curated = poi.image || (baseline && baseline[poi.id]) || _photoCache[poi.id];
+            if (curated && !_isMapOrBadImage(curated)) return curated;
             return getCategoryFallback(poi.category);
         }
         // Bekannte Generika/Fremd-Landmarks — nicht als POI-Foto cachen.
@@ -2484,9 +2499,15 @@ const allPOIs = [
             var src = data.thumbnail.source;
             if (_isMapOrBadImage(src)) return null;
             if (data.type === 'disambiguation') return null;
-            return src.replace(/\/\d+px-/, '/400px-');
+            return src.replace(/\/\d+px-/, '/500px-');
         }
+        const ENABLE_RUNTIME_PHOTO_FETCH = false;
+
         async function fetchWikiPhoto(poi, imgElements) {
+            if (!ENABLE_RUNTIME_PHOTO_FETCH) {
+                if (imgElements) _updatePhotoElements(poi.id, getCategoryFallback(poi.category), imgElements);
+                return;
+            }
             if (poi.image || _photoCache[poi.id] || _photoLoading[poi.id]) return;
             _photoLoading[poi.id] = true;
             var name = poi.name.replace(/[-\u2013]/g, ' ');
@@ -2536,7 +2557,7 @@ const allPOIs = [
                             fullSrc = src.indexOf('//') === 0 ? 'https:' + src : src;
                             if (_isMapOrBadImage(fullSrc)) continue;
                             if (!/\.(jpg|jpeg|png)/i.test(fullSrc)) continue;
-                            url = fullSrc.replace(/\/\d+px-/, '/400px-');
+                            url = fullSrc.replace(/\/\d+px-/, '/500px-');
                             _photoCache[poi.id] = url; _savePhotoCache(); _updatePhotoElements(poi.id, url, imgElements); _photoLoading[poi.id] = false; return;
                         }
                     }
@@ -2994,7 +3015,7 @@ const allPOIs = [
                 
                 const popupContent = createPopupContent(poi);
                 marker.on('popupopen', async function() {
-                    if (!poi.image && !_photoCache[poi.id]) fetchWikiPhoto(poi);
+                    // Runtime photo fetching is disabled; only curated baselines are shown.
                     if (googleApiKey && !ratingCache[poi.id]) {
                         const rating = await fetchSingleRating(poi);
                         if (rating && rating.rating > 0) {
@@ -3026,7 +3047,7 @@ const allPOIs = [
             
             return `
                 <div class="popup-content">
-                    <img src="${getPoiPhoto(poi)}" alt="${poi.name}" class="popup-image" data-poi-photo="${poi.id}" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80'">
+                    <img src="${getPoiPhoto(poi)}" alt="${poi.name}" class="popup-image" data-poi-photo="${poi.id}" onerror="this.src=getCategoryFallback('${poi.category}')">
                     <div class="popup-body">
                         <div class="popup-category">${categoryIcons[poi.category]} ${poi.category}</div>
                         <h3 class="popup-title">${poi.name}</h3>
@@ -3104,7 +3125,7 @@ const allPOIs = [
                     html += `
                         <div class="poi-card ${isVisited ? 'visited' : ''}" data-id="${poi.id}" style="--cat-color: ${categoryColors[poi.category]}">
                             <div class="poi-header">
-                                <img src="${getPoiPhoto(poi)}" alt="${poi.name}" class="poi-image" data-poi-photo="${poi.id}" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80'">
+                                <img src="${getPoiPhoto(poi)}" alt="${poi.name}" class="poi-image" data-poi-photo="${poi.id}" onerror="this.src=getCategoryFallback('${poi.category}')">
                                 <div class="poi-info">
                                     <div class="poi-title"><button class="fav-btn${favoritePOIs.includes(poi.id) ? ' active' : ''}" data-poi-id="${poi.id}" onclick="event.stopPropagation();toggleFavoritePOI(${poi.id}, this);">${favoritePOIs.includes(poi.id) ? '\u2764\uFE0F' : '\uD83E\uDD0D'}</button> ${poi.name}</div>
                                     <div class="poi-location">📍 ${poi.location}</div>
@@ -3147,7 +3168,7 @@ const allPOIs = [
             });
 
             // Wiki-Fotos lazy laden
-            _lazyLoadPhotos(pois);
+            // Runtime photo fetching is disabled; only curated baselines are shown.
         }
         
         function highlightPOICard(id) {
@@ -3673,7 +3694,12 @@ const allPOIs = [
             if (campingMode) {
                 sw.classList.add('active');
                 panel.classList.add('visible');
-                document.getElementById('camping-results').innerHTML = '<div class="camping-info">\u{1F5FA}\uFE0F Karte verschieben um Pl\u00E4tze zu laden, oder Route berechnen.</div>';
+                if (map.getZoom() < 8) {
+                    document.getElementById('camping-results').innerHTML = '<div class="camping-info">Bitte zoome etwas rein (mind. Zoom 8) um Campingplaetze zu laden.</div>';
+                } else {
+                    setCampingLoadingStatus('Camping-Suche laeuft...','Suche fuer den aktuellen Kartenausschnitt wird gestartet');
+                    loadCampingSites();
+                }
             } else {
                 sw.classList.remove('active');
                 panel.classList.remove('visible');
