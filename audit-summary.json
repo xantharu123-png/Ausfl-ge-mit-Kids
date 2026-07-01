@@ -3,22 +3,22 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 1976,
-    "with_baseline": 1976,
+    "baseline_photos": 1992,
+    "with_baseline": 1992,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
     "suspicious_urls": 0,
     "removed_suspicious_urls": 0,
-    "coverage_pct": 3.8
+    "coverage_pct": 3.9
   },
   "cluster_hotspots": [
     {
       "cc": "JP",
       "label": "Japan",
       "pois": 2874,
-      "baseline_photos": 54,
-      "coverage_pct": 1.9,
+      "baseline_photos": 58,
+      "coverage_pct": 2.0,
       "coord_cluster_locations": 435
     },
     {
@@ -56,14 +56,6 @@
   ],
   "lowest_coverage": [
     {
-      "cc": "QA",
-      "label": "Katar",
-      "pois": 327,
-      "baseline_photos": 0,
-      "coverage_pct": 0.0,
-      "coord_cluster_locations": 13
-    },
-    {
       "cc": "CY",
       "label": "Zypern",
       "pois": 1970,
@@ -86,6 +78,14 @@
       "baseline_photos": 15,
       "coverage_pct": 0.8,
       "coord_cluster_locations": 133
+    },
+    {
+      "cc": "QA",
+      "label": "Katar",
+      "pois": 327,
+      "baseline_photos": 3,
+      "coverage_pct": 0.9,
+      "coord_cluster_locations": 13
     },
     {
       "cc": "LU",

@@ -83,6 +83,25 @@ LANG_PRIO = {
 
 WORTHY_CATEGORIES = {"sehenswuerdigkeit", "kultur", "weihnachten"}
 GENERIC_TITLE_RE = re.compile(r"^(observation deck)$", re.I)
+AMBIGUOUS_SINGLE_TOKENS = {
+    "bruecke",
+    "brucke",
+    "burg",
+    "dom",
+    "fernsehturm",
+    "hafen",
+    "kirche",
+    "markt",
+    "museum",
+    "palast",
+    "park",
+    "platz",
+    "schloss",
+    "strand",
+    "tempel",
+    "turm",
+}
+WEAK_PLACE_TOKENS = {"center", "central", "centre", "mitte", "stadt", "zentrum"}
 REQUIRED_CONTEXT_TOKENS = {
     "abbey",
     "basilica",
@@ -96,6 +115,16 @@ REQUIRED_CONTEXT_TOKENS = {
     "museum",
     "palace",
     "schloss",
+}
+TOKEN_SYNONYMS = {
+    "bruecke": {"bridge"},
+    "brucke": {"bridge"},
+    "fischmarkt": {"market"},
+    "markt": {"market"},
+    "palast": {"palace"},
+    "schrein": {"shrine"},
+    "tempel": {"temple"},
+    "turm": {"tower"},
 }
 
 
@@ -178,6 +207,13 @@ def wikidata_p18_url(qid: str) -> str | None:
     return None
 
 
+def expand_tokens(tokens: set[str], raw_name: str = "") -> set[str]:
+    expanded = set(tokens)
+    for token in set(normalize(raw_name).split()) | tokens:
+        expanded.update(TOKEN_SYNONYMS.get(token, set()))
+    return expanded
+
+
 def photo_from_summary(data: dict[str, Any] | None) -> str | None:
     if not data or data.get("type") == "disambiguation":
         return None
@@ -227,7 +263,8 @@ def score_candidate(
     photo_url_override: str | None = None,
 ) -> tuple[float, dict[str, Any]]:
     place_tokens = meaningful_tokens(str(poi.get("location", "")), str(poi.get("region", "")))
-    raw_name_tokens = meaningful_tokens(str(poi.get("name", "")))
+    raw_name = str(poi.get("name", ""))
+    raw_name_tokens = expand_tokens(meaningful_tokens(raw_name), raw_name)
     core_name_tokens = raw_name_tokens - place_tokens
     name_tokens = core_name_tokens or raw_name_tokens
     title = str(data.get("title", ""))
@@ -288,6 +325,24 @@ def is_accepted(
         return False, details
     if GENERIC_TITLE_RE.search(title_norm):
         return False, details
+    core_tokens = set(details["core_name_tokens"])
+    if (
+        method == "title"
+        and exact_title_match
+        and len(core_tokens) == 1
+        and next(iter(core_tokens)) in AMBIGUOUS_SINGLE_TOKENS
+        and not details["file_hits"]
+        and not details["place_hits"]
+    ):
+        return False, details
+    if (
+        method in {"search", "geo"}
+        and len(core_tokens) == 1
+        and next(iter(core_tokens)) in AMBIGUOUS_SINGLE_TOKENS
+        and title_norm != poi_norm
+        and not (set(details["place_hits"]) - WEAK_PLACE_TOKENS)
+    ):
+        return False, details
     required_context = [
         token for token in normalize(str(poi.get("name", ""))).split()
         if token in REQUIRED_CONTEXT_TOKENS
@@ -296,6 +351,10 @@ def is_accepted(
         return False, details
     if method == "search" and len(details["core_name_tokens"]) > 1 and len(details["title_hits"]) < 2:
         return False, details
+    if method == "geo" and len(details["core_name_tokens"]) > 1:
+        strong_hits = set(details["title_hits"]) | set(details["file_hits"])
+        if len(strong_hits) < 2:
+            return False, details
     if method in {"search", "geo"} and not exact_title_match and score < 7.0:
         return False, details
     if method == "geo" and not (details["title_hits"] or details["file_hits"]):
