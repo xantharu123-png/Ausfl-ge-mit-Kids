@@ -313,6 +313,8 @@ def process_country(args: argparse.Namespace, cc: str) -> dict[str, Any]:
         candidates = [poi for poi in candidates if poi.get("category") in WORTHY_CATEGORIES]
     priority = {"sehenswuerdigkeit": 0, "kultur": 1, "weihnachten": 2, "familie": 3}
     candidates.sort(key=lambda poi: priority.get(str(poi.get("category")), 9))
+    if args.offset:
+        candidates = candidates[args.offset :]
     if args.limit:
         candidates = candidates[: args.limit]
 
@@ -350,6 +352,7 @@ def process_country(args: argparse.Namespace, cc: str) -> dict[str, Any]:
     report = {
         "cc": cc,
         "mode": "apply" if args.apply else "dry-run",
+        "offset": args.offset,
         "checked": len(candidates),
         "found": len(found),
         "before": before_count,
@@ -371,6 +374,7 @@ def main() -> int:
     parser.add_argument("country", help="Country code, e.g. CH, DE, FR, or ALL")
     parser.add_argument("--apply", action="store_true")
     parser.add_argument("--limit", type=int, default=100)
+    parser.add_argument("--offset", type=int, default=0)
     parser.add_argument("--workers", type=int, default=6)
     parser.add_argument("--max-duplicate", type=int, default=2)
     parser.add_argument("--min-score", type=float, default=3.5)
