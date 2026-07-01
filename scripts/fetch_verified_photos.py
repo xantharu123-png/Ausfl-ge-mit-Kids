@@ -83,6 +83,20 @@ LANG_PRIO = {
 
 WORTHY_CATEGORIES = {"sehenswuerdigkeit", "kultur", "weihnachten"}
 GENERIC_TITLE_RE = re.compile(r"^(observation deck)$", re.I)
+REQUIRED_CONTEXT_TOKENS = {
+    "abbey",
+    "basilica",
+    "burg",
+    "castle",
+    "cathedral",
+    "chateau",
+    "dom",
+    "fort",
+    "kloster",
+    "museum",
+    "palace",
+    "schloss",
+}
 
 
 def fetch_json(url: str, timeout: int = 8) -> dict[str, Any] | None:
@@ -126,6 +140,44 @@ def wiki_geosearch(lang: str, lat: float, lng: float, radius: int = 1200, limit:
     return data.get("query", {}).get("geosearch", [])
 
 
+def wiki_pageprops(lang: str, title: str) -> dict[str, Any] | None:
+    url = (
+        f"https://{lang}.wikipedia.org/w/api.php?action=query&format=json"
+        f"&prop=pageprops|pageimages&piprop=original&titles={urllib.parse.quote(title)}"
+    )
+    data = fetch_json(url, timeout=8)
+    pages = data.get("query", {}).get("pages", {}) if data else {}
+    for page in pages.values():
+        if "missing" not in page:
+            return page
+    return None
+
+
+def commons_thumb_url(file_name: str, width: int = 500) -> str:
+    encoded = urllib.parse.quote(file_name.replace(" ", "_"), safe="")
+    return f"https://commons.wikimedia.org/wiki/Special:FilePath/{encoded}?width={width}"
+
+
+def wikidata_p18_url(qid: str) -> str | None:
+    data = fetch_json(f"https://www.wikidata.org/wiki/Special:EntityData/{urllib.parse.quote(qid)}.json", timeout=8)
+    entity = data.get("entities", {}).get(qid, {}) if data else {}
+    claims = entity.get("claims", {}).get("P18", [])
+    for claim in claims:
+        value = (
+            claim.get("mainsnak", {})
+            .get("datavalue", {})
+            .get("value")
+        )
+        if isinstance(value, str):
+            url = commons_thumb_url(value)
+            lower = url.lower()
+            if BAD_EXT_RE.search(lower) or BAD_URL_RE.search(lower) or KNOWN_GENERIC_RE.search(lower):
+                continue
+            if re.search(r"\.(jpe?g|png)(?:[/?#]|$)", lower):
+                return url
+    return None
+
+
 def photo_from_summary(data: dict[str, Any] | None) -> str | None:
     if not data or data.get("type") == "disambiguation":
         return None
@@ -142,6 +194,14 @@ def photo_from_summary(data: dict[str, Any] | None) -> str | None:
     if not re.search(r"\.(jpe?g|png)(?:[/?#]|$)", lower):
         return None
     return re.sub(r"/\d+px-", "/500px-", src)
+
+
+def photo_from_wikidata(lang: str, title: str) -> str | None:
+    page = wiki_pageprops(lang, title)
+    qid = (page or {}).get("pageprops", {}).get("wikibase_item")
+    if not qid:
+        return None
+    return wikidata_p18_url(str(qid))
 
 
 def build_queries(poi: dict[str, Any]) -> list[str]:
@@ -164,13 +224,14 @@ def score_candidate(
     data: dict[str, Any],
     method: str,
     distance_m: int | None,
+    photo_url_override: str | None = None,
 ) -> tuple[float, dict[str, Any]]:
     place_tokens = meaningful_tokens(str(poi.get("location", "")), str(poi.get("region", "")))
     raw_name_tokens = meaningful_tokens(str(poi.get("name", "")))
     core_name_tokens = raw_name_tokens - place_tokens
     name_tokens = core_name_tokens or raw_name_tokens
     title = str(data.get("title", ""))
-    photo_url = photo_from_summary(data) or ""
+    photo_url = photo_url_override or photo_from_summary(data) or ""
     filename_norm = normalize(image_filename(photo_url))
     text = " ".join(
         [
@@ -216,8 +277,9 @@ def is_accepted(
     method: str,
     distance_m: int | None,
     min_score: float,
+    photo_url_override: str | None = None,
 ) -> tuple[bool, dict[str, Any]]:
-    score, details = score_candidate(poi, data, method, distance_m)
+    score, details = score_candidate(poi, data, method, distance_m, photo_url_override)
     title_norm = normalize(str(data.get("title", "")))
     poi_norm = normalize(str(poi.get("name", "")))
     exact_title_match = title_norm == poi_norm
@@ -225,6 +287,14 @@ def is_accepted(
     if name_hit_count == 0:
         return False, details
     if GENERIC_TITLE_RE.search(title_norm):
+        return False, details
+    required_context = [
+        token for token in normalize(str(poi.get("name", ""))).split()
+        if token in REQUIRED_CONTEXT_TOKENS
+    ]
+    if method == "search" and required_context and not any(token in title_norm for token in required_context):
+        return False, details
+    if method == "search" and len(details["core_name_tokens"]) > 1 and len(details["title_hits"]) < 2:
         return False, details
     if method in {"search", "geo"} and not exact_title_match and score < 7.0:
         return False, details
@@ -254,12 +324,16 @@ def find_photo_for_poi(
         tried.add(key)
         data = summary(lang, title)
         url = photo_from_summary(data)
+        source = "summary"
+        if not url:
+            url = photo_from_wikidata(lang, title)
+            source = "wikidata_p18"
         if not data or not url or used_urls[url] >= max_duplicate:
             return None
-        accepted, details = is_accepted(poi, data, method, distance_m, min_score)
+        accepted, details = is_accepted(poi, data, method, distance_m, min_score, url)
         if not accepted:
             return None
-        details.update({"lang": lang, "url": url})
+        details.update({"lang": lang, "url": url, "source": source})
         return details
 
     for lang in langs:
