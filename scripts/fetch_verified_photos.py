@@ -82,6 +82,7 @@ LANG_PRIO = {
 }
 
 WORTHY_CATEGORIES = {"sehenswuerdigkeit", "kultur", "weihnachten"}
+GENERIC_TITLE_RE = re.compile(r"^(observation deck)$", re.I)
 
 
 def fetch_json(url: str, timeout: int = 8) -> dict[str, Any] | None:
@@ -217,8 +218,15 @@ def is_accepted(
     min_score: float,
 ) -> tuple[bool, dict[str, Any]]:
     score, details = score_candidate(poi, data, method, distance_m)
+    title_norm = normalize(str(data.get("title", "")))
+    poi_norm = normalize(str(poi.get("name", "")))
+    exact_title_match = title_norm == poi_norm
     name_hit_count = len(details["title_hits"]) + len(details["name_hits"])
     if name_hit_count == 0:
+        return False, details
+    if GENERIC_TITLE_RE.search(title_norm):
+        return False, details
+    if method in {"search", "geo"} and not exact_title_match and score < 7.0:
         return False, details
     if method == "geo" and not (details["title_hits"] or details["file_hits"]):
         return False, details
