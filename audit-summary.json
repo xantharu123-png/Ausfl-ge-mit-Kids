@@ -3,14 +3,14 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 2702,
-    "with_baseline": 2702,
+    "baseline_photos": 2725,
+    "with_baseline": 2725,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
     "suspicious_urls": 0,
     "removed_suspicious_urls": 0,
-    "coverage_pct": 5.2
+    "coverage_pct": 5.3
   },
   "cluster_hotspots": [
     {
@@ -41,16 +41,16 @@
       "cc": "SI",
       "label": "Slowenien",
       "pois": 1979,
-      "baseline_photos": 45,
-      "coverage_pct": 2.3,
+      "baseline_photos": 49,
+      "coverage_pct": 2.5,
       "coord_cluster_locations": 133
     },
     {
       "cc": "CY",
       "label": "Zypern",
       "pois": 1970,
-      "baseline_photos": 38,
-      "coverage_pct": 1.9,
+      "baseline_photos": 41,
+      "coverage_pct": 2.1,
       "coord_cluster_locations": 110
     }
   ],
@@ -59,24 +59,24 @@
       "cc": "LU",
       "label": "Luxemburg",
       "pois": 1974,
-      "baseline_photos": 36,
-      "coverage_pct": 1.8,
+      "baseline_photos": 38,
+      "coverage_pct": 1.9,
       "coord_cluster_locations": 97
     },
     {
       "cc": "CY",
       "label": "Zypern",
       "pois": 1970,
-      "baseline_photos": 38,
-      "coverage_pct": 1.9,
+      "baseline_photos": 41,
+      "coverage_pct": 2.1,
       "coord_cluster_locations": 110
     },
     {
       "cc": "FO",
       "label": "Faeroeer",
       "pois": 1949,
-      "baseline_photos": 43,
-      "coverage_pct": 2.2,
+      "baseline_photos": 44,
+      "coverage_pct": 2.3,
       "coord_cluster_locations": 78
     },
     {
