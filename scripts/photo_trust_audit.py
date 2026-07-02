@@ -174,7 +174,8 @@ KNOWN_GENERIC_RE = re.compile(
     r"fashion_walk_shop_swarovski|jastrz%c4%99bie-zdr%c3%b3j|"
     r"wien_rathaus_hochaufl|bernstein_auf_granit|cittadella_aerea|"
     r"vaalankurkku_railway_bridge|monument_aux_morts|"
-    r"san_francisco-bay_bridge02|beelitz-heilstaetten_coa)",
+    r"san_francisco-bay_bridge02|beelitz-heilstaetten_coa|"
+    r"schutt_der_rappenloch|felssturz_rappenloch)",
     re.I,
 )
 
