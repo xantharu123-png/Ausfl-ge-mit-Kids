@@ -133,7 +133,12 @@ KNOWN_GENERIC_RE = re.compile(
     r"landsgemeinde_-_glarus|tradition-warner-highsmith|jungfraubahn\.png|"
     r"s-bahn_berlin_innsbrucker_platz|nationalpark_hohe_tauern\.png|"
     r"destruction_of_pompeii_and_herculaneum|san_sebastiano_fuori_le_mura|"
-    r"milan_centralstation|d%c3%bcrnstein_in_kr\.png)",
+    r"milan_centralstation|d%c3%bcrnstein_in_kr\.png|"
+    r"steingartencambridge|mangastorejapan|the_ladies%27_home_journal|"
+    r"die_gartenlaube|benzaiten_.*white_dragon|cnw_brakeman|"
+    r"opera_garnier_stairway|various_products_made_from_paper|"
+    r"marycarpenter|16-hole_chrom|sonneratia_alba|changingseasons|"
+    r"mana_-_glas|kengo_box|cream_on_fanclub|asashoryu_fight)",
     re.I,
 )
 
