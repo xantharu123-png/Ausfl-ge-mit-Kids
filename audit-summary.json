@@ -3,14 +3,14 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 2798,
-    "with_baseline": 2798,
+    "baseline_photos": 2815,
+    "with_baseline": 2815,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
     "suspicious_urls": 0,
     "removed_suspicious_urls": 0,
-    "coverage_pct": 5.4
+    "coverage_pct": 5.5
   },
   "cluster_hotspots": [
     {
@@ -41,8 +41,8 @@
       "cc": "SI",
       "label": "Slowenien",
       "pois": 1979,
-      "baseline_photos": 49,
-      "coverage_pct": 2.5,
+      "baseline_photos": 55,
+      "coverage_pct": 2.8,
       "coord_cluster_locations": 133
     },
     {
@@ -88,12 +88,12 @@
       "coord_cluster_locations": 68
     },
     {
-      "cc": "SI",
-      "label": "Slowenien",
-      "pois": 1979,
-      "baseline_photos": 49,
-      "coverage_pct": 2.5,
-      "coord_cluster_locations": 133
+      "cc": "FI",
+      "label": "Finnland",
+      "pois": 1971,
+      "baseline_photos": 53,
+      "coverage_pct": 2.7,
+      "coord_cluster_locations": 81
     }
   ]
 }
