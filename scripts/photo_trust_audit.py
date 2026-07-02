@@ -142,7 +142,8 @@ KNOWN_GENERIC_RE = re.compile(
     r"dried_soba_noodles|wakkanai_montage|wikitreff_002|"
     r"chemin_de_ronde_muraille_long|russell_falls|"
     r"og%c3%b3rki_w_trakcie_kiszenia|arboretum\.westonbirt|"
-    r"galeries_lafayette_haussmann)",
+    r"galeries_lafayette_haussmann|carnaval-festival|wine_grapes03|"
+    r"bundesarchiv_bild_183-1990-1003-400)",
     re.I,
 )
 
