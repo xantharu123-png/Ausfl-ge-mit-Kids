@@ -3,8 +3,8 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 2769,
-    "with_baseline": 2769,
+    "baseline_photos": 2789,
+    "with_baseline": 2789,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
@@ -25,8 +25,8 @@
       "cc": "BE",
       "label": "Belgien",
       "pois": 1957,
-      "baseline_photos": 78,
-      "coverage_pct": 4.0,
+      "baseline_photos": 84,
+      "coverage_pct": 4.3,
       "coord_cluster_locations": 316
     },
     {
@@ -80,20 +80,20 @@
       "coord_cluster_locations": 78
     },
     {
-      "cc": "FI",
-      "label": "Finnland",
-      "pois": 1971,
-      "baseline_photos": 45,
-      "coverage_pct": 2.3,
-      "coord_cluster_locations": 81
-    },
-    {
       "cc": "GR",
       "label": "Griechenland",
       "pois": 2471,
-      "baseline_photos": 57,
-      "coverage_pct": 2.3,
+      "baseline_photos": 59,
+      "coverage_pct": 2.4,
       "coord_cluster_locations": 68
+    },
+    {
+      "cc": "SI",
+      "label": "Slowenien",
+      "pois": 1979,
+      "baseline_photos": 49,
+      "coverage_pct": 2.5,
+      "coord_cluster_locations": 133
     }
   ]
 }
