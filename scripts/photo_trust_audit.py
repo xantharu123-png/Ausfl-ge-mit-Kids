@@ -116,7 +116,8 @@ KNOWN_GENERIC_RE = re.compile(
     r"lisbontram|jellingsten|str%c3%b6hl-rangkronen|"
     r"fire_inside_an_abandoned_convent.*quebec|libreoffice_writer|"
     r"hapag-lloyd_antwerpen_express|anamur_burnu|embrik_strand|"
-    r"tent_camping_along_the_sulayr_trail)",
+    r"tent_camping_along_the_sulayr_trail|amaterske_akvarium|"
+    r"vesting_index)",
     re.I,
 )
 

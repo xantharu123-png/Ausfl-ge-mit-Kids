@@ -59,6 +59,20 @@ WAVES: dict[str, dict[str, Any]] = {
         "skip_geo": False,
         "min_score": 3.5,
     },
+    "title-clean-worthy": {
+        "categories": "sehenswuerdigkeit,kultur,weihnachten",
+        "title_only": True,
+        "skip_search": False,
+        "skip_geo": False,
+        "min_score": 3.5,
+    },
+    "title-clean-family": {
+        "categories": "familie",
+        "title_only": True,
+        "skip_search": False,
+        "skip_geo": False,
+        "min_score": 3.5,
+    },
     "search-worthy": {
         "categories": "sehenswuerdigkeit,kultur,weihnachten",
         "title_only": False,

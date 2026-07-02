@@ -3,8 +3,8 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 2126,
-    "with_baseline": 2126,
+    "baseline_photos": 2128,
+    "with_baseline": 2128,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,

@@ -98,6 +98,7 @@ AMBIGUOUS_SINGLE_TOKENS = {
     "bridge",
     "bruecke",
     "brucke",
+    "aquarium",
     "burg",
     "camping",
     "castle",
@@ -106,7 +107,9 @@ AMBIGUOUS_SINGLE_TOKENS = {
     "dorf",
     "dom",
     "fernsehturm",
+    "festung",
     "forest",
+    "fortress",
     "gebirge",
     "hafen",
     "halbinsel",
@@ -385,11 +388,20 @@ def stripped_name_variants(name: str, location: str) -> list[str]:
     return [value for value in variants if not (value.lower() in seen or seen.add(value.lower()))]
 
 
+def is_ambiguous_single_query(value: str) -> bool:
+    tokens = meaningful_tokens(value)
+    return len(tokens) == 1 and next(iter(tokens)) in AMBIGUOUS_SINGLE_TOKENS
+
+
 def build_queries(poi: dict[str, Any]) -> list[str]:
     name = str(poi.get("name", "")).strip()
     location = str(poi.get("location", "")).strip()
     region = str(poi.get("region", "")).strip()
-    stripped_names = stripped_name_variants(name, location)
+    stripped_names = [
+        value
+        for value in stripped_name_variants(name, location)
+        if not is_ambiguous_single_query(value)
+    ]
     queries = [
         name,
         name.replace("-", " "),
