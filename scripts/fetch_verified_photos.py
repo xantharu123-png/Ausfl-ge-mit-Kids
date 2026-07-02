@@ -86,7 +86,7 @@ LANG_PRIO = {
 WORTHY_CATEGORIES = {"sehenswuerdigkeit", "kultur", "weihnachten"}
 GENERIC_TITLE_RE = re.compile(
     r"^(observation deck|arc de triomphe|jardin des plantes|sea life|der bote vom gardasee|"
-    r"kasteel keukenhof|carnival festival)$",
+    r"kasteel keukenhof|carnival festival|botanischer garten|botanical garden)$",
     re.I,
 )
 NON_PLACE_ENTITY_RE = re.compile(
@@ -155,6 +155,9 @@ AMBIGUOUS_SINGLE_TOKENS = {
     "markt",
     "mall",
     "mittelalter",
+    "minster",
+    "muenster",
+    "munster",
     "museum",
     "mountain",
     "mountains",
