@@ -99,6 +99,7 @@ AMBIGUOUS_SINGLE_TOKENS = {
     "bruecke",
     "brucke",
     "burg",
+    "camping",
     "castle",
     "cathedral",
     "church",
