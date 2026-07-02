@@ -98,7 +98,7 @@ FIELD_STR = re.compile(r'(\w+):\s*"((?:[^"\\]|\\.)*)"')
 FIELD_NUM = re.compile(r"(\w+):\s*(-?\d+(?:\.\d+)?)")
 
 BAD_URL_RE = re.compile(
-    r"(karte|wappen|flag|coat_of_arms|logo|map[_.]|\bmap\d|locator|location_in|"
+    r"(%3f|wikipedia/en/|karte|wappen|flag|coat_of_arms|logo|map[_.]|\bmap\d|locator|location_in|"
     r"positionskarte|posizione|relief_|verwaltung|im_bezirk|blank|icon|symbol|blason|escudo|"
     r"stemma|bandiera|banner|diagram|schema|schild|signboard|signage|nameplate|coa\.png|"
     r"plaque|infotafel|grundriss|thumbnail\.jpg)",

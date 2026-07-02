@@ -3,30 +3,30 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 2650,
-    "with_baseline": 2650,
+    "baseline_photos": 2702,
+    "with_baseline": 2702,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
     "suspicious_urls": 0,
     "removed_suspicious_urls": 0,
-    "coverage_pct": 5.1
+    "coverage_pct": 5.2
   },
   "cluster_hotspots": [
     {
       "cc": "JP",
       "label": "Japan",
       "pois": 2874,
-      "baseline_photos": 78,
-      "coverage_pct": 2.7,
+      "baseline_photos": 87,
+      "coverage_pct": 3.0,
       "coord_cluster_locations": 435
     },
     {
       "cc": "BE",
       "label": "Belgien",
       "pois": 1957,
-      "baseline_photos": 69,
-      "coverage_pct": 3.5,
+      "baseline_photos": 78,
+      "coverage_pct": 4.0,
       "coord_cluster_locations": 316
     },
     {
@@ -72,28 +72,28 @@
       "coord_cluster_locations": 110
     },
     {
-      "cc": "FI",
-      "label": "Finnland",
-      "pois": 1971,
-      "baseline_photos": 42,
-      "coverage_pct": 2.1,
-      "coord_cluster_locations": 81
-    },
-    {
-      "cc": "GR",
-      "label": "Griechenland",
-      "pois": 2471,
-      "baseline_photos": 51,
-      "coverage_pct": 2.1,
-      "coord_cluster_locations": 68
-    },
-    {
       "cc": "FO",
       "label": "Faeroeer",
       "pois": 1949,
       "baseline_photos": 43,
       "coverage_pct": 2.2,
       "coord_cluster_locations": 78
+    },
+    {
+      "cc": "FI",
+      "label": "Finnland",
+      "pois": 1971,
+      "baseline_photos": 45,
+      "coverage_pct": 2.3,
+      "coord_cluster_locations": 81
+    },
+    {
+      "cc": "GR",
+      "label": "Griechenland",
+      "pois": 2471,
+      "baseline_photos": 57,
+      "coverage_pct": 2.3,
+      "coord_cluster_locations": 68
     }
   ]
 }
