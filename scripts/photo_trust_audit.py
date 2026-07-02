@@ -99,7 +99,7 @@ FIELD_NUM = re.compile(r"(\w+):\s*(-?\d+(?:\.\d+)?)")
 
 BAD_URL_RE = re.compile(
     r"(karte|wappen|flag|coat_of_arms|logo|map[_.]|locator|location_in|"
-    r"positionskarte|relief_|verwaltung|blank|icon|symbol|blason|escudo|"
+    r"positionskarte|relief_|verwaltung|im_bezirk|blank|icon|symbol|blason|escudo|"
     r"stemma|bandiera|banner|diagram|schema|schild|signboard|signage|nameplate|"
     r"plaque|infotafel|grundriss|thumbnail\.jpg)",
     re.I,
@@ -130,7 +130,7 @@ KNOWN_GENERIC_RE = re.compile(
     r"schade.*gletscher|baltic.*ship|zeller_see_grafik|"
     r"eifelpark_coaster|lingelbach_karneval|palio_-_manifesto|"
     r"christkindlesmarkt_nuernberg|duesseldorf_firework|"
-    r"landsgemeinde_-_glarus|tradition-warner-highsmith)",
+    r"landsgemeinde_-_glarus|tradition-warner-highsmith|jungfraubahn\.png)",
     re.I,
 )
 

@@ -3,13 +3,13 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 2213,
-    "with_baseline": 2213,
+    "baseline_photos": 2207,
+    "with_baseline": 2207,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
     "suspicious_urls": 0,
-    "removed_suspicious_urls": 0,
+    "removed_suspicious_urls": 10,
     "coverage_pct": 4.3
   },
   "cluster_hotspots": [
