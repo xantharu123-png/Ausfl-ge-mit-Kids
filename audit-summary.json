@@ -3,8 +3,8 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 2789,
-    "with_baseline": 2789,
+    "baseline_photos": 2798,
+    "with_baseline": 2798,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
@@ -49,8 +49,8 @@
       "cc": "CY",
       "label": "Zypern",
       "pois": 1970,
-      "baseline_photos": 41,
-      "coverage_pct": 2.1,
+      "baseline_photos": 44,
+      "coverage_pct": 2.2,
       "coord_cluster_locations": 110
     }
   ],
@@ -59,16 +59,16 @@
       "cc": "LU",
       "label": "Luxemburg",
       "pois": 1974,
-      "baseline_photos": 38,
-      "coverage_pct": 1.9,
+      "baseline_photos": 44,
+      "coverage_pct": 2.2,
       "coord_cluster_locations": 97
     },
     {
       "cc": "CY",
       "label": "Zypern",
       "pois": 1970,
-      "baseline_photos": 41,
-      "coverage_pct": 2.1,
+      "baseline_photos": 44,
+      "coverage_pct": 2.2,
       "coord_cluster_locations": 110
     },
     {
