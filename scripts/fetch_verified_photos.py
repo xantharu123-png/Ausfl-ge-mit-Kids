@@ -130,6 +130,7 @@ AMBIGUOUS_SINGLE_TOKENS = {
     "golf",
     "hafen",
     "halbinsel",
+    "hiking",
     "hugel",
     "insel",
     "kirche",
