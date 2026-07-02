@@ -416,6 +416,8 @@ def is_accepted(
         return False, details
     if method == "search" and len(details["core_name_tokens"]) > 1 and len(details["title_hits"]) < 2:
         return False, details
+    if method == "search" and not exact_title_match and not details["file_hits"] and not details["place_hits"]:
+        return False, details
     if method == "wikidata":
         strong_hits = set(details["title_hits"]) | set(details["file_hits"])
         strong_place_hits = set(details["place_hits"]) - WEAK_PLACE_TOKENS
