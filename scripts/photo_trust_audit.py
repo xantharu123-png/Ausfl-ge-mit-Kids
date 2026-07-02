@@ -127,7 +127,7 @@ KNOWN_GENERIC_RE = re.compile(
     r"st_mary%27s_church.*castle_street|neusiedler_lake_satellite|"
     r"santiago_cathedral_2021|franz_joseph_i_of_austria|"
     r"basilicasemproniareconstruction|golfer_swing|"
-    r"schade.*gletscher)",
+    r"schade.*gletscher|baltic.*ship)",
     re.I,
 )
 

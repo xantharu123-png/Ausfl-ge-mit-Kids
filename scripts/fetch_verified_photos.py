@@ -143,6 +143,8 @@ AMBIGUOUS_SINGLE_TOKENS = {
     "shrine",
     "schloss",
     "seilbahn",
+    "schiff",
+    "ship",
     "strand",
     "tempel",
     "temple",
