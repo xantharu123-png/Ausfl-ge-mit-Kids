@@ -3,8 +3,8 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 2332,
-    "with_baseline": 2332,
+    "baseline_photos": 2347,
+    "with_baseline": 2347,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
@@ -25,8 +25,8 @@
       "cc": "BE",
       "label": "Belgien",
       "pois": 1957,
-      "baseline_photos": 54,
-      "coverage_pct": 2.8,
+      "baseline_photos": 69,
+      "coverage_pct": 3.5,
       "coord_cluster_locations": 316
     },
     {
