@@ -125,7 +125,8 @@ KNOWN_GENERIC_RE = re.compile(
     r"mariagerfjord_ved_hadsund|slanic_salt_mine|fraenkische_schweiz\.png|"
     r"ammerthal_as_006|arles.*roman_amphitheatre|"
     r"st_mary%27s_church.*castle_street|neusiedler_lake_satellite|"
-    r"santiago_cathedral_2021)",
+    r"santiago_cathedral_2021|franz_joseph_i_of_austria|"
+    r"basilicasemproniareconstruction|golfer_swing)",
     re.I,
 )
 
