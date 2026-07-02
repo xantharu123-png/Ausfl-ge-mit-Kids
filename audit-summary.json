@@ -3,8 +3,8 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 2329,
-    "with_baseline": 2329,
+    "baseline_photos": 2332,
+    "with_baseline": 2332,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
@@ -41,8 +41,8 @@
       "cc": "SI",
       "label": "Slowenien",
       "pois": 1979,
-      "baseline_photos": 18,
-      "coverage_pct": 0.9,
+      "baseline_photos": 21,
+      "coverage_pct": 1.1,
       "coord_cluster_locations": 133
     },
     {
@@ -80,20 +80,20 @@
       "coord_cluster_locations": 81
     },
     {
-      "cc": "SI",
-      "label": "Slowenien",
-      "pois": 1979,
-      "baseline_photos": 18,
-      "coverage_pct": 0.9,
-      "coord_cluster_locations": 133
-    },
-    {
       "cc": "FO",
       "label": "Faeroeer",
       "pois": 1949,
       "baseline_photos": 22,
       "coverage_pct": 1.1,
       "coord_cluster_locations": 78
+    },
+    {
+      "cc": "SI",
+      "label": "Slowenien",
+      "pois": 1979,
+      "baseline_photos": 21,
+      "coverage_pct": 1.1,
+      "coord_cluster_locations": 133
     }
   ]
 }
