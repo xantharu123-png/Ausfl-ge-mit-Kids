@@ -145,6 +145,7 @@ AMBIGUOUS_SINGLE_TOKENS = {
     "platz",
     "range",
     "region",
+    "railway",
     "scharen",
     "shrine",
     "schloss",

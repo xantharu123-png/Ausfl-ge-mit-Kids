@@ -139,7 +139,7 @@ KNOWN_GENERIC_RE = re.compile(
     r"opera_garnier_stairway|various_products_made_from_paper|"
     r"marycarpenter|16-hole_chrom|sonneratia_alba|changingseasons|"
     r"mana_-_glas|kengo_box|cream_on_fanclub|asashoryu_fight|"
-    r"dried_soba_noodles|wakkanai_montage)",
+    r"dried_soba_noodles|wakkanai_montage|wikitreff_002)",
     re.I,
 )
 
