@@ -131,7 +131,8 @@ KNOWN_GENERIC_RE = re.compile(
     r"eifelpark_coaster|lingelbach_karneval|palio_-_manifesto|"
     r"christkindlesmarkt_nuernberg|duesseldorf_firework|"
     r"landsgemeinde_-_glarus|tradition-warner-highsmith|jungfraubahn\.png|"
-    r"s-bahn_berlin_innsbrucker_platz|nationalpark_hohe_tauern\.png)",
+    r"s-bahn_berlin_innsbrucker_platz|nationalpark_hohe_tauern\.png|"
+    r"destruction_of_pompeii_and_herculaneum|san_sebastiano_fuori_le_mura)",
     re.I,
 )
 
