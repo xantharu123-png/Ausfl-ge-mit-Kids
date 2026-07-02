@@ -3,14 +3,14 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 3421,
-    "with_baseline": 3421,
+    "baseline_photos": 3487,
+    "with_baseline": 3487,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
     "suspicious_urls": 0,
-    "removed_suspicious_urls": 12,
-    "coverage_pct": 6.6
+    "removed_suspicious_urls": 1,
+    "coverage_pct": 6.8
   },
   "cluster_hotspots": [
     {
@@ -25,16 +25,16 @@
       "cc": "BE",
       "label": "Belgien",
       "pois": 1957,
-      "baseline_photos": 98,
-      "coverage_pct": 5.0,
+      "baseline_photos": 122,
+      "coverage_pct": 6.2,
       "coord_cluster_locations": 316
     },
     {
       "cc": "ES",
       "label": "Spanien",
       "pois": 1953,
-      "baseline_photos": 99,
-      "coverage_pct": 5.1,
+      "baseline_photos": 124,
+      "coverage_pct": 6.3,
       "coord_cluster_locations": 149
     },
     {
