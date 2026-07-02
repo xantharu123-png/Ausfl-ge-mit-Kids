@@ -128,7 +128,9 @@ KNOWN_GENERIC_RE = re.compile(
     r"santiago_cathedral_2021|franz_joseph_i_of_austria|"
     r"basilicasemproniareconstruction|golfer_swing|"
     r"schade.*gletscher|baltic.*ship|zeller_see_grafik|"
-    r"eifelpark_coaster)",
+    r"eifelpark_coaster|lingelbach_karneval|palio_-_manifesto|"
+    r"christkindlesmarkt_nuernberg|duesseldorf_firework|"
+    r"landsgemeinde_-_glarus|tradition-warner-highsmith)",
     re.I,
 )
 
