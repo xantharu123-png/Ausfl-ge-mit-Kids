@@ -3,14 +3,14 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 2533,
-    "with_baseline": 2533,
+    "baseline_photos": 2602,
+    "with_baseline": 2602,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
     "suspicious_urls": 0,
     "removed_suspicious_urls": 0,
-    "coverage_pct": 4.9
+    "coverage_pct": 5.0
   },
   "cluster_hotspots": [
     {
@@ -80,20 +80,20 @@
       "coord_cluster_locations": 78
     },
     {
-      "cc": "GR",
-      "label": "Griechenland",
-      "pois": 2471,
-      "baseline_photos": 36,
-      "coverage_pct": 1.5,
-      "coord_cluster_locations": 68
+      "cc": "SI",
+      "label": "Slowenien",
+      "pois": 1979,
+      "baseline_photos": 35,
+      "coverage_pct": 1.8,
+      "coord_cluster_locations": 133
     },
     {
-      "cc": "IS",
-      "label": "Island",
-      "pois": 1970,
-      "baseline_photos": 36,
-      "coverage_pct": 1.8,
-      "coord_cluster_locations": 91
+      "cc": "FI",
+      "label": "Finnland",
+      "pois": 1971,
+      "baseline_photos": 42,
+      "coverage_pct": 2.1,
+      "coord_cluster_locations": 81
     }
   ]
 }
