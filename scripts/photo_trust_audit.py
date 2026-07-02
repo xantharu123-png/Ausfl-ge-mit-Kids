@@ -111,7 +111,8 @@ KNOWN_GENERIC_RE = re.compile(
     r"interlaken_aer|appenzell_2022|thun_be|solothurn_2023|"
     r"la_tour_eiffel_vue_de_la_tour_saint-jacques|arc_de_triomphe|"
     r"mont-saint-michel_vu_du_ciel|big_ben|tower_bridge_london|"
-    r"colosseum_in_rome|brandenburger_tor_abends|pratergarten_berlin)",
+    r"colosseum_in_rome|brandenburger_tor_abends|pratergarten_berlin|"
+    r"flora\.png|coffee_plantation.*kaua)",
     re.I,
 )
 

@@ -418,7 +418,10 @@ def is_accepted(
         return False, details
     if method == "wikidata":
         strong_hits = set(details["title_hits"]) | set(details["file_hits"])
-        if len(details["core_name_tokens"]) > 1 and not strong_hits and not details["place_hits"]:
+        strong_place_hits = set(details["place_hits"]) - WEAK_PLACE_TOKENS
+        if len(core_tokens) > 1 and len(strong_hits) < 2 and not strong_place_hits:
+            return False, details
+        if len(core_tokens) == 1 and next(iter(core_tokens)) in AMBIGUOUS_SINGLE_TOKENS and not details["file_hits"] and not strong_place_hits:
             return False, details
         if not (strong_hits or details["place_hits"]):
             return False, details
