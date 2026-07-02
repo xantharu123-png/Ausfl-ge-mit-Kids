@@ -4,3 +4,10 @@ node_modules/
 *.bak_*
 POI_Audit*.json
 POI_Audit*.md
+photo_fetch_report_*.json
+photo_fetch_report_*.md
+photo_fill_report_*.json
+photo_fill_status.json
+photo_trust_report.json
+photo_trust_report.md
+scripts/__pycache__/
