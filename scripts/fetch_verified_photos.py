@@ -426,13 +426,17 @@ def data_from_wikidata_hit(hit: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
-def stripped_name_variants(name: str, location: str) -> list[str]:
+def stripped_name_variants(name: str, location: str, region: str = "") -> list[str]:
     variants: list[str] = []
     location_parts = [
         location,
         location.split(",")[0],
         location.split("-")[0],
         location.split("\u2013")[0],
+        region,
+        region.split(",")[0],
+        region.split("-")[0],
+        region.split("\u2013")[0],
     ]
     for raw_location in location_parts:
         loc = raw_location.strip()
@@ -443,6 +447,12 @@ def stripped_name_variants(name: str, location: str) -> list[str]:
             stripped = match.group(1).strip()
             if len(stripped) >= 4 and stripped.lower() != name.lower():
                 variants.append(stripped)
+        suffix_match = re.match(rf"^(.+?)(?:[\s:]+|[-\u2013\u2014]+){re.escape(loc)}\s*$", name, re.I)
+        if suffix_match:
+            stripped = suffix_match.group(1).strip()
+            if len(stripped) >= 4 and stripped.lower() != name.lower():
+                variants.append(stripped)
+                variants.append(f"{stripped} ({loc})")
     seen: set[str] = set()
     return [value for value in variants if not (value.lower() in seen or seen.add(value.lower()))]
 
@@ -458,7 +468,7 @@ def build_queries(poi: dict[str, Any]) -> list[str]:
     region = str(poi.get("region", "")).strip()
     stripped_names = [
         value
-        for value in stripped_name_variants(name, location)
+        for value in stripped_name_variants(name, location, region)
         if not is_ambiguous_single_query(value)
     ]
     queries = [
