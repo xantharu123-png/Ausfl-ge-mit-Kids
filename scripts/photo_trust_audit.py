@@ -165,7 +165,9 @@ KNOWN_GENERIC_RE = re.compile(
     r"donau_einzugsgebiet|clock_tower_-_palace_of_westminster|"
     r"kapelle_%28zeeland|phong_nha-ke_bang_cave3|sg_fexx_05|"
     r"maelmin_-_reconstruction|montafonersteinschaf|"
-    r"cleaned-illustration_nymphaea_alba)",
+    r"cleaned-illustration_nymphaea_alba|waldviertel_weikertschlag3|"
+    r"tren_a_las_nubes_cruzando_viaducto_la_polvorilla|"
+    r"woerther_see_in_bayern|berlin_neue_synagoge_2005)",
     re.I,
 )
 
