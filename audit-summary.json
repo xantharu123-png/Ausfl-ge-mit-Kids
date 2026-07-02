@@ -3,13 +3,13 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 3607,
-    "with_baseline": 3607,
+    "baseline_photos": 3630,
+    "with_baseline": 3630,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
     "suspicious_urls": 0,
-    "removed_suspicious_urls": 4,
+    "removed_suspicious_urls": 8,
     "coverage_pct": 7.0
   },
   "cluster_hotspots": [
@@ -41,16 +41,16 @@
       "cc": "SI",
       "label": "Slowenien",
       "pois": 1979,
-      "baseline_photos": 83,
-      "coverage_pct": 4.2,
+      "baseline_photos": 90,
+      "coverage_pct": 4.5,
       "coord_cluster_locations": 133
     },
     {
       "cc": "CY",
       "label": "Zypern",
       "pois": 1970,
-      "baseline_photos": 86,
-      "coverage_pct": 4.4,
+      "baseline_photos": 83,
+      "coverage_pct": 4.2,
       "coord_cluster_locations": 110
     }
   ],
@@ -59,40 +59,40 @@
       "cc": "LU",
       "label": "Luxemburg",
       "pois": 1974,
-      "baseline_photos": 77,
-      "coverage_pct": 3.9,
+      "baseline_photos": 82,
+      "coverage_pct": 4.2,
       "coord_cluster_locations": 97
+    },
+    {
+      "cc": "CY",
+      "label": "Zypern",
+      "pois": 1970,
+      "baseline_photos": 83,
+      "coverage_pct": 4.2,
+      "coord_cluster_locations": 110
     },
     {
       "cc": "FO",
       "label": "Faeroeer",
       "pois": 1949,
-      "baseline_photos": 80,
-      "coverage_pct": 4.1,
+      "baseline_photos": 87,
+      "coverage_pct": 4.5,
       "coord_cluster_locations": 78
     },
     {
       "cc": "SI",
       "label": "Slowenien",
       "pois": 1979,
-      "baseline_photos": 83,
-      "coverage_pct": 4.2,
+      "baseline_photos": 90,
+      "coverage_pct": 4.5,
       "coord_cluster_locations": 133
-    },
-    {
-      "cc": "CY",
-      "label": "Zypern",
-      "pois": 1970,
-      "baseline_photos": 86,
-      "coverage_pct": 4.4,
-      "coord_cluster_locations": 110
     },
     {
       "cc": "GR",
       "label": "Griechenland",
       "pois": 2471,
-      "baseline_photos": 111,
-      "coverage_pct": 4.5,
+      "baseline_photos": 119,
+      "coverage_pct": 4.8,
       "coord_cluster_locations": 68
     }
   ]
