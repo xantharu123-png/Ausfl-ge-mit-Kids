@@ -132,7 +132,8 @@ KNOWN_GENERIC_RE = re.compile(
     r"christkindlesmarkt_nuernberg|duesseldorf_firework|"
     r"landsgemeinde_-_glarus|tradition-warner-highsmith|jungfraubahn\.png|"
     r"s-bahn_berlin_innsbrucker_platz|nationalpark_hohe_tauern\.png|"
-    r"destruction_of_pompeii_and_herculaneum|san_sebastiano_fuori_le_mura)",
+    r"destruction_of_pompeii_and_herculaneum|san_sebastiano_fuori_le_mura|"
+    r"milan_centralstation|d%c3%bcrnstein_in_kr\.png)",
     re.I,
 )
 

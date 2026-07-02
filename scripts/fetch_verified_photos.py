@@ -152,6 +152,7 @@ AMBIGUOUS_SINGLE_TOKENS = {
     "schiff",
     "ship",
     "sommerrodelbahn",
+    "station",
     "strand",
     "tempel",
     "temple",
