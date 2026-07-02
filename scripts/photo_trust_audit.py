@@ -176,7 +176,8 @@ KNOWN_GENERIC_RE = re.compile(
     r"vaalankurkku_railway_bridge|monument_aux_morts|"
     r"san_francisco-bay_bridge02|beelitz-heilstaetten_coa|"
     r"schutt_der_rappenloch|felssturz_rappenloch|"
-    r"valley_rathaus|lorettoberg-ansichten)",
+    r"valley_rathaus|lorettoberg-ansichten|goslar_kaiserpfalz\.jpg|"
+    r"limburg_-_alte_lahnbr|trier_innenstadt3|ggb_%28square%29)",
     re.I,
 )
 
