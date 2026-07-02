@@ -3,22 +3,22 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 3290,
-    "with_baseline": 3290,
+    "baseline_photos": 3352,
+    "with_baseline": 3352,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
     "suspicious_urls": 0,
     "removed_suspicious_urls": 0,
-    "coverage_pct": 6.4
+    "coverage_pct": 6.5
   },
   "cluster_hotspots": [
     {
       "cc": "JP",
       "label": "Japan",
       "pois": 2874,
-      "baseline_photos": 132,
-      "coverage_pct": 4.6,
+      "baseline_photos": 144,
+      "coverage_pct": 5.0,
       "coord_cluster_locations": 435
     },
     {
@@ -41,8 +41,8 @@
       "cc": "SI",
       "label": "Slowenien",
       "pois": 1979,
-      "baseline_photos": 75,
-      "coverage_pct": 3.8,
+      "baseline_photos": 83,
+      "coverage_pct": 4.2,
       "coord_cluster_locations": 133
     },
     {
@@ -64,14 +64,6 @@
       "coord_cluster_locations": 97
     },
     {
-      "cc": "SI",
-      "label": "Slowenien",
-      "pois": 1979,
-      "baseline_photos": 75,
-      "coverage_pct": 3.8,
-      "coord_cluster_locations": 133
-    },
-    {
       "cc": "FO",
       "label": "Faeroeer",
       "pois": 1949,
@@ -80,20 +72,28 @@
       "coord_cluster_locations": 78
     },
     {
-      "cc": "IS",
-      "label": "Island",
-      "pois": 1970,
-      "baseline_photos": 79,
-      "coverage_pct": 4.0,
-      "coord_cluster_locations": 91
-    },
-    {
       "cc": "CY",
       "label": "Zypern",
       "pois": 1970,
       "baseline_photos": 78,
       "coverage_pct": 4.0,
       "coord_cluster_locations": 110
+    },
+    {
+      "cc": "GR",
+      "label": "Griechenland",
+      "pois": 2471,
+      "baseline_photos": 102,
+      "coverage_pct": 4.1,
+      "coord_cluster_locations": 68
+    },
+    {
+      "cc": "SI",
+      "label": "Slowenien",
+      "pois": 1979,
+      "baseline_photos": 83,
+      "coverage_pct": 4.2,
+      "coord_cluster_locations": 133
     }
   ]
 }
