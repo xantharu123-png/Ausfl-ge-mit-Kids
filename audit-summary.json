@@ -3,14 +3,14 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 3213,
-    "with_baseline": 3213,
+    "baseline_photos": 3249,
+    "with_baseline": 3249,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
     "suspicious_urls": 0,
-    "removed_suspicious_urls": 0,
-    "coverage_pct": 6.2
+    "removed_suspicious_urls": 1,
+    "coverage_pct": 6.3
   },
   "cluster_hotspots": [
     {
@@ -49,8 +49,8 @@
       "cc": "CY",
       "label": "Zypern",
       "pois": 1970,
-      "baseline_photos": 63,
-      "coverage_pct": 3.2,
+      "baseline_photos": 72,
+      "coverage_pct": 3.7,
       "coord_cluster_locations": 110
     }
   ],
@@ -59,41 +59,41 @@
       "cc": "LU",
       "label": "Luxemburg",
       "pois": 1974,
-      "baseline_photos": 60,
-      "coverage_pct": 3.0,
+      "baseline_photos": 65,
+      "coverage_pct": 3.3,
       "coord_cluster_locations": 97
-    },
-    {
-      "cc": "CY",
-      "label": "Zypern",
-      "pois": 1970,
-      "baseline_photos": 63,
-      "coverage_pct": 3.2,
-      "coord_cluster_locations": 110
     },
     {
       "cc": "FO",
       "label": "Faeroeer",
       "pois": 1949,
-      "baseline_photos": 64,
-      "coverage_pct": 3.3,
+      "baseline_photos": 69,
+      "coverage_pct": 3.5,
       "coord_cluster_locations": 78
     },
     {
       "cc": "GR",
       "label": "Griechenland",
       "pois": 2471,
-      "baseline_photos": 81,
-      "coverage_pct": 3.3,
+      "baseline_photos": 90,
+      "coverage_pct": 3.6,
       "coord_cluster_locations": 68
     },
     {
-      "cc": "FI",
-      "label": "Finnland",
-      "pois": 1971,
-      "baseline_photos": 73,
+      "cc": "CY",
+      "label": "Zypern",
+      "pois": 1970,
+      "baseline_photos": 72,
       "coverage_pct": 3.7,
-      "coord_cluster_locations": 81
+      "coord_cluster_locations": 110
+    },
+    {
+      "cc": "SI",
+      "label": "Slowenien",
+      "pois": 1979,
+      "baseline_photos": 75,
+      "coverage_pct": 3.8,
+      "coord_cluster_locations": 133
     }
   ]
 }
