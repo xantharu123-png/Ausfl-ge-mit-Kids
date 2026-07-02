@@ -122,7 +122,8 @@ KNOWN_GENERIC_RE = re.compile(
     r"chimney_rock_trail_point_reyes|united_nations_geographical_subregions|"
     r"locationsapmi|pallas-yll%c3%a4stunturin_kp|"
     r"corfe-castle_im_h%c3%bcgelland|bucht_in_neuseeland|"
-    r"mariagerfjord_ved_hadsund|slanic_salt_mine|fraenkische_schweiz\.png)",
+    r"mariagerfjord_ved_hadsund|slanic_salt_mine|fraenkische_schweiz\.png|"
+    r"ammerthal_as_006)",
     re.I,
 )
 
