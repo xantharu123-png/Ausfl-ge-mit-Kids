@@ -543,6 +543,14 @@ def is_accepted(
     ):
         return False, details
     if (
+        method == "title"
+        and not exact_title_match
+        and len(core_tokens) == 1
+        and next(iter(core_tokens)) in AMBIGUOUS_SINGLE_TOKENS
+        and not (set(details["place_hits"]) - WEAK_PLACE_TOKENS)
+    ):
+        return False, details
+    if (
         method in {"search", "geo"}
         and len(core_tokens) == 1
         and next(iter(core_tokens)) in AMBIGUOUS_SINGLE_TOKENS
