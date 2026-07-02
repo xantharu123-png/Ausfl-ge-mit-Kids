@@ -93,22 +93,43 @@ NON_PLACE_ENTITY_RE = re.compile(
     re.I,
 )
 AMBIGUOUS_SINGLE_TOKENS = {
+    "beach",
+    "bridge",
     "bruecke",
     "brucke",
     "burg",
+    "castle",
+    "cathedral",
+    "church",
+    "dorf",
     "dom",
     "fernsehturm",
+    "forest",
+    "gebirge",
     "hafen",
+    "halbinsel",
     "kirche",
+    "market",
     "markt",
     "museum",
+    "mountain",
+    "mountains",
+    "palace",
     "palast",
     "park",
+    "peninsula",
     "platz",
+    "range",
+    "shrine",
     "schloss",
     "strand",
     "tempel",
+    "temple",
+    "tower",
     "turm",
+    "village",
+    "wald",
+    "woods",
 }
 WEAK_PLACE_TOKENS = {"center", "central", "centre", "mitte", "stadt", "zentrum"}
 SHORT_CONTEXT_TOKENS = {"arc", "zoo"}
@@ -288,13 +309,37 @@ def data_from_wikidata_hit(hit: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
+def stripped_name_variants(name: str, location: str) -> list[str]:
+    variants: list[str] = []
+    location_parts = [
+        location,
+        location.split(",")[0],
+        location.split("-")[0],
+        location.split("–")[0],
+    ]
+    for raw_location in location_parts:
+        loc = raw_location.strip()
+        if len(loc) < 3:
+            continue
+        match = re.match(rf"^\s*{re.escape(loc)}(?:[\s:]+|[-–—]+)(.+)$", name, re.I)
+        if match:
+            stripped = match.group(1).strip()
+            if len(stripped) >= 4 and stripped.lower() != name.lower():
+                variants.append(stripped)
+    seen: set[str] = set()
+    return [value for value in variants if not (value.lower() in seen or seen.add(value.lower()))]
+
+
 def build_queries(poi: dict[str, Any]) -> list[str]:
     name = str(poi.get("name", "")).strip()
     location = str(poi.get("location", "")).strip()
     region = str(poi.get("region", "")).strip()
+    stripped_names = stripped_name_variants(name, location)
     queries = [
         name,
         name.replace("-", " "),
+        *stripped_names,
+        *(stripped.replace("-", " ") for stripped in stripped_names),
         f"{name} {location}" if location and location.lower() not in name.lower() else "",
         f"{name} de {location}" if location and location.lower() not in name.lower() else "",
         f"{name} of {location}" if location and location.lower() not in name.lower() else "",
@@ -374,6 +419,8 @@ def is_accepted(
     if name_hit_count == 0:
         return False, details
     if GENERIC_TITLE_RE.search(title_norm):
+        return False, details
+    if title_norm in AMBIGUOUS_SINGLE_TOKENS:
         return False, details
     if method == "wikidata" and NON_PLACE_ENTITY_RE.search(str(data.get("description", ""))):
         return False, details
