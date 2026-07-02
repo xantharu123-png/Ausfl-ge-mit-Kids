@@ -161,7 +161,7 @@ KNOWN_GENERIC_RE = re.compile(
     r"ecliptic_path|corl0207|john_william_waterhouse_-_magic_circle|"
     r"shaverrasp_lifestylecupcakes|englishchannel|the_baptism_of_christ|"
     r"ubtz_2te116um|kobalt_electrolytic|assiniboin_indians|"
-    r"obersch.*neweide_htw)",
+    r"obersch.*neweide_htw|eingang_zum_naturpark_blockheide)",
     re.I,
 )
 

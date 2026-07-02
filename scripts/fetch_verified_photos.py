@@ -147,6 +147,7 @@ AMBIGUOUS_SINGLE_TOKENS = {
     "mountains",
     "nationalpark",
     "nationalfeiertag",
+    "naturpark",
     "onsen",
     "palace",
     "palast",
