@@ -100,7 +100,7 @@ FIELD_NUM = re.compile(r"(\w+):\s*(-?\d+(?:\.\d+)?)")
 BAD_URL_RE = re.compile(
     r"(karte|wappen|flag|coat_of_arms|logo|map[_.]|\bmap\d|locator|location_in|"
     r"positionskarte|posizione|relief_|verwaltung|im_bezirk|blank|icon|symbol|blason|escudo|"
-    r"stemma|bandiera|banner|diagram|schema|schild|signboard|signage|nameplate|"
+    r"stemma|bandiera|banner|diagram|schema|schild|signboard|signage|nameplate|coa\.png|"
     r"plaque|infotafel|grundriss|thumbnail\.jpg)",
     re.I,
 )
@@ -171,7 +171,10 @@ KNOWN_GENERIC_RE = re.compile(
     r"st_michaels_church_hildesheim|prt\.png|"
     r"venice_lagoon_december|valvasor_leonstain_1680|"
     r"temperate_house_in_kew_gardens|muenster_innenstadt|"
-    r"fashion_walk_shop_swarovski)",
+    r"fashion_walk_shop_swarovski|jastrz%c4%99bie-zdr%c3%b3j|"
+    r"wien_rathaus_hochaufl|bernstein_auf_granit|cittadella_aerea|"
+    r"vaalankurkku_railway_bridge|monument_aux_morts|"
+    r"san_francisco-bay_bridge02|beelitz-heilstaetten_coa)",
     re.I,
 )
 
