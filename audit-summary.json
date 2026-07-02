@@ -3,14 +3,14 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 3354,
-    "with_baseline": 3354,
+    "baseline_photos": 3421,
+    "with_baseline": 3421,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
     "suspicious_urls": 0,
-    "removed_suspicious_urls": 0,
-    "coverage_pct": 6.5
+    "removed_suspicious_urls": 12,
+    "coverage_pct": 6.6
   },
   "cluster_hotspots": [
     {
@@ -49,8 +49,8 @@
       "cc": "CY",
       "label": "Zypern",
       "pois": 1970,
-      "baseline_photos": 78,
-      "coverage_pct": 4.0,
+      "baseline_photos": 86,
+      "coverage_pct": 4.4,
       "coord_cluster_locations": 110
     }
   ],
@@ -59,33 +59,17 @@
       "cc": "LU",
       "label": "Luxemburg",
       "pois": 1974,
-      "baseline_photos": 74,
-      "coverage_pct": 3.7,
+      "baseline_photos": 77,
+      "coverage_pct": 3.9,
       "coord_cluster_locations": 97
     },
     {
       "cc": "FO",
       "label": "Faeroeer",
       "pois": 1949,
-      "baseline_photos": 78,
-      "coverage_pct": 4.0,
-      "coord_cluster_locations": 78
-    },
-    {
-      "cc": "CY",
-      "label": "Zypern",
-      "pois": 1970,
-      "baseline_photos": 78,
-      "coverage_pct": 4.0,
-      "coord_cluster_locations": 110
-    },
-    {
-      "cc": "GR",
-      "label": "Griechenland",
-      "pois": 2471,
-      "baseline_photos": 102,
+      "baseline_photos": 80,
       "coverage_pct": 4.1,
-      "coord_cluster_locations": 68
+      "coord_cluster_locations": 78
     },
     {
       "cc": "SI",
@@ -94,6 +78,22 @@
       "baseline_photos": 83,
       "coverage_pct": 4.2,
       "coord_cluster_locations": 133
+    },
+    {
+      "cc": "CY",
+      "label": "Zypern",
+      "pois": 1970,
+      "baseline_photos": 86,
+      "coverage_pct": 4.4,
+      "coord_cluster_locations": 110
+    },
+    {
+      "cc": "GR",
+      "label": "Griechenland",
+      "pois": 2471,
+      "baseline_photos": 111,
+      "coverage_pct": 4.5,
+      "coord_cluster_locations": 68
     }
   ]
 }
