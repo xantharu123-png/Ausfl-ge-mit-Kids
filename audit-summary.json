@@ -3,13 +3,13 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 2211,
-    "with_baseline": 2211,
+    "baseline_photos": 2200,
+    "with_baseline": 2200,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
     "suspicious_urls": 0,
-    "removed_suspicious_urls": 0,
+    "removed_suspicious_urls": 11,
     "coverage_pct": 4.3
   },
   "cluster_hotspots": [
@@ -64,20 +64,20 @@
       "coord_cluster_locations": 110
     },
     {
+      "cc": "LU",
+      "label": "Luxemburg",
+      "pois": 1974,
+      "baseline_photos": 7,
+      "coverage_pct": 0.4,
+      "coord_cluster_locations": 97
+    },
+    {
       "cc": "FI",
       "label": "Finnland",
       "pois": 1971,
       "baseline_photos": 14,
       "coverage_pct": 0.7,
       "coord_cluster_locations": 81
-    },
-    {
-      "cc": "LU",
-      "label": "Luxemburg",
-      "pois": 1974,
-      "baseline_photos": 18,
-      "coverage_pct": 0.9,
-      "coord_cluster_locations": 97
     },
     {
       "cc": "SI",

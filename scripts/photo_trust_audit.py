@@ -145,7 +145,11 @@ KNOWN_GENERIC_RE = re.compile(
     r"galeries_lafayette_haussmann|carnaval-festival|wine_grapes03|"
     r"bundesarchiv_bild_183-1990-1003-400|hiking_to_the_ice_lakes|"
     r"onsen_in_nachikatsuura|laighmilton1|hachiman\.jpg|"
-    r"schluecht_beiwuhr)",
+    r"schluecht_beiwuhr|port_havre_2|ardennen03|"
+    r"kinder_products_at_the_supermarket|mort_du_commandant_lamy|"
+    r"town_and_country_fh000023|vladimir_putin_taking_the_presidential_oath|"
+    r"art-portrait-collage_2|lab_bench|luxemburgs\.png|"
+    r"sauk_indian_family)",
     re.I,
 )
 
