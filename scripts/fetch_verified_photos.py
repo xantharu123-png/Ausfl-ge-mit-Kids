@@ -138,6 +138,9 @@ AMBIGUOUS_SINGLE_TOKENS = {
     "hiking",
     "hohle",
     "hoehle",
+    "huette",
+    "hut",
+    "hutte",
     "hugel",
     "insel",
     "kapelle",
@@ -168,6 +171,7 @@ AMBIGUOUS_SINGLE_TOKENS = {
     "scharen",
     "schlucht",
     "schluecht",
+    "seerosen",
     "salzlake",
     "shrine",
     "schloss",
@@ -476,10 +480,12 @@ def build_queries(poi: dict[str, Any]) -> list[str]:
     name = str(poi.get("name", "")).strip()
     location = str(poi.get("location", "")).strip()
     region = str(poi.get("region", "")).strip()
+    place_tokens = meaningful_tokens(location, region)
     stripped_names = [
         value
         for value in stripped_name_variants(name, location, region)
         if not is_ambiguous_single_query(value)
+        and not (meaningful_tokens(value) and meaningful_tokens(value) <= place_tokens)
     ]
     queries = [
         name,

@@ -98,7 +98,7 @@ FIELD_STR = re.compile(r'(\w+):\s*"((?:[^"\\]|\\.)*)"')
 FIELD_NUM = re.compile(r"(\w+):\s*(-?\d+(?:\.\d+)?)")
 
 BAD_URL_RE = re.compile(
-    r"(karte|wappen|flag|coat_of_arms|logo|map[_.]|locator|location_in|"
+    r"(karte|wappen|flag|coat_of_arms|logo|map[_.]|\bmap\d|locator|location_in|"
     r"positionskarte|relief_|verwaltung|im_bezirk|blank|icon|symbol|blason|escudo|"
     r"stemma|bandiera|banner|diagram|schema|schild|signboard|signage|nameplate|"
     r"plaque|infotafel|grundriss|thumbnail\.jpg)",
@@ -163,7 +163,9 @@ KNOWN_GENERIC_RE = re.compile(
     r"ubtz_2te116um|kobalt_electrolytic|assiniboin_indians|"
     r"obersch.*neweide_htw|eingang_zum_naturpark_blockheide|"
     r"donau_einzugsgebiet|clock_tower_-_palace_of_westminster|"
-    r"kapelle_%28zeeland|phong_nha-ke_bang_cave3|sg_fexx_05)",
+    r"kapelle_%28zeeland|phong_nha-ke_bang_cave3|sg_fexx_05|"
+    r"maelmin_-_reconstruction|montafonersteinschaf|"
+    r"cleaned-illustration_nymphaea_alba)",
     re.I,
 )
 
