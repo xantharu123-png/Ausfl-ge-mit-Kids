@@ -100,7 +100,7 @@ FIELD_NUM = re.compile(r"(\w+):\s*(-?\d+(?:\.\d+)?)")
 BAD_URL_RE = re.compile(
     r"(karte|wappen|flag|coat_of_arms|logo|map[_.]|locator|location_in|"
     r"positionskarte|relief_|verwaltung|blank|icon|symbol|blason|escudo|"
-    r"stemma|banner|diagram|schema|schild|signboard|signage|nameplate|"
+    r"stemma|bandiera|banner|diagram|schema|schild|signboard|signage|nameplate|"
     r"plaque|infotafel|grundriss|thumbnail\.jpg)",
     re.I,
 )
