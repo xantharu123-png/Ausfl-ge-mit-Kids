@@ -151,7 +151,17 @@ KNOWN_GENERIC_RE = re.compile(
     r"art-portrait-collage_2|lab_bench|luxemburgs\.png|"
     r"sauk_indian_family|mariazellerbahn_04|filestack_retouched|"
     r"charles_rennie_mackintosh.*sedia|allegory_of_music|"
-    r"herstellung-eines-kupferstichs)",
+    r"herstellung-eines-kupferstichs|blagaj_.*grad_1|"
+    r"trba%c4%8dki_buk_1|cathedral_of_the_assumption,_dubrovnik|"
+    r"bukhara03|great_mosque_of_samarra|mpezesteni,_thessaloniki|"
+    r"bufo_boreas|symposium_scene_nicias_painter|princess_caroline|"
+    r"%c3%89glise_saint-martin_de_ley|kos_by_sentinel|dionysos_louvre|"
+    r"gandrung_banyuwangi|nafplio_town_hall|bitburger_glass|santorin|"
+    r"bsk_csob_maraton|grevy.*zebra|kasyno_szlacheckie|"
+    r"ecliptic_path|corl0207|john_william_waterhouse_-_magic_circle|"
+    r"shaverrasp_lifestylecupcakes|englishchannel|the_baptism_of_christ|"
+    r"ubtz_2te116um|kobalt_electrolytic|assiniboin_indians|"
+    r"obersch.*neweide_htw)",
     re.I,
 )
 

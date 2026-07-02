@@ -3,14 +3,14 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 2195,
-    "with_baseline": 2195,
+    "baseline_photos": 2166,
+    "with_baseline": 2166,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
     "suspicious_urls": 0,
-    "removed_suspicious_urls": 5,
-    "coverage_pct": 4.3
+    "removed_suspicious_urls": 29,
+    "coverage_pct": 4.2
   },
   "cluster_hotspots": [
     {
@@ -75,7 +75,7 @@
       "cc": "FI",
       "label": "Finnland",
       "pois": 1971,
-      "baseline_photos": 14,
+      "baseline_photos": 13,
       "coverage_pct": 0.7,
       "coord_cluster_locations": 81
     },
@@ -91,8 +91,8 @@
       "cc": "FO",
       "label": "Faeroeer",
       "pois": 1949,
-      "baseline_photos": 23,
-      "coverage_pct": 1.2,
+      "baseline_photos": 22,
+      "coverage_pct": 1.1,
       "coord_cluster_locations": 78
     }
   ]
