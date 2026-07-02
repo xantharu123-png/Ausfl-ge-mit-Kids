@@ -3,46 +3,46 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 3105,
-    "with_baseline": 3105,
+    "baseline_photos": 3190,
+    "with_baseline": 3190,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
     "suspicious_urls": 0,
     "removed_suspicious_urls": 0,
-    "coverage_pct": 6.0
+    "coverage_pct": 6.2
   },
   "cluster_hotspots": [
     {
       "cc": "JP",
       "label": "Japan",
       "pois": 2874,
-      "baseline_photos": 122,
-      "coverage_pct": 4.2,
+      "baseline_photos": 131,
+      "coverage_pct": 4.6,
       "coord_cluster_locations": 435
     },
     {
       "cc": "BE",
       "label": "Belgien",
       "pois": 1957,
-      "baseline_photos": 90,
-      "coverage_pct": 4.6,
+      "baseline_photos": 98,
+      "coverage_pct": 5.0,
       "coord_cluster_locations": 316
     },
     {
       "cc": "ES",
       "label": "Spanien",
       "pois": 1953,
-      "baseline_photos": 85,
-      "coverage_pct": 4.4,
+      "baseline_photos": 94,
+      "coverage_pct": 4.8,
       "coord_cluster_locations": 149
     },
     {
       "cc": "SI",
       "label": "Slowenien",
       "pois": 1979,
-      "baseline_photos": 69,
-      "coverage_pct": 3.5,
+      "baseline_photos": 73,
+      "coverage_pct": 3.7,
       "coord_cluster_locations": 133
     },
     {
@@ -88,12 +88,12 @@
       "coord_cluster_locations": 68
     },
     {
-      "cc": "SI",
-      "label": "Slowenien",
-      "pois": 1979,
-      "baseline_photos": 69,
-      "coverage_pct": 3.5,
-      "coord_cluster_locations": 133
+      "cc": "FI",
+      "label": "Finnland",
+      "pois": 1971,
+      "baseline_photos": 73,
+      "coverage_pct": 3.7,
+      "coord_cluster_locations": 81
     }
   ]
 }
