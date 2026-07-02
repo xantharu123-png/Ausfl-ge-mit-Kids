@@ -112,7 +112,7 @@ KNOWN_GENERIC_RE = re.compile(
     r"la_tour_eiffel_vue_de_la_tour_saint-jacques|arc_de_triomphe|"
     r"mont-saint-michel_vu_du_ciel|big_ben|tower_bridge_london|"
     r"colosseum_in_rome|brandenburger_tor_abends|pratergarten_berlin|"
-    r"flora\.png|coffee_plantation.*kaua|trajan(?:'|%27)?s_column|"
+    r"flora\.png|coffee_plantation.*kaua|trajan(?:'|%27)?s_column|trajan_column|"
     r"lisbontram|jellingsten|str%c3%b6hl-rangkronen|"
     r"fire_inside_an_abandoned_convent.*quebec|libreoffice_writer|"
     r"hapag-lloyd_antwerpen_express|anamur_burnu|embrik_strand|"
@@ -122,7 +122,7 @@ KNOWN_GENERIC_RE = re.compile(
     r"chimney_rock_trail_point_reyes|united_nations_geographical_subregions|"
     r"locationsapmi|pallas-yll%c3%a4stunturin_kp|"
     r"corfe-castle_im_h%c3%bcgelland|bucht_in_neuseeland|"
-    r"mariagerfjord_ved_hadsund)",
+    r"mariagerfjord_ved_hadsund|slanic_salt_mine|fraenkische_schweiz\.png)",
     re.I,
 )
 
