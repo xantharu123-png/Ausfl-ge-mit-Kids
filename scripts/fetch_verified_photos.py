@@ -17,6 +17,7 @@ import argparse
 import concurrent.futures
 import functools
 import json
+import math
 import re
 import ssl
 import sys
@@ -238,9 +239,14 @@ def commons_thumb_url(file_name: str, width: int = 500) -> str:
 
 
 @functools.lru_cache(maxsize=20000)
-def wikidata_p18_url(qid: str) -> str | None:
+def wikidata_entity(qid: str) -> dict[str, Any]:
     data = fetch_json(f"https://www.wikidata.org/wiki/Special:EntityData/{urllib.parse.quote(qid)}.json", timeout=8)
-    entity = data.get("entities", {}).get(qid, {}) if data else {}
+    return data.get("entities", {}).get(qid, {}) if data else {}
+
+
+@functools.lru_cache(maxsize=20000)
+def wikidata_p18_url(qid: str) -> str | None:
+    entity = wikidata_entity(qid)
     claims = entity.get("claims", {}).get("P18", [])
     for claim in claims:
         value = (
@@ -258,6 +264,43 @@ def wikidata_p18_url(qid: str) -> str | None:
     return None
 
 
+@functools.lru_cache(maxsize=20000)
+def wikidata_coord(qid: str) -> tuple[float, float] | None:
+    entity = wikidata_entity(qid)
+    claims = entity.get("claims", {}).get("P625", [])
+    for claim in claims:
+        value = (
+            claim.get("mainsnak", {})
+            .get("datavalue", {})
+            .get("value")
+        )
+        if isinstance(value, dict) and "latitude" in value and "longitude" in value:
+            return float(value["latitude"]), float(value["longitude"])
+    return None
+
+
+def distance_m(lat1: float, lng1: float, lat2: float, lng2: float) -> int:
+    radius_m = 6371000
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    d_phi = math.radians(lat2 - lat1)
+    d_lambda = math.radians(lng2 - lng1)
+    a = (
+        math.sin(d_phi / 2) ** 2
+        + math.cos(phi1) * math.cos(phi2) * math.sin(d_lambda / 2) ** 2
+    )
+    return round(radius_m * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a)))
+
+
+def wikidata_distance_m(qid: str, poi: dict[str, Any]) -> int | None:
+    coord = wikidata_coord(qid)
+    lat = poi.get("lat")
+    lng = poi.get("lng")
+    if not coord or not isinstance(lat, (int, float)) or not isinstance(lng, (int, float)):
+        return None
+    return distance_m(float(lat), float(lng), coord[0], coord[1])
+
+
 def expand_tokens(tokens: set[str], raw_name: str = "") -> set[str]:
     expanded = set(tokens)
     raw_tokens = set(normalize(raw_name).split())
@@ -265,6 +308,15 @@ def expand_tokens(tokens: set[str], raw_name: str = "") -> set[str]:
     for token in raw_tokens | tokens:
         expanded.update(TOKEN_SYNONYMS.get(token, set()))
     return expanded
+
+
+def matching_tokens(tokens: set[str], normalized_text: str) -> set[str]:
+    words = set(normalized_text.split())
+    return {
+        token
+        for token in tokens
+        if token in words or (len(token) >= 5 and token in normalized_text)
+    }
 
 
 def photo_from_summary(data: dict[str, Any] | None) -> str | None:
@@ -317,13 +369,13 @@ def stripped_name_variants(name: str, location: str) -> list[str]:
         location,
         location.split(",")[0],
         location.split("-")[0],
-        location.split("–")[0],
+        location.split("\u2013")[0],
     ]
     for raw_location in location_parts:
         loc = raw_location.strip()
         if len(loc) < 3:
             continue
-        match = re.match(rf"^\s*{re.escape(loc)}(?:[\s:]+|[-–—]+)(.+)$", name, re.I)
+        match = re.match(rf"^\s*{re.escape(loc)}(?:[\s:]+|[-\u2013\u2014]+)(.+)$", name, re.I)
         if match:
             stripped = match.group(1).strip()
             if len(stripped) >= 4 and stripped.lower() != name.lower():
@@ -378,10 +430,10 @@ def score_candidate(
     title_norm = normalize(title)
     text_norm = normalize(text)
 
-    title_hits = {token for token in name_tokens if token in title_norm}
-    file_hits = {token for token in name_tokens if token in filename_norm}
-    name_hits = {token for token in name_tokens if token in text_norm}
-    place_hits = {token for token in place_tokens if token in text_norm}
+    title_hits = matching_tokens(name_tokens, title_norm)
+    file_hits = matching_tokens(name_tokens, filename_norm)
+    name_hits = matching_tokens(name_tokens, text_norm)
+    place_hits = matching_tokens(place_tokens, text_norm)
 
     score = 0.0
     score += len(title_hits) * 3
@@ -390,6 +442,8 @@ def score_candidate(
     score += len(place_hits) * 0.75
     if method == "geo" and distance_m is not None:
         score += max(0.0, 2.5 - (distance_m / 600.0))
+    if method == "wikidata" and distance_m is not None:
+        score += max(0.0, 3.0 - (distance_m / 500.0))
 
     details = {
         "title": title,
@@ -470,11 +524,14 @@ def is_accepted(
     if method == "wikidata":
         strong_hits = set(details["title_hits"]) | set(details["file_hits"])
         strong_place_hits = set(details["place_hits"]) - WEAK_PLACE_TOKENS
-        if len(core_tokens) > 1 and len(strong_hits) < 2 and not strong_place_hits:
+        close_entity = distance_m is not None and distance_m <= 750
+        if distance_m is not None and distance_m > 25000:
+            return False, details
+        if len(core_tokens) > 1 and len(strong_hits) < 2 and not strong_place_hits and not close_entity:
             return False, details
         if len(core_tokens) == 1 and next(iter(core_tokens)) in AMBIGUOUS_SINGLE_TOKENS and not details["file_hits"] and not strong_place_hits:
             return False, details
-        if not (strong_hits or details["place_hits"]):
+        if not (strong_hits or details["place_hits"] or close_entity):
             return False, details
     if method == "geo" and len(details["core_name_tokens"]) > 1:
         strong_hits = set(details["title_hits"]) | set(details["file_hits"])
@@ -549,7 +606,8 @@ def find_photo_for_poi(
                     url = wikidata_p18_url(qid)
                     if not url or used_urls[url] >= max_duplicate:
                         continue
-                    accepted, details = is_accepted(poi, data, "wikidata", None, min_score, url)
+                    entity_distance_m = wikidata_distance_m(qid, poi)
+                    accepted, details = is_accepted(poi, data, "wikidata", entity_distance_m, min_score, url)
                     if not accepted:
                         continue
                     details.update({"lang": lang, "url": url, "source": "wikidata_search", "wikidata_id": qid})

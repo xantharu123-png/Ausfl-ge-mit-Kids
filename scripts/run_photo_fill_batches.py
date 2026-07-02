@@ -89,6 +89,22 @@ WAVES: dict[str, dict[str, Any]] = {
         "wikidata_search": True,
         "min_score": 5.0,
     },
+    "wikidata-geo-worthy": {
+        "categories": "sehenswuerdigkeit,kultur,weihnachten",
+        "title_only": True,
+        "skip_search": True,
+        "skip_geo": True,
+        "wikidata_search": True,
+        "min_score": 5.0,
+    },
+    "wikidata-geo-family": {
+        "categories": "familie",
+        "title_only": True,
+        "skip_search": True,
+        "skip_geo": True,
+        "wikidata_search": True,
+        "min_score": 5.0,
+    },
 }
 
 
