@@ -87,6 +87,11 @@ GENERIC_TITLE_RE = re.compile(
     r"^(observation deck|arc de triomphe|jardin des plantes|sea life|der bote vom gardasee|kasteel keukenhof)$",
     re.I,
 )
+NON_PLACE_ENTITY_RE = re.compile(
+    r"(album|book|film|fictional|human settlement|painting|song|street in|video game|"
+    r"wikimedia disambiguation page)",
+    re.I,
+)
 AMBIGUOUS_SINGLE_TOKENS = {
     "bruecke",
     "brucke",
@@ -163,6 +168,19 @@ def wiki_search(lang: str, query: str, limit: int = 5) -> list[str]:
     if not data:
         return []
     return [hit["title"] for hit in data.get("query", {}).get("search", []) if hit.get("title")]
+
+
+@functools.lru_cache(maxsize=20000)
+def wikidata_search(lang: str, query: str, limit: int = 5) -> list[dict[str, Any]]:
+    url = (
+        f"https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json"
+        f"&language={urllib.parse.quote(lang)}&uselang=en&srlimit={limit}"
+        f"&limit={limit}&search={urllib.parse.quote(query)}"
+    )
+    data = fetch_json(url, timeout=8)
+    if not data:
+        return []
+    return data.get("search", [])
 
 
 @functools.lru_cache(maxsize=20000)
@@ -252,6 +270,24 @@ def photo_from_wikidata(lang: str, title: str) -> str | None:
     return wikidata_p18_url(str(qid))
 
 
+def data_from_wikidata_hit(hit: dict[str, Any]) -> dict[str, Any] | None:
+    qid = hit.get("id")
+    if not qid:
+        return None
+    aliases = hit.get("aliases") or []
+    match_text = hit.get("match", {}).get("text") or ""
+    label = str(hit.get("label") or match_text or qid)
+    description = str(hit.get("description") or "")
+    if NON_PLACE_ENTITY_RE.search(description):
+        return None
+    return {
+        "title": label,
+        "description": description,
+        "extract": " ".join(str(value) for value in [match_text, *aliases, description] if value),
+        "wikidata_id": qid,
+    }
+
+
 def build_queries(poi: dict[str, Any]) -> list[str]:
     name = str(poi.get("name", "")).strip()
     location = str(poi.get("location", "")).strip()
@@ -339,6 +375,8 @@ def is_accepted(
         return False, details
     if GENERIC_TITLE_RE.search(title_norm):
         return False, details
+    if method == "wikidata" and NON_PLACE_ENTITY_RE.search(str(data.get("description", ""))):
+        return False, details
     if method == "title" and not exact_title_match and not (details["title_hits"] or details["file_hits"]):
         return False, details
     if method == "title" and not exact_title_match and len(details["core_name_tokens"]) > 1:
@@ -378,6 +416,12 @@ def is_accepted(
         return False, details
     if method == "search" and len(details["core_name_tokens"]) > 1 and len(details["title_hits"]) < 2:
         return False, details
+    if method == "wikidata":
+        strong_hits = set(details["title_hits"]) | set(details["file_hits"])
+        if len(details["core_name_tokens"]) > 1 and not strong_hits and not details["place_hits"]:
+            return False, details
+        if not (strong_hits or details["place_hits"]):
+            return False, details
     if method == "geo" and len(details["core_name_tokens"]) > 1:
         strong_hits = set(details["title_hits"]) | set(details["file_hits"])
         if len(strong_hits) < 2:
@@ -401,6 +445,7 @@ def find_photo_for_poi(
     min_score: float,
     allow_search: bool = True,
     allow_geo: bool = True,
+    allow_wikidata_search: bool = False,
 ) -> dict[str, Any] | None:
     langs = LANG_PRIO.get(cc, ["de", "en"])
     tried: set[tuple[str, str]] = set()
@@ -438,6 +483,23 @@ def find_photo_for_poi(
                     found = try_title(lang, title, "search")
                     if found:
                         return found
+
+    if allow_wikidata_search:
+        for lang in search_langs:
+            for query in build_queries(poi)[:4]:
+                for hit in wikidata_search(lang, query, limit=5):
+                    data = data_from_wikidata_hit(hit)
+                    if not data:
+                        continue
+                    qid = str(data.get("wikidata_id", ""))
+                    url = wikidata_p18_url(qid)
+                    if not url or used_urls[url] >= max_duplicate:
+                        continue
+                    accepted, details = is_accepted(poi, data, "wikidata", None, min_score, url)
+                    if not accepted:
+                        continue
+                    details.update({"lang": lang, "url": url, "source": "wikidata_search", "wikidata_id": qid})
+                    return details
 
     lat = poi.get("lat")
     lng = poi.get("lng")
@@ -498,6 +560,7 @@ def process_country(args: argparse.Namespace, cc: str) -> dict[str, Any]:
             args.min_score,
             allow_search=not (args.title_only or args.skip_search),
             allow_geo=not (args.title_only or args.skip_geo),
+            allow_wikidata_search=args.wikidata_search,
         )
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as executor:
@@ -530,6 +593,7 @@ def process_country(args: argparse.Namespace, cc: str) -> dict[str, Any]:
         "title_only": args.title_only,
         "skip_search": args.skip_search,
         "skip_geo": args.skip_geo,
+        "wikidata_search": args.wikidata_search,
         "categories": args.categories,
         "checked": len(candidates),
         "found": len(found),
@@ -561,6 +625,7 @@ def main() -> int:
     parser.add_argument("--title-only", action="store_true", help="Only accept direct title/query matches")
     parser.add_argument("--skip-search", action="store_true")
     parser.add_argument("--skip-geo", action="store_true")
+    parser.add_argument("--wikidata-search", action="store_true")
     args = parser.parse_args()
 
     reports = [process_country(args, cc) for cc in country_from_arg(args.country)]

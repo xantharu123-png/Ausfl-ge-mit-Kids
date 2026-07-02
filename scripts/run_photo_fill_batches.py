@@ -73,6 +73,22 @@ WAVES: dict[str, dict[str, Any]] = {
         "skip_geo": True,
         "min_score": 7.0,
     },
+    "wikidata-worthy": {
+        "categories": "sehenswuerdigkeit,kultur,weihnachten",
+        "title_only": True,
+        "skip_search": True,
+        "skip_geo": True,
+        "wikidata_search": True,
+        "min_score": 5.0,
+    },
+    "wikidata-family": {
+        "categories": "familie",
+        "title_only": True,
+        "skip_search": True,
+        "skip_geo": True,
+        "wikidata_search": True,
+        "min_score": 5.0,
+    },
 }
 
 
@@ -172,6 +188,7 @@ def run_country_batch(
             float(wave_config.get("min_score", args.min_score)),
             allow_search=not (wave_config.get("title_only") or wave_config.get("skip_search")),
             allow_geo=not (wave_config.get("title_only") or wave_config.get("skip_geo")),
+            allow_wikidata_search=bool(wave_config.get("wikidata_search")),
         )
         return poi, result
 

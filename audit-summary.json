@@ -3,8 +3,8 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 2106,
-    "with_baseline": 2106,
+    "baseline_photos": 2131,
+    "with_baseline": 2131,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
@@ -17,24 +17,24 @@
       "cc": "JP",
       "label": "Japan",
       "pois": 2874,
-      "baseline_photos": 79,
-      "coverage_pct": 2.7,
+      "baseline_photos": 81,
+      "coverage_pct": 2.8,
       "coord_cluster_locations": 435
     },
     {
       "cc": "BE",
       "label": "Belgien",
       "pois": 1957,
-      "baseline_photos": 52,
-      "coverage_pct": 2.7,
+      "baseline_photos": 55,
+      "coverage_pct": 2.8,
       "coord_cluster_locations": 316
     },
     {
       "cc": "ES",
       "label": "Spanien",
       "pois": 1953,
-      "baseline_photos": 63,
-      "coverage_pct": 3.2,
+      "baseline_photos": 69,
+      "coverage_pct": 3.5,
       "coord_cluster_locations": 149
     },
     {
