@@ -189,6 +189,7 @@ AMBIGUOUS_SINGLE_TOKENS = {
     "sommerrodelbahn",
     "station",
     "strand",
+    "swarovski",
     "synagoge",
     "synagogue",
     "tempel",
