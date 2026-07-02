@@ -529,7 +529,7 @@ def is_accepted(
             return False, details
         if len(core_tokens) > 1 and len(strong_hits) < 2 and not strong_place_hits and not close_entity:
             return False, details
-        if len(core_tokens) == 1 and next(iter(core_tokens)) in AMBIGUOUS_SINGLE_TOKENS and not details["file_hits"] and not strong_place_hits:
+        if len(core_tokens) == 1 and next(iter(core_tokens)) in AMBIGUOUS_SINGLE_TOKENS and title_norm != poi_norm and not strong_place_hits:
             return False, details
         if not (strong_hits or details["place_hits"] or close_entity):
             return False, details

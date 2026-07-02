@@ -115,7 +115,7 @@ KNOWN_GENERIC_RE = re.compile(
     r"flora\.png|coffee_plantation.*kaua|trajan(?:'|%27)?s_column|"
     r"lisbontram|jellingsten|str%c3%b6hl-rangkronen|"
     r"fire_inside_an_abandoned_convent.*quebec|libreoffice_writer|"
-    r"hapag-lloyd_antwerpen_express|anamur_burnu)",
+    r"hapag-lloyd_antwerpen_express|anamur_burnu|embrik_strand)",
     re.I,
 )
 
