@@ -168,7 +168,8 @@ KNOWN_GENERIC_RE = re.compile(
     r"cleaned-illustration_nymphaea_alba|waldviertel_weikertschlag3|"
     r"tren_a_las_nubes_cruzando_viaducto_la_polvorilla|"
     r"woerther_see_in_bayern|berlin_neue_synagoge_2005|"
-    r"st_michaels_church_hildesheim|prt\.png)",
+    r"st_michaels_church_hildesheim|prt\.png|"
+    r"venice_lagoon_december)",
     re.I,
 )
 

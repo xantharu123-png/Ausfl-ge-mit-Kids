@@ -149,6 +149,8 @@ AMBIGUOUS_SINGLE_TOKENS = {
     "kathedrale",
     "karneval",
     "landsgemeinde",
+    "lagoon",
+    "lagune",
     "market",
     "markt",
     "mall",
