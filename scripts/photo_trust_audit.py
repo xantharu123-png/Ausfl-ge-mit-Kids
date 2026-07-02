@@ -179,6 +179,7 @@ KNOWN_GENERIC_RE = re.compile(
     r"valley_rathaus|lorettoberg-ansichten|goslar_kaiserpfalz\.jpg|"
     r"limburg_-_alte_lahnbr|trier_innenstadt3|ggb_%28square%29|"
     r"nuclear_reactor_ignalina|%c3%96resund_helsingborg|lenin_in_1920|"
+    r"mineral_king_valley|"
     r"urho-kekkonen-1975|2019-03-16_01_aquaculture_in_chile|"
     r"islande_glacier_drangajokull|position-torshavn\.png|"
     r"lj%c3%b3sbj%c3%b6rg_petra)",
