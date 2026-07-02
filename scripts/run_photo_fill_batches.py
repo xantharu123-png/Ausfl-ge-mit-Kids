@@ -22,6 +22,7 @@ from photo_trust_audit import HTML_TO_CC, ROOT, extract_pois, load_photos, write
 
 
 STATUS_PATH = ROOT / "photo_fill_status.json"
+CATEGORY_PRIORITY = {"sehenswuerdigkeit": 0, "kultur": 1, "weihnachten": 2, "familie": 3}
 
 WAVES: dict[str, dict[str, Any]] = {
     "title-worthy": {
@@ -161,6 +162,21 @@ def category_set(value: str | None) -> set[str] | None:
     return {item.strip() for item in value.split(",") if item.strip()}
 
 
+def candidate_sort_key(poi: dict[str, Any]) -> tuple[Any, ...]:
+    name = str(poi.get("name") or "")
+    tokens = fetcher.meaningful_tokens(name)
+    specific_tokens = tokens - fetcher.AMBIGUOUS_SINGLE_TOKENS - fetcher.WEAK_PLACE_TOKENS
+    return (
+        CATEGORY_PRIORITY.get(str(poi.get("category")), 9),
+        not specific_tokens,
+        fetcher.is_ambiguous_single_query(name),
+        -len(specific_tokens),
+        -len(tokens),
+        len(name),
+        int(poi["id"]),
+    )
+
+
 def country_stats(cc: str, categories: set[str] | None, checked_ids: set[str]) -> dict[str, Any]:
     pois = extract_pois(html_for_country(cc))
     photos = load_photos(cc)
@@ -200,8 +216,7 @@ def run_country_batch(
     candidates = [poi for poi in pois if str(poi["id"]) not in photos]
     if categories is not None:
         candidates = [poi for poi in candidates if str(poi.get("category")) in categories]
-    priority = {"sehenswuerdigkeit": 0, "kultur": 1, "weihnachten": 2, "familie": 3}
-    candidates.sort(key=lambda poi: priority.get(str(poi.get("category")), 9))
+    candidates.sort(key=candidate_sort_key)
     selected = [poi for poi in candidates if str(poi["id"]) not in checked_ids][: args.limit]
 
     print(f"[{wave}:{cc}] checking {len(selected)} POIs", flush=True)
