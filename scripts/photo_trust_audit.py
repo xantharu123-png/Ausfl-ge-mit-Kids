@@ -123,7 +123,8 @@ KNOWN_GENERIC_RE = re.compile(
     r"locationsapmi|pallas-yll%c3%a4stunturin_kp|"
     r"corfe-castle_im_h%c3%bcgelland|bucht_in_neuseeland|"
     r"mariagerfjord_ved_hadsund|slanic_salt_mine|fraenkische_schweiz\.png|"
-    r"ammerthal_as_006)",
+    r"ammerthal_as_006|arles.*roman_amphitheatre|"
+    r"st_mary%27s_church.*castle_street)",
     re.I,
 )
 

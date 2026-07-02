@@ -9,7 +9,7 @@
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
     "suspicious_urls": 0,
-    "removed_suspicious_urls": 1,
+    "removed_suspicious_urls": 0,
     "coverage_pct": 4.2
   },
   "cluster_hotspots": [
