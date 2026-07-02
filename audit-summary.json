@@ -3,8 +3,8 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 3352,
-    "with_baseline": 3352,
+    "baseline_photos": 3354,
+    "with_baseline": 3354,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
@@ -59,7 +59,7 @@
       "cc": "LU",
       "label": "Luxemburg",
       "pois": 1974,
-      "baseline_photos": 73,
+      "baseline_photos": 74,
       "coverage_pct": 3.7,
       "coord_cluster_locations": 97
     },
