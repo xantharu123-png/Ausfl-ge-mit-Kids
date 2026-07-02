@@ -149,7 +149,9 @@ KNOWN_GENERIC_RE = re.compile(
     r"kinder_products_at_the_supermarket|mort_du_commandant_lamy|"
     r"town_and_country_fh000023|vladimir_putin_taking_the_presidential_oath|"
     r"art-portrait-collage_2|lab_bench|luxemburgs\.png|"
-    r"sauk_indian_family)",
+    r"sauk_indian_family|mariazellerbahn_04|filestack_retouched|"
+    r"charles_rennie_mackintosh.*sedia|allegory_of_music|"
+    r"herstellung-eines-kupferstichs)",
     re.I,
 )
 
