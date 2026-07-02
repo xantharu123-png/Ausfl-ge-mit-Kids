@@ -101,7 +101,7 @@ BAD_URL_RE = re.compile(
     r"(karte|wappen|flag|coat_of_arms|logo|map[_.]|locator|location_in|"
     r"positionskarte|relief_|verwaltung|blank|icon|symbol|blason|escudo|"
     r"stemma|banner|diagram|schema|schild|signboard|signage|nameplate|"
-    r"plaque|infotafel)",
+    r"plaque|infotafel|grundriss|thumbnail\.jpg)",
     re.I,
 )
 BAD_EXT_RE = re.compile(r"\.(svg|tif|tiff|webm|ogv|gif)(?:[/?#]|$)", re.I)
@@ -112,7 +112,10 @@ KNOWN_GENERIC_RE = re.compile(
     r"la_tour_eiffel_vue_de_la_tour_saint-jacques|arc_de_triomphe|"
     r"mont-saint-michel_vu_du_ciel|big_ben|tower_bridge_london|"
     r"colosseum_in_rome|brandenburger_tor_abends|pratergarten_berlin|"
-    r"flora\.png|coffee_plantation.*kaua)",
+    r"flora\.png|coffee_plantation.*kaua|trajan(?:'|%27)?s_column|"
+    r"lisbontram|jellingsten|str%c3%b6hl-rangkronen|"
+    r"fire_inside_an_abandoned_convent.*quebec|libreoffice_writer|"
+    r"hapag-lloyd_antwerpen_express)",
     re.I,
 )
 
