@@ -1,48 +1,48 @@
 {
-  "generated_at": "2026-07-01",
+  "generated_at": "2026-07-02",
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 1992,
-    "with_baseline": 1992,
+    "baseline_photos": 2071,
+    "with_baseline": 2071,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
     "suspicious_urls": 0,
     "removed_suspicious_urls": 0,
-    "coverage_pct": 3.9
+    "coverage_pct": 4.0
   },
   "cluster_hotspots": [
     {
       "cc": "JP",
       "label": "Japan",
       "pois": 2874,
-      "baseline_photos": 58,
-      "coverage_pct": 2.0,
+      "baseline_photos": 59,
+      "coverage_pct": 2.1,
       "coord_cluster_locations": 435
     },
     {
       "cc": "BE",
       "label": "Belgien",
       "pois": 1957,
-      "baseline_photos": 49,
-      "coverage_pct": 2.5,
+      "baseline_photos": 52,
+      "coverage_pct": 2.7,
       "coord_cluster_locations": 316
     },
     {
       "cc": "ES",
       "label": "Spanien",
       "pois": 1953,
-      "baseline_photos": 60,
-      "coverage_pct": 3.1,
+      "baseline_photos": 63,
+      "coverage_pct": 3.2,
       "coord_cluster_locations": 149
     },
     {
       "cc": "SI",
       "label": "Slowenien",
       "pois": 1979,
-      "baseline_photos": 15,
-      "coverage_pct": 0.8,
+      "baseline_photos": 17,
+      "coverage_pct": 0.9,
       "coord_cluster_locations": 133
     },
     {
@@ -67,25 +67,9 @@
       "cc": "FI",
       "label": "Finnland",
       "pois": 1971,
-      "baseline_photos": 12,
-      "coverage_pct": 0.6,
+      "baseline_photos": 14,
+      "coverage_pct": 0.7,
       "coord_cluster_locations": 81
-    },
-    {
-      "cc": "SI",
-      "label": "Slowenien",
-      "pois": 1979,
-      "baseline_photos": 15,
-      "coverage_pct": 0.8,
-      "coord_cluster_locations": 133
-    },
-    {
-      "cc": "QA",
-      "label": "Katar",
-      "pois": 327,
-      "baseline_photos": 3,
-      "coverage_pct": 0.9,
-      "coord_cluster_locations": 13
     },
     {
       "cc": "LU",
@@ -94,6 +78,22 @@
       "baseline_photos": 18,
       "coverage_pct": 0.9,
       "coord_cluster_locations": 97
+    },
+    {
+      "cc": "SI",
+      "label": "Slowenien",
+      "pois": 1979,
+      "baseline_photos": 17,
+      "coverage_pct": 0.9,
+      "coord_cluster_locations": 133
+    },
+    {
+      "cc": "FO",
+      "label": "Faeroeer",
+      "pois": 1949,
+      "baseline_photos": 22,
+      "coverage_pct": 1.1,
+      "coord_cluster_locations": 78
     }
   ]
 }

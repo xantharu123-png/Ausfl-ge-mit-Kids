@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import concurrent.futures
+import functools
 import json
 import re
 import ssl
@@ -82,7 +83,7 @@ LANG_PRIO = {
 }
 
 WORTHY_CATEGORIES = {"sehenswuerdigkeit", "kultur", "weihnachten"}
-GENERIC_TITLE_RE = re.compile(r"^(observation deck)$", re.I)
+GENERIC_TITLE_RE = re.compile(r"^(observation deck|arc de triomphe|jardin des plantes)$", re.I)
 AMBIGUOUS_SINGLE_TOKENS = {
     "bruecke",
     "brucke",
@@ -102,6 +103,7 @@ AMBIGUOUS_SINGLE_TOKENS = {
     "turm",
 }
 WEAK_PLACE_TOKENS = {"center", "central", "centre", "mitte", "stadt", "zentrum"}
+SHORT_CONTEXT_TOKENS = {"arc", "zoo"}
 REQUIRED_CONTEXT_TOKENS = {
     "abbey",
     "basilica",
@@ -142,11 +144,13 @@ def fetch_json(url: str, timeout: int = 8) -> dict[str, Any] | None:
     return None
 
 
+@functools.lru_cache(maxsize=20000)
 def summary(lang: str, title: str) -> dict[str, Any] | None:
     encoded = urllib.parse.quote(title.replace(" ", "_"))
     return fetch_json(f"https://{lang}.wikipedia.org/api/rest_v1/page/summary/{encoded}")
 
 
+@functools.lru_cache(maxsize=20000)
 def wiki_search(lang: str, query: str, limit: int = 5) -> list[str]:
     url = (
         f"https://{lang}.wikipedia.org/w/api.php?action=query&format=json"
@@ -158,6 +162,7 @@ def wiki_search(lang: str, query: str, limit: int = 5) -> list[str]:
     return [hit["title"] for hit in data.get("query", {}).get("search", []) if hit.get("title")]
 
 
+@functools.lru_cache(maxsize=20000)
 def wiki_geosearch(lang: str, lat: float, lng: float, radius: int = 1200, limit: int = 10) -> list[dict[str, Any]]:
     url = (
         f"https://{lang}.wikipedia.org/w/api.php?action=query&format=json"
@@ -169,6 +174,7 @@ def wiki_geosearch(lang: str, lat: float, lng: float, radius: int = 1200, limit:
     return data.get("query", {}).get("geosearch", [])
 
 
+@functools.lru_cache(maxsize=20000)
 def wiki_pageprops(lang: str, title: str) -> dict[str, Any] | None:
     url = (
         f"https://{lang}.wikipedia.org/w/api.php?action=query&format=json"
@@ -187,6 +193,7 @@ def commons_thumb_url(file_name: str, width: int = 500) -> str:
     return f"https://commons.wikimedia.org/wiki/Special:FilePath/{encoded}?width={width}"
 
 
+@functools.lru_cache(maxsize=20000)
 def wikidata_p18_url(qid: str) -> str | None:
     data = fetch_json(f"https://www.wikidata.org/wiki/Special:EntityData/{urllib.parse.quote(qid)}.json", timeout=8)
     entity = data.get("entities", {}).get(qid, {}) if data else {}
@@ -209,7 +216,9 @@ def wikidata_p18_url(qid: str) -> str | None:
 
 def expand_tokens(tokens: set[str], raw_name: str = "") -> set[str]:
     expanded = set(tokens)
-    for token in set(normalize(raw_name).split()) | tokens:
+    raw_tokens = set(normalize(raw_name).split())
+    expanded.update(token for token in raw_tokens if token in SHORT_CONTEXT_TOKENS)
+    for token in raw_tokens | tokens:
         expanded.update(TOKEN_SYNONYMS.get(token, set()))
     return expanded
 
@@ -248,6 +257,8 @@ def build_queries(poi: dict[str, Any]) -> list[str]:
         name,
         name.replace("-", " "),
         f"{name} {location}" if location and location.lower() not in name.lower() else "",
+        f"{name} de {location}" if location and location.lower() not in name.lower() else "",
+        f"{name} of {location}" if location and location.lower() not in name.lower() else "",
         f"{name} {region}" if region and len(region) <= 12 else "",
         f"{name} ({location})" if location and location.lower() not in name.lower() else "",
     ]
@@ -325,7 +336,20 @@ def is_accepted(
         return False, details
     if GENERIC_TITLE_RE.search(title_norm):
         return False, details
+    if method == "title" and not exact_title_match and not (details["title_hits"] or details["file_hits"]):
+        return False, details
+    if method == "title" and not exact_title_match and len(details["core_name_tokens"]) > 1:
+        if len(details["title_hits"]) < 2 and not details["file_hits"]:
+            return False, details
     core_tokens = set(details["core_name_tokens"])
+    if (
+        method == "title"
+        and exact_title_match
+        and len(core_tokens) > 1
+        and not details["file_hits"]
+        and not details["place_hits"]
+    ):
+        return False, details
     if (
         method == "title"
         and exact_title_match
@@ -372,6 +396,8 @@ def find_photo_for_poi(
     used_urls: Counter[str],
     max_duplicate: int,
     min_score: float,
+    allow_search: bool = True,
+    allow_geo: bool = True,
 ) -> dict[str, Any] | None:
     langs = LANG_PRIO.get(cc, ["de", "en"])
     tried: set[tuple[str, str]] = set()
@@ -402,16 +428,17 @@ def find_photo_for_poi(
                 return found
 
     search_langs = list(dict.fromkeys([langs[0], "en", "de"]))
-    for lang in search_langs:
-        for query in build_queries(poi)[:3]:
-            for title in wiki_search(lang, query, limit=5):
-                found = try_title(lang, title, "search")
-                if found:
-                    return found
+    if allow_search:
+        for lang in search_langs:
+            for query in build_queries(poi)[:3]:
+                for title in wiki_search(lang, query, limit=5):
+                    found = try_title(lang, title, "search")
+                    if found:
+                        return found
 
     lat = poi.get("lat")
     lng = poi.get("lng")
-    if isinstance(lat, (int, float)) and isinstance(lng, (int, float)):
+    if allow_geo and isinstance(lat, (int, float)) and isinstance(lng, (int, float)):
         for lang in search_langs:
             for hit in wiki_geosearch(lang, float(lat), float(lng)):
                 title = hit.get("title")
@@ -444,6 +471,9 @@ def process_country(args: argparse.Namespace, cc: str) -> dict[str, Any]:
     candidates = [poi for poi in pois if str(poi["id"]) not in photos]
     if args.only_worthy:
         candidates = [poi for poi in candidates if poi.get("category") in WORTHY_CATEGORIES]
+    if args.categories:
+        allowed_categories = {category.strip() for category in args.categories.split(",") if category.strip()}
+        candidates = [poi for poi in candidates if str(poi.get("category")) in allowed_categories]
     priority = {"sehenswuerdigkeit": 0, "kultur": 1, "weihnachten": 2, "familie": 3}
     candidates.sort(key=lambda poi: priority.get(str(poi.get("category")), 9))
     if args.offset:
@@ -457,7 +487,15 @@ def process_country(args: argparse.Namespace, cc: str) -> dict[str, Any]:
     started = time.time()
 
     def work(poi: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any] | None]:
-        return poi, find_photo_for_poi(cc, poi, used_urls, args.max_duplicate, args.min_score)
+        return poi, find_photo_for_poi(
+            cc,
+            poi,
+            used_urls,
+            args.max_duplicate,
+            args.min_score,
+            allow_search=not (args.title_only or args.skip_search),
+            allow_geo=not (args.title_only or args.skip_geo),
+        )
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as executor:
         futures = [executor.submit(work, poi) for poi in candidates]
@@ -486,6 +524,10 @@ def process_country(args: argparse.Namespace, cc: str) -> dict[str, Any]:
         "cc": cc,
         "mode": "apply" if args.apply else "dry-run",
         "offset": args.offset,
+        "title_only": args.title_only,
+        "skip_search": args.skip_search,
+        "skip_geo": args.skip_geo,
+        "categories": args.categories,
         "checked": len(candidates),
         "found": len(found),
         "before": before_count,
@@ -512,6 +554,10 @@ def main() -> int:
     parser.add_argument("--max-duplicate", type=int, default=2)
     parser.add_argument("--min-score", type=float, default=3.5)
     parser.add_argument("--only-worthy", action="store_true")
+    parser.add_argument("--categories", help="Comma-separated POI categories to include")
+    parser.add_argument("--title-only", action="store_true", help="Only accept direct title/query matches")
+    parser.add_argument("--skip-search", action="store_true")
+    parser.add_argument("--skip-geo", action="store_true")
     args = parser.parse_args()
 
     reports = [process_country(args, cc) for cc in country_from_arg(args.country)]
