@@ -3,8 +3,8 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 2210,
-    "with_baseline": 2210,
+    "baseline_photos": 2211,
+    "with_baseline": 2211,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
@@ -17,7 +17,7 @@
       "cc": "JP",
       "label": "Japan",
       "pois": 2874,
-      "baseline_photos": 71,
+      "baseline_photos": 72,
       "coverage_pct": 2.5,
       "coord_cluster_locations": 435
     },
