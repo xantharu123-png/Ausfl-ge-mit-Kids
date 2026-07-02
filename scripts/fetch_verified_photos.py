@@ -84,7 +84,7 @@ LANG_PRIO = {
 
 WORTHY_CATEGORIES = {"sehenswuerdigkeit", "kultur", "weihnachten"}
 GENERIC_TITLE_RE = re.compile(
-    r"^(observation deck|arc de triomphe|jardin des plantes|sea life|der bote vom gardasee)$",
+    r"^(observation deck|arc de triomphe|jardin des plantes|sea life|der bote vom gardasee|kasteel keukenhof)$",
     re.I,
 )
 AMBIGUOUS_SINGLE_TOKENS = {
