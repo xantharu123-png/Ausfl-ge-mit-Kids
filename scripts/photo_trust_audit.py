@@ -99,7 +99,7 @@ FIELD_NUM = re.compile(r"(\w+):\s*(-?\d+(?:\.\d+)?)")
 
 BAD_URL_RE = re.compile(
     r"(karte|wappen|flag|coat_of_arms|logo|map[_.]|\bmap\d|locator|location_in|"
-    r"positionskarte|relief_|verwaltung|im_bezirk|blank|icon|symbol|blason|escudo|"
+    r"positionskarte|posizione|relief_|verwaltung|im_bezirk|blank|icon|symbol|blason|escudo|"
     r"stemma|bandiera|banner|diagram|schema|schild|signboard|signage|nameplate|"
     r"plaque|infotafel|grundriss|thumbnail\.jpg)",
     re.I,
@@ -167,7 +167,8 @@ KNOWN_GENERIC_RE = re.compile(
     r"maelmin_-_reconstruction|montafonersteinschaf|"
     r"cleaned-illustration_nymphaea_alba|waldviertel_weikertschlag3|"
     r"tren_a_las_nubes_cruzando_viaducto_la_polvorilla|"
-    r"woerther_see_in_bayern|berlin_neue_synagoge_2005)",
+    r"woerther_see_in_bayern|berlin_neue_synagoge_2005|"
+    r"st_michaels_church_hildesheim|prt\.png)",
     re.I,
 )
 
