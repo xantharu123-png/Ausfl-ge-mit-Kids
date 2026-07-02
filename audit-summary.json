@@ -3,22 +3,22 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 3487,
-    "with_baseline": 3487,
+    "baseline_photos": 3607,
+    "with_baseline": 3607,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
     "suspicious_urls": 0,
-    "removed_suspicious_urls": 1,
-    "coverage_pct": 6.8
+    "removed_suspicious_urls": 4,
+    "coverage_pct": 7.0
   },
   "cluster_hotspots": [
     {
       "cc": "JP",
       "label": "Japan",
       "pois": 2874,
-      "baseline_photos": 144,
-      "coverage_pct": 5.0,
+      "baseline_photos": 204,
+      "coverage_pct": 7.1,
       "coord_cluster_locations": 435
     },
     {
