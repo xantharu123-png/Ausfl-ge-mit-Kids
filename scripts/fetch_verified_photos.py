@@ -98,7 +98,8 @@ GENERIC_TITLE_RE = re.compile(
     r"opera house|pinacoteca|giovanni.*evangelista|foro romano|"
     r"benediktinerkloster|fischerdorf|canal|grand place|grun|gruen|"
     r"seen|mosque|wasserkraft|belfort|belle epoque|badlands|marsh|louvre|"
-    r"corn maze|butterfly house|science center)$",
+    r"corn maze|butterfly house|science center|madame tussauds|dungeon|"
+    r"central park|natural history museum)$",
     re.I,
 )
 NON_PLACE_ENTITY_RE = re.compile(
