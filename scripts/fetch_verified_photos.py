@@ -90,7 +90,8 @@ GENERIC_TITLE_RE = re.compile(
     r"harbor|harbour|marina|vineyard|funicular|fountain|windmill|"
     r"aquadukt|aqueduct|nationalmuseum|schildkroten|watermill|"
     r"monastery|kloster|catacombs|river cruise|wald|dorf|"
-    r"strasse|stra e|street)$",
+    r"strasse|stra e|street|weingut|town square|torre civica|"
+    r"piazza del popolo)$",
     re.I,
 )
 NON_PLACE_ENTITY_RE = re.compile(
