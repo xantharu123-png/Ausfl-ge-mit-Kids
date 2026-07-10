@@ -96,7 +96,8 @@ GENERIC_TITLE_RE = re.compile(
     r"chapel|museo diocesano|museo civico|ponte vecchio|castello|funivia|"
     r"sebastien le prestre.*vauban|kunstweg|archaologie|archaeologie|"
     r"opera house|pinacoteca|giovanni.*evangelista|foro romano|"
-    r"benediktinerkloster|fischerdorf|canal|grand place|grun|gruen)$",
+    r"benediktinerkloster|fischerdorf|canal|grand place|grun|gruen|"
+    r"seen|mosque|wasserkraft|belfort|belle epoque)$",
     re.I,
 )
 NON_PLACE_ENTITY_RE = re.compile(
