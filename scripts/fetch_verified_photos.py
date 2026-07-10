@@ -86,7 +86,11 @@ LANG_PRIO = {
 WORTHY_CATEGORIES = {"sehenswuerdigkeit", "kultur", "weihnachten"}
 GENERIC_TITLE_RE = re.compile(
     r"^(observation deck|arc de triomphe|jardin des plantes|sea life|der bote vom gardasee|"
-    r"kasteel keukenhof|carnival festival|botanischer garten|botanical garden)$",
+    r"kasteel keukenhof|carnival festival|botanischer garten|botanical garden|"
+    r"harbor|harbour|marina|vineyard|funicular|fountain|windmill|"
+    r"aquadukt|aqueduct|nationalmuseum|schildkroten|watermill|"
+    r"monastery|kloster|catacombs|river cruise|wald|dorf|"
+    r"strasse|stra e|street)$",
     re.I,
 )
 NON_PLACE_ENTITY_RE = re.compile(
