@@ -3,8 +3,8 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 4081,
-    "with_baseline": 4081,
+    "baseline_photos": 4084,
+    "with_baseline": 4084,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
@@ -33,8 +33,8 @@
       "cc": "ES",
       "label": "Spanien",
       "pois": 1953,
-      "baseline_photos": 187,
-      "coverage_pct": 9.6,
+      "baseline_photos": 189,
+      "coverage_pct": 9.7,
       "coord_cluster_locations": 149
     },
     {
