@@ -630,9 +630,17 @@ def is_accepted(
         method == "title"
         and exact_title_match
         and len(core_tokens) == 1
-        and next(iter(core_tokens)) in AMBIGUOUS_SINGLE_TOKENS
+        and not (set(details["place_hits"]) - WEAK_PLACE_TOKENS)
+    ):
+        return False, details
+    raw_name_tokens = set(meaningful_tokens(str(poi.get("name", ""))))
+    raw_place_tokens = set(meaningful_tokens(str(poi.get("location", "")), str(poi.get("region", ""))))
+    if (
+        method == "title"
+        and exact_title_match
+        and raw_name_tokens
+        and raw_name_tokens <= raw_place_tokens
         and not details["file_hits"]
-        and not details["place_hits"]
     ):
         return False, details
     if (

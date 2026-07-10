@@ -1,16 +1,16 @@
 {
-  "generated_at": "2026-07-10",
+  "generated_at": "2026-07-11",
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 4084,
-    "with_baseline": 4084,
+    "baseline_photos": 4105,
+    "with_baseline": 4105,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
     "suspicious_urls": 0,
     "removed_suspicious_urls": 0,
-    "coverage_pct": 7.9
+    "coverage_pct": 8.0
   },
   "cluster_hotspots": [
     {
