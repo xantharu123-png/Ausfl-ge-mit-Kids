@@ -100,7 +100,7 @@ GENERIC_TITLE_RE = re.compile(
     r"seen|mosque|wasserkraft|belfort|belle epoque|badlands|marsh|louvre|"
     r"corn maze|butterfly house|science center|madame tussauds|dungeon|"
     r"central park|natural history museum|thermalbad|plage|musee des automates|"
-    r"adventskalender|noel|marche de noel|tour de france)$",
+    r"adventskalender|noel|marche de noel|tour de france|motocross|boat racing)$",
     re.I,
 )
 NON_PLACE_ENTITY_RE = re.compile(
