@@ -101,7 +101,7 @@ GENERIC_TITLE_RE = re.compile(
     r"corn maze|butterfly house|science center|madame tussauds|dungeon|"
     r"central park|natural history museum|thermalbad|plage|musee des automates|"
     r"adventskalender|noel|marche de noel|tour de france|motocross|boat racing|"
-    r"terry fox run|bergsteigen|wanderweg|klettern|surfing)$",
+    r"terry fox run|bergsteigen|wanderweg|klettern|surfing|sauna|casino)$",
     re.I,
 )
 NON_PLACE_ENTITY_RE = re.compile(
@@ -648,6 +648,14 @@ def is_accepted(
         and not exact_title_match
         and len(core_tokens) == 1
         and next(iter(core_tokens)) in AMBIGUOUS_SINGLE_TOKENS
+        and not (set(details["place_hits"]) - WEAK_PLACE_TOKENS)
+    ):
+        return False, details
+    if (
+        method == "title"
+        and not exact_title_match
+        and len(core_tokens) == 1
+        and not details["file_hits"]
         and not (set(details["place_hits"]) - WEAK_PLACE_TOKENS)
     ):
         return False, details
