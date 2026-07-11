@@ -3,8 +3,8 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 4128,
-    "with_baseline": 4128,
+    "baseline_photos": 4152,
+    "with_baseline": 4152,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
@@ -41,8 +41,8 @@
       "cc": "SI",
       "label": "Slowenien",
       "pois": 1979,
-      "baseline_photos": 90,
-      "coverage_pct": 4.5,
+      "baseline_photos": 99,
+      "coverage_pct": 5.0,
       "coord_cluster_locations": 133
     },
     {
@@ -64,22 +64,6 @@
       "coord_cluster_locations": 97
     },
     {
-      "cc": "FO",
-      "label": "Faeroeer",
-      "pois": 1949,
-      "baseline_photos": 88,
-      "coverage_pct": 4.5,
-      "coord_cluster_locations": 78
-    },
-    {
-      "cc": "SI",
-      "label": "Slowenien",
-      "pois": 1979,
-      "baseline_photos": 90,
-      "coverage_pct": 4.5,
-      "coord_cluster_locations": 133
-    },
-    {
       "cc": "CY",
       "label": "Zypern",
       "pois": 1970,
@@ -88,12 +72,28 @@
       "coord_cluster_locations": 110
     },
     {
-      "cc": "SK",
-      "label": "Slowakei",
-      "pois": 1986,
-      "baseline_photos": 102,
-      "coverage_pct": 5.1,
-      "coord_cluster_locations": 94
+      "cc": "FO",
+      "label": "Faeroeer",
+      "pois": 1949,
+      "baseline_photos": 95,
+      "coverage_pct": 4.9,
+      "coord_cluster_locations": 78
+    },
+    {
+      "cc": "SI",
+      "label": "Slowenien",
+      "pois": 1979,
+      "baseline_photos": 99,
+      "coverage_pct": 5.0,
+      "coord_cluster_locations": 133
+    },
+    {
+      "cc": "GR",
+      "label": "Griechenland",
+      "pois": 2471,
+      "baseline_photos": 130,
+      "coverage_pct": 5.3,
+      "coord_cluster_locations": 68
     }
   ]
 }
