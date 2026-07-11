@@ -3,14 +3,14 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 4152,
-    "with_baseline": 4152,
+    "baseline_photos": 4170,
+    "with_baseline": 4170,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
     "suspicious_urls": 0,
     "removed_suspicious_urls": 0,
-    "coverage_pct": 8.0
+    "coverage_pct": 8.1
   },
   "cluster_hotspots": [
     {
@@ -56,14 +56,6 @@
   ],
   "lowest_coverage": [
     {
-      "cc": "LU",
-      "label": "Luxemburg",
-      "pois": 1974,
-      "baseline_photos": 84,
-      "coverage_pct": 4.3,
-      "coord_cluster_locations": 97
-    },
-    {
       "cc": "CY",
       "label": "Zypern",
       "pois": 1970,
@@ -86,6 +78,14 @@
       "baseline_photos": 99,
       "coverage_pct": 5.0,
       "coord_cluster_locations": 133
+    },
+    {
+      "cc": "LU",
+      "label": "Luxemburg",
+      "pois": 1974,
+      "baseline_photos": 102,
+      "coverage_pct": 5.2,
+      "coord_cluster_locations": 97
     },
     {
       "cc": "GR",
