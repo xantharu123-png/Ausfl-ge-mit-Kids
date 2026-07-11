@@ -3,8 +3,8 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 4117,
-    "with_baseline": 4117,
+    "baseline_photos": 4128,
+    "with_baseline": 4128,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
@@ -88,12 +88,12 @@
       "coord_cluster_locations": 110
     },
     {
-      "cc": "GR",
-      "label": "Griechenland",
-      "pois": 2471,
-      "baseline_photos": 119,
-      "coverage_pct": 4.8,
-      "coord_cluster_locations": 68
+      "cc": "SK",
+      "label": "Slowakei",
+      "pois": 1986,
+      "baseline_photos": 102,
+      "coverage_pct": 5.1,
+      "coord_cluster_locations": 94
     }
   ]
 }
