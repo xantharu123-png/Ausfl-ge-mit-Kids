@@ -3,8 +3,8 @@
   "totals": {
     "countries": 30,
     "pois": 51591,
-    "baseline_photos": 4170,
-    "with_baseline": 4170,
+    "baseline_photos": 4188,
+    "with_baseline": 4188,
     "orphan_photos": 0,
     "exact_name_dups": 392,
     "coord_cluster_locations": 2460,
@@ -49,20 +49,12 @@
       "cc": "CY",
       "label": "Zypern",
       "pois": 1970,
-      "baseline_photos": 93,
-      "coverage_pct": 4.7,
+      "baseline_photos": 111,
+      "coverage_pct": 5.6,
       "coord_cluster_locations": 110
     }
   ],
   "lowest_coverage": [
-    {
-      "cc": "CY",
-      "label": "Zypern",
-      "pois": 1970,
-      "baseline_photos": 93,
-      "coverage_pct": 4.7,
-      "coord_cluster_locations": 110
-    },
     {
       "cc": "FO",
       "label": "Faeroeer",
@@ -94,6 +86,14 @@
       "baseline_photos": 130,
       "coverage_pct": 5.3,
       "coord_cluster_locations": 68
+    },
+    {
+      "cc": "FI",
+      "label": "Finnland",
+      "pois": 1971,
+      "baseline_photos": 106,
+      "coverage_pct": 5.4,
+      "coord_cluster_locations": 81
     }
   ]
 }
